@@ -1,0 +1,320 @@
+/* --- NOUVEAU: Styles de Connexion --- */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #ecf0f1;
+}
+
+.login-form {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-form h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.login-form p {
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem; /* Réduit pour l'erreur */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Important */
+  font-size: 1rem;
+}
+
+.login-form .btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.login-error {
+  color: #e74c3c;
+  font-weight: bold;
+  min-height: 1.2em; /* Réserve l'espace */
+  margin: 0.5rem 0 0 0;
+}
+
+.login-error-placeholder {
+  min-height: 1.2em;
+  margin: 0.5rem 0 0 0;
+}
+
+
+/* --- Styles de l'application (existants) --- */
+
+/* Styles Globaux */
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #ecf0f1;
+  font-family: Arial, sans-serif;
+}
+
+.page-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+h1, h2, h3 {
+  color: #2c3e50;
+}
+
+h1 {
+  margin-bottom: 2rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+}
+
+p {
+  color: #34495e;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Styles de Boutons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+.btn-primary {
+  background-color: #3498db;
+}
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+.btn-secondary {
+  background-color: #2ecc71;
+}
+.btn-secondary:hover {
+  background-color: #27ae60;
+}
+.btn-danger {
+  background-color: #e74c3c;
+}
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+/* Barre de Navigation */
+.navbar {
+  background-color: #2c3e50;
+  padding: 1rem;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.nav-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.nav-buttons button {
+  padding: 0.5rem 1rem;
+  color: white;
+  border: 1px solid white;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+.nav-buttons button:hover {
+  background-color: #34495e;
+}
+.nav-buttons button.active {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+/* Dashboard: Grille de Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.stat-card h3 {
+  color: white;
+  margin-top: 0;
+}
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+  color: white;
+}
+.stat-time {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  color: white;
+}
+.stat-card-interactions { background-color: #3498db; }
+.stat-card-modules { background-color: #2ecc71; }
+.stat-card-last { background-color: #e74c3c; }
+
+/* Dashboard: Graphique */
+.chart-container {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+.chart-placeholder {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  color: #999;
+}
+.chart-mock {
+  display: flex;
+  width: 80%;
+  height: 80%;
+  gap: 5px;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+.bar {
+  flex: 1;
+  background-color: #3498db;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.bar:hover {
+  opacity: 1;
+}
+
+/* Interactions: Filtres */
+.filter-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+.filter-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  transition: background-color 0.2s, color 0.2s;
+}
+.filter-buttons button:hover {
+  background-color: #bdc3c7;
+}
+.filter-buttons button.active {
+  background-color: #3498db;
+  color: white;
+}
+
+/* Interactions: Table */
+.table-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 1rem;
+  text-align: left;
+}
+thead tr {
+  background-color: #34495e;
+  color: white;
+}
+tbody tr {
+  border-bottom: 1px solid #dee2e6;
+}
+tbody tr.even-row {
+  background-color: #f8f9fa;
+}
+
+/* Modules: Grille */
+.modules-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.module-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 3px solid #2ecc71; /* Actif par défaut */
+}
+.module-card.inactive {
+  border-color: #e74c3c;
+}
+.module-card h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+.status-active {
+  color: #2ecc71;
+  font-weight: bold;
+}
+.status-inactive {
+  color: #e74c3c;
+  font-weight: bold;
+}
+.module-buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.module-buttons .btn {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+/* Page Sons */
+.sounds-page {
+  text-align: center;
+  padding: 2rem;
+}
