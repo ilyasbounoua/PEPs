@@ -5,9 +5,11 @@ CREATE TABLE public.Module (
 	status character varying(50) NOT NULL,
 	volume integer NOT NULL,
 	current_mode character varying(50) NOT NULL,
-	acif boolean NOT NULL,
+	actif boolean NOT NULL,
 	last_seen timestamp NOT NULL
 );
+
+DROP TABLE Sound;
 
 CREATE TABLE public.Sound (
     idsound SERIAL NOT NULL PRIMARY KEY,
@@ -16,7 +18,6 @@ CREATE TABLE public.Sound (
 );
 
 CREATE TABLE public.Interaction (
-
 	idinteraction Serial NOT NULL PRIMARY KEY,
 	idsound integer ,
 	idmodule integer ,
