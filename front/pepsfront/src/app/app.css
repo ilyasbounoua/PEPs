@@ -1,95 +1,79 @@
-/* --- NOUVEAU: Styles de Connexion --- */
+/* --- VARIABLES DE COULEUR (inspirées du logo PEP'S) --- */
+:host {
+  --primary-color: #2c3e50; /* Bleu/Vert foncé */
+  --secondary-color: #0089c4; /* Bleu Dauphin */
+  --accent-color: #4CAF50; /* Vert Logo */
+  --warn-color: #e74c3c; /* Rouge (Inactif / Erreur) */
+  --text-light: #ffffff;
+  --text-dark: #333;
+  --background-color: #ecf0f1;
+  --card-background: #ffffff;
+  --border-color: #dfe4e8;
+}
+
+/* --- STYLES DE CONNEXION (F1) --- */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #ecf0f1;
+  background-color: var(--background-color);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
 }
 
 .login-form {
-  background-color: white;
-  padding: 2.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form mat-form-field {
   width: 100%;
-  max-width: 400px;
+}
+
+.login-form mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px 8px; /* Ajustement pour aligner */
+}
+
+/* AJOUT: Style pour l'erreur de connexion générale */
+.login-general-error {
+  font-size: 14px;
+  margin-top: -16px; /* Remonte l'erreur sous le champ */
+  margin-bottom: 16px;
   text-align: center;
+  display: block; /* S'assurer que mat-error est visible */
 }
 
-.login-form h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #2c3e50;
+/* --- STRUCTURE GLOBALE DE L'APP --- */
+.app-container {
+  height: 100vh;
+  width: 100vw;
 }
 
-.login-form p {
-  margin-bottom: 1.5rem;
-  color: #555;
+.toolbar {
+  background-color: var(--primary-color);
+  color: var(--text-light);
 }
 
-.login-form input[type="password"] {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem; /* Réduit pour l'erreur */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box; /* Important */
-  font-size: 1rem;
+.toolbar span {
+  margin-left: 16px;
 }
 
-.login-form .btn {
-  width: 100%;
-  margin-top: 1rem;
+.main-content {
+  background-color: var(--background-color);
 }
 
-.login-error {
-  color: #e74c3c;
-  font-weight: bold;
-  min-height: 1.2em; /* Réserve l'espace */
-  margin: 0.5rem 0 0 0;
-}
-
-.login-error-placeholder {
-  min-height: 1.2em;
-  margin: 0.5rem 0 0 0;
-}
-
-
-/* --- Styles de l'application (existants) --- */
-
-/* Styles Globaux */
-:host {
-  display: block;
-  min-height: 100vh;
-  background-color: #ecf0f1;
-  font-family: Arial, sans-serif;
-}
-
-.page-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+.page-area {
+  padding: 24px;
 }
 
 .page-content {
   animation: fadeIn 0.3s ease-in-out;
-}
-
-h1, h2, h3 {
-  color: #2c3e50;
-}
-
-h1 {
-  margin-bottom: 2rem;
-}
-
-h2 {
-  margin-bottom: 1rem;
-}
-
-p {
-  color: #34495e;
 }
 
 @keyframes fadeIn {
@@ -97,224 +81,248 @@ p {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Styles de Boutons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-.btn-primary {
-  background-color: #3498db;
-}
-.btn-primary:hover {
-  background-color: #2980b9;
-}
-.btn-secondary {
-  background-color: #2ecc71;
-}
-.btn-secondary:hover {
-  background-color: #27ae60;
-}
-.btn-danger {
-  background-color: #e74c3c;
-}
-.btn-danger:hover {
-  background-color: #c0392b;
+/* --- MENU LATÉRAL (SIDENAV) --- */
+.sidenav {
+  width: 250px;
+  background-color: var(--primary-color);
+  color: var(--text-light);
 }
 
-/* Barre de Navigation */
-.navbar {
-  background-color: #2c3e50;
-  padding: 1rem;
-  color: white;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.nav-buttons {
+.sidenav-header {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-.nav-buttons button {
-  padding: 0.5rem 1rem;
-  color: white;
-  border: 1px solid white;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: transparent;
-  transition: background-color 0.2s;
-}
-.nav-buttons button:hover {
-  background-color: #34495e;
-}
-.nav-buttons button.active {
-  background-color: #3498db;
-  border-color: #3498db;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Dashboard: Grille de Stats */
+.logo {
+  height: 40px;
+  width: 40px;
+  margin-right: 12px;
+}
+
+.logo-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+/* --- Animation du Menu (Inspirée de l'exemple) --- */
+.mat-nav-list .mat-list-item {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* FORCER LA COULEUR BLANCHE - Cibler TOUS les éléments possibles */
+.sidenav .mat-list-item,
+.sidenav .mat-list-item *,
+.sidenav .mat-mdc-list-item,
+.sidenav .mat-mdc-list-item *,
+.sidenav .mdc-list-item,
+.sidenav .mdc-list-item *,
+.sidenav .mat-mdc-list-item-title,
+.sidenav .mat-list-item-title,
+.sidenav [matListItemTitle],
+.sidenav span,
+.sidenav .mat-icon,
+.sidenav [matListItemIcon] {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.sidenav .mat-icon {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Déclenchement de l'animation quand le menu est ouvert */
+.mat-sidenav-opened .mat-nav-list .mat-list-item {
+  animation: slideInItem 0.4s forwards cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* Application du délai en cascade (comme la boucle @for en SCSS) */
+.mat-sidenav-opened .mat-list-item:nth-child(1) { animation-delay: 0.05s; }
+.mat-sidenav-opened .mat-list-item:nth-child(2) { animation-delay: 0.1s; }
+.mat-sidenav-opened .mat-list-item:nth-child(3) { animation-delay: 0.15s; }
+.mat-sidenav-opened .mat-list-item:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Ajout d'un style de survol (hover) pour améliorer l'interaction */
+.mat-nav-list .mat-list-item:hover:not(.active),
+.sidenav .mat-mdc-list-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* FORCER le texte en blanc au survol */
+.sidenav .mat-list-item:hover:not(.active) *,
+.sidenav .mat-mdc-list-item:hover:not(.active) * {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+
+/* Style de l'item actif */
+.mat-nav-list .mat-list-item.active,
+.sidenav .mat-mdc-list-item.active {
+  background-color: rgba(0, 137, 196, 0.3) !important;
+  font-weight: bold !important;
+  border-left: 4px solid var(--secondary-color) !important;
+}
+
+/* FORCER le texte en blanc pour l'item actif */
+.sidenav .mat-list-item.active *,
+.sidenav .mat-mdc-list-item.active * {
+  color: rgba(255, 255, 255, 1) !important;
+  font-weight: bold !important;
+}
+
+/* --- PAGE: DASHBOARD (F2) --- */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
 }
-.stat-card {
-  color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+.stat-card .mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0.05);
 }
-.stat-card h3 {
-  color: white;
-  margin-top: 0;
+
+.stat-card .mat-card-avatar {
+  color: var(--primary-color);
 }
-.stat-number {
+.stat-card .icon-active {
+  color: var(--accent-color);
+}
+.stat-card .mat-card-title {
   font-size: 2rem;
   font-weight: bold;
-  margin: 0.5rem 0;
-  color: white;
 }
-.stat-time {
+.stat-card .mat-card-subtitle {
   font-size: 1rem;
-  margin: 0.5rem 0;
-  color: white;
 }
-.stat-card-interactions { background-color: #3498db; }
-.stat-card-modules { background-color: #2ecc71; }
-.stat-card-last { background-color: #e74c3c; }
 
-/* Dashboard: Graphique */
-.chart-container {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
+.chart-card {
+  width: 100%;
 }
+
 .chart-placeholder {
   width: 100%;
   height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
-  border: 1px dashed #ccc;
   border-radius: 4px;
   color: #999;
 }
+
 .chart-mock {
   display: flex;
-  width: 80%;
-  height: 80%;
-  gap: 5px;
+  width: 95%;
+  height: 90%;
+  gap: 8px;
   align-items: flex-end;
   justify-content: space-around;
+  border-bottom: 2px solid var(--border-color);
+  border-left: 2px solid var(--border-color);
+  padding: 0 4px;
 }
+
 .bar {
   flex: 1;
-  background-color: #3498db;
-  opacity: 0.6;
+  background-color: var(--secondary-color);
+  opacity: 0.7;
   transition: opacity 0.2s;
+  border-radius: 4px 4px 0 0;
 }
 .bar:hover {
   opacity: 1;
 }
 
-/* Interactions: Filtres */
-.filter-buttons {
-  margin-bottom: 1rem;
+/* --- PAGE: INTERACTIONS (F3) --- */
+.mat-card-header {
   display: flex;
-  gap: 1rem;
-}
-.filter-buttons button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #ecf0f1;
-  color: #2c3e50;
-  transition: background-color 0.2s, color 0.2s;
-}
-.filter-buttons button:hover {
-  background-color: #bdc3c7;
-}
-.filter-buttons button.active {
-  background-color: #3498db;
-  color: white;
-}
-
-/* Interactions: Table */
-.table-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  overflow: hidden;
-  margin-bottom: 1rem;
-}
-table {
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  border-collapse: collapse;
 }
-th, td {
-  padding: 1rem;
-  text-align: left;
+.spacer { flex: 1 1 auto; }
+.mat-radio-group {
+  display: flex;
+  gap: 20px;
 }
-thead tr {
-  background-color: #34495e;
-  color: white;
+.table-container {
+  width: 100%;
+  overflow-x: auto;
 }
-tbody tr {
-  border-bottom: 1px solid #dee2e6;
-}
-tbody tr.even-row {
-  background-color: #f8f9fa;
+.mat-table {
+  width: 100%;
 }
 
-/* Modules: Grille */
+/* --- PAGE: MODULES (F4) --- */
 .modules-grid {
   display: grid;
-  gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
 }
 .module-card {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border: 3px solid #2ecc71; /* Actif par défaut */
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.module-card.inactive {
-  border-color: #e74c3c;
-}
-.module-card h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
+.module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 .status-active {
-  color: #2ecc71;
+  color: var(--accent-color);
   font-weight: bold;
 }
 .status-inactive {
-  color: #e74c3c;
+  color: var(--warn-color);
   font-weight: bold;
 }
-.module-buttons {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.5rem;
+.icon-active { color: var(--accent-color); }
+.icon-inactive { color: var(--warn-color); }
+
+/* --- PAGE: DÉTAIL/CONFIG MODULE (F5) --- */
+.config-card {
+  max-width: 600px;
+  margin: 0 auto;
 }
-.module-buttons .btn {
-  flex: 1;
-  padding: 0.5rem;
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mat-slider {
+  width: 100%;
+}
+.mat-slide-toggle {
+  display: block;
+  margin: 8px 0;
+}
+.mat-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 16px !important;
 }
 
-/* Page Sons */
+/* --- PAGE: SONS --- */
 .sounds-page {
   text-align: center;
-  padding: 2rem;
 }
