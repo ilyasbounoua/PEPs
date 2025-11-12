@@ -9,8 +9,6 @@ CREATE TABLE public.Module (
 	last_seen timestamp NOT NULL
 );
 
-DROP TABLE Sound;
-
 CREATE TABLE public.Sound (
     idsound SERIAL NOT NULL PRIMARY KEY,
     nom character varying(255) NOT NULL,

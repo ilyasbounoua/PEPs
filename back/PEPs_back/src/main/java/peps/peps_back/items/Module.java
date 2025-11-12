@@ -36,7 +36,7 @@ import javax.validation.constraints.Size;
     @NamedQuery(name = "Module.findByStatus", query = "SELECT m FROM Module m WHERE m.status = :status"),
     @NamedQuery(name = "Module.findByVolume", query = "SELECT m FROM Module m WHERE m.volume = :volume"),
     @NamedQuery(name = "Module.findByCurrentMode", query = "SELECT m FROM Module m WHERE m.currentMode = :currentMode"),
-    @NamedQuery(name = "Module.findByAcif", query = "SELECT m FROM Module m WHERE m.acif = :acif"),
+    @NamedQuery(name = "Module.findByActif", query = "SELECT m FROM Module m WHERE m.actif = :actif"),
     @NamedQuery(name = "Module.findByLastSeen", query = "SELECT m FROM Module m WHERE m.lastSeen = :lastSeen")})
 public class Module implements Serializable {
 
@@ -72,8 +72,8 @@ public class Module implements Serializable {
     private String currentMode;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "acif")
-    private boolean acif;
+    @Column(name = "actif")
+    private boolean actif;
     @Basic(optional = false)
     @NotNull
     @Column(name = "last_seen")
@@ -89,14 +89,14 @@ public class Module implements Serializable {
         this.idmodule = idmodule;
     }
 
-    public Module(Integer idmodule, String nom, String ipAdress, String status, int volume, String currentMode, boolean acif, Date lastSeen) {
+    public Module(Integer idmodule, String nom, String ipAdress, String status, int volume, String currentMode, boolean actif, Date lastSeen) {
         this.idmodule = idmodule;
         this.nom = nom;
         this.ipAdress = ipAdress;
         this.status = status;
         this.volume = volume;
         this.currentMode = currentMode;
-        this.acif = acif;
+        this.actif = actif;
         this.lastSeen = lastSeen;
     }
 
@@ -148,12 +148,12 @@ public class Module implements Serializable {
         this.currentMode = currentMode;
     }
 
-    public boolean getAcif() {
-        return acif;
+    public boolean getActif() {
+        return actif;
     }
 
-    public void setAcif(boolean acif) {
-        this.acif = acif;
+    public void setActif(boolean actif) {
+        this.actif = actif;
     }
 
     public Date getLastSeen() {
