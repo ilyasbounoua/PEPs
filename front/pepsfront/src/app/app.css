@@ -268,9 +268,21 @@
 .table-container {
   width: 100%;
   overflow-x: auto;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .mat-table {
   width: 100%;
+  max-width: 100%;
+}
+
+.mat-card {
+  overflow: hidden;
+}
+
+.mat-card-content {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* --- PAGE: MODULES (F4) --- */
