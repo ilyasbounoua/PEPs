@@ -1,0 +1,340 @@
+/* --- VARIABLES DE COULEUR (inspirées du logo PEP'S) --- */
+:host {
+  --primary-color: #2c3e50; /* Bleu/Vert foncé */
+  --secondary-color: #0089c4; /* Bleu Dauphin */
+  --accent-color: #4CAF50; /* Vert Logo */
+  --warn-color: #e74c3c; /* Rouge (Inactif / Erreur) */
+  --text-light: #ffffff;
+  --text-dark: #333;
+  --background-color: #ecf0f1;
+  --card-background: #ffffff;
+  --border-color: #dfe4e8;
+}
+
+/* --- STYLES DE CONNEXION (F1) --- */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form mat-form-field {
+  width: 100%;
+}
+
+.login-form mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px 8px; /* Ajustement pour aligner */
+}
+
+/* AJOUT: Style pour l'erreur de connexion générale */
+.login-general-error {
+  font-size: 14px;
+  margin-top: -16px; /* Remonte l'erreur sous le champ */
+  margin-bottom: 16px;
+  text-align: center;
+  display: block; /* S'assurer que mat-error est visible */
+}
+
+/* --- STRUCTURE GLOBALE DE L'APP --- */
+.app-container {
+  height: 100vh;
+  width: 100vw;
+}
+
+.toolbar {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.toolbar span {
+  margin-left: 16px;
+}
+
+.main-content {
+  background-color: var(--background-color);
+}
+
+.page-area {
+  padding: 24px;
+}
+
+.page-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MENU LATÉRAL (SIDENAV) --- */
+.sidenav {
+  width: 250px;
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  height: 40px;
+  width: 40px;
+  margin-right: 12px;
+}
+
+.logo-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+/* --- Animation du Menu (Inspirée de l'exemple) --- */
+.mat-nav-list .mat-list-item {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* FORCER LA COULEUR BLANCHE - Cibler TOUS les éléments possibles */
+.sidenav .mat-list-item,
+.sidenav .mat-list-item *,
+.sidenav .mat-mdc-list-item,
+.sidenav .mat-mdc-list-item *,
+.sidenav .mdc-list-item,
+.sidenav .mdc-list-item *,
+.sidenav .mat-mdc-list-item-title,
+.sidenav .mat-list-item-title,
+.sidenav [matListItemTitle],
+.sidenav span,
+.sidenav .mat-icon,
+.sidenav [matListItemIcon] {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.sidenav .mat-icon {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Déclenchement de l'animation quand le menu est ouvert */
+.mat-sidenav-opened .mat-nav-list .mat-list-item {
+  animation: slideInItem 0.4s forwards cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* Application du délai en cascade (comme la boucle @for en SCSS) */
+.mat-sidenav-opened .mat-list-item:nth-child(1) { animation-delay: 0.05s; }
+.mat-sidenav-opened .mat-list-item:nth-child(2) { animation-delay: 0.1s; }
+.mat-sidenav-opened .mat-list-item:nth-child(3) { animation-delay: 0.15s; }
+.mat-sidenav-opened .mat-list-item:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Ajout d'un style de survol (hover) pour améliorer l'interaction */
+.mat-nav-list .mat-list-item:hover:not(.active),
+.sidenav .mat-mdc-list-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* FORCER le texte en blanc au survol */
+.sidenav .mat-list-item:hover:not(.active) *,
+.sidenav .mat-mdc-list-item:hover:not(.active) * {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+
+/* Style de l'item actif */
+.mat-nav-list .mat-list-item.active,
+.sidenav .mat-mdc-list-item.active {
+  background-color: rgba(0, 137, 196, 0.3) !important;
+  font-weight: bold !important;
+  border-left: 4px solid var(--secondary-color) !important;
+}
+
+/* FORCER le texte en blanc pour l'item actif */
+.sidenav .mat-list-item.active *,
+.sidenav .mat-mdc-list-item.active * {
+  color: rgba(255, 255, 255, 1) !important;
+  font-weight: bold !important;
+}
+
+/* --- PAGE: DASHBOARD (F2) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.stat-card .mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0.05);
+}
+
+.stat-card .mat-card-avatar {
+  color: var(--primary-color);
+}
+.stat-card .icon-active {
+  color: var(--accent-color);
+}
+.stat-card .mat-card-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.stat-card .mat-card-subtitle {
+  font-size: 1rem;
+}
+
+.chart-card {
+  width: 100%;
+}
+
+.chart-placeholder {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #999;
+}
+
+.chart-mock {
+  display: flex;
+  width: 95%;
+  height: 90%;
+  gap: 8px;
+  align-items: flex-end;
+  justify-content: space-around;
+  border-bottom: 2px solid var(--border-color);
+  border-left: 2px solid var(--border-color);
+  padding: 0 4px;
+}
+
+.bar {
+  flex: 1;
+  background-color: var(--secondary-color);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  border-radius: 4px 4px 0 0;
+}
+.bar:hover {
+  opacity: 1;
+}
+
+/* --- PAGE: INTERACTIONS (F3) --- */
+.mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.spacer { flex: 1 1 auto; }
+.mat-radio-group {
+  display: flex;
+  gap: 20px;
+}
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.mat-table {
+  width: 100%;
+  max-width: 100%;
+}
+
+.mat-card {
+  overflow: hidden;
+}
+
+.mat-card-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --- PAGE: MODULES (F4) --- */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+.module-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.status-active {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+.status-inactive {
+  color: var(--warn-color);
+  font-weight: bold;
+}
+.icon-active { color: var(--accent-color); }
+.icon-inactive { color: var(--warn-color); }
+
+/* --- PAGE: DÉTAIL/CONFIG MODULE (F5) --- */
+.config-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mat-slider {
+  width: 100%;
+}
+.mat-slide-toggle {
+  display: block;
+  margin: 8px 0;
+}
+.mat-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 16px !important;
+}
+
+/* --- PAGE: SONS --- */
+.sounds-page {
+  text-align: center;
+}
