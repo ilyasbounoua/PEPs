@@ -1,10 +1,8 @@
-import { Component, ChangeDetectionStrategy, computed, signal, inject, OnInit } from '@angular/core'; // Ajout de inject et OnInit
+import { Component, ChangeDetectionStrategy, computed, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClient } from '@angular/common/http'; // Ajout de HttpClientModule et HttpClient
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 
-// --- Importations Angular Material ---
-// Importez les modules dont vous avez besoin pour les composants Material
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -53,25 +51,11 @@ interface DailyData {
   count: number;
 }
 
-// --- Données Statiques (Mocks) ---
-const dailyData: DailyData[] = [
-  { time: '8h', count: 12 }, { time: '10h', count: 18 }, { time: '12h', count: 25 },
-  { time: '14h', count: 21 }, { time: '16h', count: 15 }, { time: '18h', count: 8 }
-];
-
-const interactionsData: Interaction[] = [
-  { id: 1, date: '2025-01-15 14:23:15', module: 'Module A', type: 'Bec' },
-  { id: 2, date: '2025-01-15 13:45:22', module: 'Module B', type: 'Patte' },
-  { id: 3, date: '2025-01-15 12:10:08', module: 'Module A', type: 'Bec' },
-  { id: 4, date: '2025-01-15 11:30:45', module: 'Module C', type: 'Patte' },
-  { id: 5, date: '2025-01-14 09:15:00', module: 'Module B', type: 'Bec' },
-];
-
-const modulesData: Module[] = [
-  { id: 1, name: 'Module A', location: 'Enclos Nord', status: 'Actif', ip: '192.168.1.10', config: { volume: 80, mode: 'Automatique', actif: true, son: true } },
-  { id: 2, name: 'Module B', location: 'Enclos Sud', status: 'Actif', ip: '192.168.1.11', config: { volume: 60, mode: 'Manuel', actif: true, son: false } },
-  { id: 3, name: 'Module C', location: 'Enclos Est', status: 'Inactif', ip: '192.168.1.12', config: { volume: 75, mode: 'Automatique', actif: false, son: true } }
-];
+interface Sound {
+  id: number;
+  name: string;
+  type: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -80,8 +64,7 @@ const modulesData: Module[] = [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule, 
-    // --- Modules Material ---
+    HttpClientModule,
     MatSidenavModule,
     MatListModule,
     MatToolbarModule,
@@ -101,55 +84,65 @@ const modulesData: Module[] = [
   styleUrls: ['./app.css'],  
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class App implements OnInit { 
-  // --- Injection de HttpClient ---
+export class App implements OnInit {
   http = inject(HttpClient);
+  private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
 
-  // --- État Global ---
   isLoggedIn = signal(false);
   loginError = signal('');
   readonly correctHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
   
   currentPage = signal('dashboard');
-  isSidenavOpen = signal(true); // Menu ouvert par défaut sur desktop
+  isSidenavOpen = signal(true);
 
-  // --- État et Données du Dashboard ---
-  // Initialisation à 0 ou "chargement"
   stats = signal<StatCard>({
-    totalInteractions: 0, // Initialisé à 0
-    activeModules: modulesData.filter(m => m.status === 'Actif').length,
-    lastInteraction: 'Chargement...' // État de chargement
+    totalInteractions: 0,
+    activeModules: 0,
+    lastInteraction: 'Chargement...'
   });
-  dailyChartData: DailyData[] = dailyData;
+  dailyChartData = signal<DailyData[]>([]);
 
-  // --- État et Données des Interactions ---
   filter = signal('all');
-  interactions = signal<Interaction[]>(interactionsData);
-  displayedColumns: string[] = ['date', 'module', 'type']; // Pour la table Material
+  interactions = signal<Interaction[]>([]);
+  displayedColumns: string[] = ['date', 'module', 'type'];
 
   filteredInteractions = computed(() => {
     const f = this.filter();
-    const todayStr = '2025-01-15';
-    const yesterdayStr = '2025-01-14';
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const allInteractions = this.interactions();
 
     if (f === 'today') {
-      return this.interactions().filter(i => i.date.startsWith(todayStr));
+      return allInteractions.filter(i => {
+        const interactionDate = new Date(i.date);
+        return interactionDate >= today;
+      });
     }
     if (f === 'yesterday') {
-      return this.interactions().filter(i => i.date.startsWith(yesterdayStr));
+      return allInteractions.filter(i => {
+        const interactionDate = new Date(i.date);
+        return interactionDate >= yesterday && interactionDate < today;
+      });
     }
-    // "week" - pour cet exemple, on retourne tout
     if (f === 'week') {
-      return this.interactions();
+      return allInteractions.filter(i => {
+        const interactionDate = new Date(i.date);
+        return interactionDate >= weekAgo;
+      });
     }
-    return this.interactions(); // 'all'
+    return allInteractions;
   });
 
-  // --- État et Données des Modules ---
-  modules = signal<Module[]>(modulesData);
+  modules = signal<Module[]>([]);
   selectedModule = signal<Module | undefined>(undefined);
+  
+  sounds = signal<Sound[]>([]);
 
-  // Titre de la page, calculé
   pageTitle = computed(() => {
     switch(this.currentPage()) {
       case 'dashboard': return 'Tableau de Bord';
@@ -161,46 +154,92 @@ export class App implements OnInit {
     }
   });
 
-  // --- Méthodes ---
-
   ngOnInit() {
-    // Si on est déjà loggé (ex: futur rechargement de page), on charge les données
-    // Pour l'instant, la connexion n'est pas persistante,
-    // donc cela ne s'activera pas, mais c'est une bonne pratique.
     if (this.isLoggedIn()) {
-      this.loadDashboardData();
+      this.loadAllData();
     }
   }
 
+  loadAllData() {
+    this.loadDashboardData();
+    this.loadDailyStats();
+    this.loadInteractions();
+    this.loadModules();
+    this.loadSounds();
+  }
 
   loadDashboardData() {
-    // On met l'UI en mode chargement
     this.stats.update(current => ({
       ...current,
       totalInteractions: 0,
       lastInteraction: 'Chargement...'
     }));
 
-    // Appel HTTP GET
-    this.http.get<StatCard>('http://localhost:8080/PEPs_back/dashboard').subscribe({
+    this.http.get<StatCard>(`${this.BASE_URL}/dashboard`).subscribe({
       next: (data) => {
-        // Succès: on met à jour le signal avec les vraies données
-        // Note: L'API devrait retourner la structure StatCard complète
         this.stats.set({
           totalInteractions: data.totalInteractions,
-          // Si l'API ne renvoie pas activeModules, on le recalcule
-          activeModules: data.activeModules ?? this.modules().filter(m => m.status === 'Actif').length,
+          activeModules: data.activeModules,
           lastInteraction: data.lastInteraction
         });
       },
       error: (err) => {
         console.error('Erreur de chargement du dashboard:', err);
-        // En cas d'erreur (ex: backend non démarré), on affiche une erreur
         this.stats.update(current => ({
           ...current,
           totalInteractions: 0,
           lastInteraction: 'Erreur de connexion'
         }));
+      }
+    });
+  }
+
+  loadDailyStats() {
+    this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats`).subscribe({
+      next: (data) => {
+        this.dailyChartData.set(data);
+      },
+      error: (err) => {
+        console.error('Erreur de chargement des stats journalières:', err);
+      }
+    });
+  }
+
+  loadInteractions() {
+    this.http.get<any[]>(`${this.BASE_URL}/interactions`).subscribe({
+      next: (data) => {
+        const formattedInteractions = data.map(i => ({
+          id: i.id,
+          date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19),
+          module: i.module,
+          type: i.type
+        }));
+        this.interactions.set(formattedInteractions);
+      },
+      error: (err) => {
+        console.error('Erreur de chargement des interactions:', err);
+      }
+    });
+  }
+
+  loadModules() {
+    this.http.get<Module[]>(`${this.BASE_URL}/modules`).subscribe({
+      next: (data) => {
+        this.modules.set(data);
+      },
+      error: (err) => {
+        console.error('Erreur de chargement des modules:', err);
+      }
+    });
+  }
+
+  loadSounds() {
+    this.http.get<Sound[]>(`${this.BASE_URL}/sounds`).subscribe({
+      next: (data) => {
+        this.sounds.set(data);
+      },
+      error: (err) => {
+        console.error('Erreur de chargement des sons:', err);
       }
     });
   }
@@ -226,7 +265,7 @@ export class App implements OnInit {
 
       if (hexHash === this.correctHash) {
         this.isLoggedIn.set(true);
-        this.loadDashboardData();
+        this.loadAllData();
       } else {
         this.loginError.set('Mot de passe incorrect.');
       }
@@ -246,7 +285,7 @@ export class App implements OnInit {
   }
 
   refreshStats() {
-    this.loadDashboardData();
+    this.loadAllData();
   }
 
   setFilter(newFilter: string) {
@@ -259,30 +298,22 @@ export class App implements OnInit {
   }
 
   saveModuleConfig(moduleToSave: Module) {
-    this.modules.update(currentModules =>
-      currentModules.map(m =>
-        m.id === moduleToSave.id ? { ...m, ...moduleToSave } : m
-      )
-    );
-    // Mettre à jour le statut global (si 'actif' a changé)
-    this.modules.update(currentModules =>
-      currentModules.map(m =>
-        m.id === moduleToSave.id ? { ...m, status: moduleToSave.config.actif ? 'Actif' : 'Inactif' } : m
-      )
-    );
-    // Mettre à jour les stats du dashboard
-    this.stats.update(currentStats => ({
-      ...currentStats,
-      activeModules: this.modules().filter(m => m.status === 'Actif').length
-    }));
-
-    console.log('Configuration sauvegardée:', moduleToSave);
-    // Revenir à la liste des modules
-    this.currentPage.set('modules');
-    this.selectedModule.set(undefined);
+    this.http.put<Module>(`${this.BASE_URL}/modules/${moduleToSave.id}`, moduleToSave).subscribe({
+      next: (updatedModule) => {
+        this.modules.update(currentModules =>
+          currentModules.map(m => m.id === updatedModule.id ? updatedModule : m)
+        );
+        console.log('Configuration sauvegardée:', updatedModule);
+        this.currentPage.set('modules');
+        this.selectedModule.set(undefined);
+        this.loadDashboardData();
+      },
+      error: (err) => {
+        console.error('Erreur de sauvegarde:', err);
+      }
+    });
   }
 
-  // F6: Export CSV simple
   exportAsCsv() {
     const data = this.filteredInteractions();
     if (data.length === 0) {
@@ -293,9 +324,8 @@ export class App implements OnInit {
     const rows = data.map(i => [i.id, `"${i.date}"`, i.module, i.type].join(','));
     
     const csvContent = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-s-8;' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     
-    // Créer un lien temporaire et simuler un clic pour télécharger
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -305,7 +335,6 @@ export class App implements OnInit {
     document.body.removeChild(link);
   }
 
-  // Helper pour le slider de volume
   formatVolumeLabel(value: number): string {
     return `${value}%`;
   }

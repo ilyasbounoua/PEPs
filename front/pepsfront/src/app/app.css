@@ -336,5 +336,20 @@
 
 /* --- PAGE: SONS --- */
 .sounds-page {
-  text-align: center;
+}
+
+.sounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.sound-card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.sound-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }

@@ -2,37 +2,49 @@
 
 ## Update Overview
 
-We updated application to connect the Angular frontend with the Java Spring backend to fetch real data from PostgreSQL database instead of using mock data.
+The application now fully connects the Angular frontend with the Java Spring backend to fetch and update real data from PostgreSQL database.
 
 ### Changes Made:
 
 #### 1. Backend Changes (Java Spring)
 
-**File: `back/PEPs_back/src/main/java/peps/peps_back/controllers/DashBoardController.java`**
-- Updated to fetch real data from the database using JPA repositories
-- Now returns JSON format with proper structure: `{ totalInteractions, activeModules, lastInteraction }`
-- Counts total interactions from the database
-- Counts active modules (where `actif` is true)
-- Gets the most recent interaction timestamp
+**File: `web.xml`**
+- Changed servlet mapping from `*.do` to `/` to handle REST endpoints
 
-**File: `back/PEPs_back/src/main/java/peps/peps_back/controllers/DashboardStats.java`** (NEW)
-- Created DTO class to structure the dashboard response data
-- Matches the `StatCard` interface expected by Angular frontend
+**File: `DashBoardController.java`**
+- Fetches dashboard statistics from database
 
-**File: `back/PEPs_back/pom.xml`**
-- Added Jackson dependency for JSON serialization: `jackson-databind` version 2.13.4.2
-- This allows Spring to automatically convert Java objects to JSON
+**New Controllers:**
+- `InteractionController.java` - GET `/interactions` returns all interactions with module names
+- `ModuleController.java` - GET/PUT `/modules` manages module data and configuration
+- `SoundController.java` - GET `/sounds` returns all sounds from database
+- `DailyStatsController.java` - GET `/daily-stats` returns hourly interaction counts for today
+
+**DTOs Created:**
+- `DashboardStats.java` - Dashboard statistics
+- `InteractionDTO.java` - Interaction data transfer
+- `ModuleDTO.java`, `ModuleConfigDTO.java` - Module data and configuration
+- `SoundDTO.java` - Sound data
+- `DailyDataDTO.java` - Daily statistics
 
 #### 2. Frontend Changes (Angular)
 
-**File: `front/pepsfront/src/app/app.config.ts`**
-- Added `provideHttpClient(withFetch())` to enable HTTP requests in the Angular app
-- This is required for Angular 20+ standalone applications
+**File: `app.ts`**
+- Added BASE_URL constant for API endpoint
+- Removed all mock/static data
+- All data is now fetched from backend API
+- Implemented date filtering that works with current dates (not hardcoded)
+- Module configuration now saves to backend via PUT request
+- Added sounds signal to store and display database sounds
+- Refresh button now reloads all data from backend
 
-**File: `front/pepsfront/src/app/app.ts`**
-- Already had the HTTP call implemented (no changes needed)
-- Calls `http://localhost:8080/PEPs_back/dashboard` when logged in
-- Displays loading state and handles errors
+**File: `app.html`**
+- Fixed last interaction display to show full date and time
+- Changed dailyChartData to use signal
+- Updated sounds page to display all sounds from database
+
+**File: `app.css`**
+- Added styling for sounds grid display
 
 ---
 
@@ -58,12 +70,13 @@ We updated application to connect the Angular frontend with the Java Spring back
    ```
 
 **Note:** If PostgreSQL credentials are different, update them in:
-`back/PEPs_back/src/main/resources/META-INF/persistence.xml`  
-We added persisistence.xml to .gitignore to avoid committing sensitive info.
+`back/PEPs_back/src/main/resources/META-INF/persistence.xml`
 
 ### Step 2: Build and Deploy Backend
 
-Run the Peps_baxk project in Netbeans, or via command line:
+**IMPORTANT:** Stop your running Tomcat/GlassFish server first!
+
+Run the Peps_back project in Netbeans, or via command line:
 
 1. Navigate to backend directory:
    ```bash
@@ -75,12 +88,18 @@ Run the Peps_baxk project in Netbeans, or via command line:
    mvn clean install
    ```
 
-**Note:** For command line deploy the generated WAR file:
+3. Deploy the generated WAR file:
    - Find the WAR file in `target/PEPs_back-0.1.war`
    - Deploy it to your application server (Tomcat/GlassFish)
    - Make sure it's deployed at context path `/PEPs_back`
-   - Verify backend is running: `http://localhost:8080/PEPs_back/dashboard`
-   - You should see JSON like: `{"totalInteractions":4,"activeModules":2,"lastInteraction":"2025-01-18 10:30:45"}`
+
+4. Verify backend is running:
+   - Dashboard: `http://localhost:8080/PEPs_back/dashboard`
+   - Should return JSON like: `{"totalInteractions":4,"activeModules":2,"lastInteraction":"2025-01-18 10:30:45"}`
+   - Interactions: `http://localhost:8080/PEPs_back/interactions`
+   - Modules: `http://localhost:8080/PEPs_back/modules`
+   - Sounds: `http://localhost:8080/PEPs_back/sounds`
+   - Daily Stats: `http://localhost:8080/PEPs_back/daily-stats`
 
 ### Step 3: Run Frontend
 
@@ -103,12 +122,89 @@ Run the Peps_baxk project in Netbeans, or via command line:
 
 ### Step 4: Test the Connection
 
-1. Login with password: `admin` (SHA-256 hash is already configured)
-2. You should see the Dashboard with real data from the database:
-   - **Total Interactions**: Count from database
-   - **Active Modules**: Count of modules where actif=true
-   - **Last Interaction**: Timestamp of most recent interaction
-3. Click the refresh button to reload data from the backend
+1. Login with password: `admin`
+2. The application will fetch all data from the database:
+   - **Dashboard**: Shows real interaction counts, active modules, and last interaction timestamp
+   - **Daily Chart**: Shows hourly interaction counts for today
+   - **Interactions Page**: Shows all interactions from database
+     - Filters work with current date (not hardcoded)
+     - "Aujourd'hui" shows today's interactions
+     - "Hier" shows yesterday's interactions
+     - "Semaine" shows last 7 days
+   - **Modules Page**: Shows all modules from database with their configuration
+     - Click on a module to edit its configuration
+     - Changes are saved to database
+   - **Sons Page**: Shows all sounds from database
+
+---
+
+## API Endpoints
+
+Currently implemented:
+
+- **GET** `/dashboard` - Returns dashboard statistics
+  ```json
+  {
+    "totalInteractions": 4,
+    "activeModules": 2,
+    "lastInteraction": "2025-01-18 10:30:45"
+  }
+  ```
+
+- **GET** `/interactions` - Returns list of all interactions
+  ```json
+  [
+    {
+      "id": 1,
+      "date": "2025-01-18T10:25:00",
+      "module": "Module Perchoir 1",
+      "type": "Bec"
+    }
+  ]
+  ```
+
+- **GET** `/modules` - Returns list of all modules
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Module Perchoir 1",
+      "location": "",
+      "status": "Actif",
+      "ip": "192.168.1.10",
+      "config": {
+        "volume": 80,
+        "mode": "Automatique",
+        "actif": true,
+        "son": false
+      }
+    }
+  ]
+  ```
+
+- **GET** `/modules/{id}` - Returns specific module details
+
+- **PUT** `/modules/{id}` - Updates module configuration
+  
+- **GET** `/sounds` - Returns list of all sounds
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Cri Ara Bleu",
+      "type": "Vocal"
+    }
+  ]
+  ```
+
+- **GET** `/daily-stats` - Returns hourly statistics for today
+  ```json
+  [
+    {"time": "8h", "count": 0},
+    {"time": "10h", "count": 2},
+    {"time": "12h", "count": 1}
+  ]
+  ```
 
 ---
 
@@ -121,10 +217,11 @@ Run the Peps_baxk project in Netbeans, or via command line:
 - Verify credentials in `persistence.xml`
 - Check database exists: `psql -U postgres -l`
 
-**Problem: 404 error on /dashboard endpoint**
+**Problem: 404 error on endpoints**
 - Verify WAR is deployed correctly
 - Check application server logs
 - Ensure context path is `/PEPs_back`
+- Verify web.xml servlet mapping is set to `/` not `*.do`
 
 **Problem: Backend returns null or errors**
 - Check application server logs
@@ -135,47 +232,23 @@ Run the Peps_baxk project in Netbeans, or via command line:
 
 **Problem: CORS errors**
 - Backend already has `@CrossOrigin(origins = "http://localhost:4200")`
-- If using different port, update the annotation in `DashBoardController.java`
+- If using different port, update the annotation in all controllers
 
 **Problem: "Erreur de connexion" message**
 - Check backend is running and accessible
 - Open browser console (F12) to see detailed error
-- Verify URL is correct: `http://localhost:8080/PEPs_back/dashboard`
+- Verify URL is correct: `http://localhost:8080/PEPs_back/`
 
-**Problem: Still showing mock data**
+**Problem: Still showing old data or empty data**
 - Clear browser cache
 - Hard refresh: Ctrl+Shift+R
 - Check browser console for HTTP errors
+- Verify backend endpoints return data (test in browser or with curl)
 
----
-
-## API Endpoints
-
-Currently implemented:
-- **GET** `/dashboard` - Returns dashboard statistics
-
-Expected Response:
-```json
-{
-  "totalInteractions": 4,
-  "activeModules": 2,
-  "lastInteraction": "2025-01-18 10:30:45"
-}
-```
-
----
-
-## Next Steps (Optional Enhancements)
-
-To fetch more real data instead of mock data, you could add these endpoints:
-
-1. **GET** `/interactions` - Return list of interactions
-2. **GET** `/interactions?filter=today` - Filter interactions by date
-3. **GET** `/modules` - Return list of modules
-4. **GET** `/modules/{id}` - Get specific module details
-5. **PUT** `/modules/{id}` - Update module configuration
-
-These would replace the mock data in `app.ts` for interactions and modules.
+**Problem: Date filters not working correctly**
+- Filters now use current date, not hardcoded dates
+- Verify backend is returning dates in correct format
+- Check browser console for date parsing errors
 
 ---
 
@@ -212,3 +285,4 @@ If you encounter issues:
 2. Check PostgreSQL logs
 3. Check browser console (F12)
 4. Verify all services are running on correct ports
+5. Test each endpoint individually with curl or browser
