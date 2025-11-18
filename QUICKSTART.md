@@ -1,126 +1,136 @@
-# PEPs Application - Quick Start Guide
+# Application PEPs - Guide de Démarrage Rapide
 
-## What is PEPs?
+## Qu'est-ce que PEPs?
 
-PEPs is a web-based monitoring and management system designed for tracking interactions with intelligent modules. The application provides real-time statistics, historical data analysis, and configuration management capabilities.
+PEPs est un système de surveillance et de gestion web conçu pour suivre les interactions avec des modules intelligents. L'application fournit des statistiques en temps réel, une analyse de données historiques et des capacités de gestion de configuration.
 
-## Quick Setup (5 Minutes)
+## Installation Rapide (5 Minutes)
 
-### 1. Database (2 minutes)
+### 1. Base de Données (2 minutes)
 ```bash
-# Start PostgreSQL
+# Démarrer PostgreSQL
 pg_ctl start
 
-# Create database structure
+# Créer la structure de la base de données
 psql -U postgres -d postgres -f "sql/requete creation tables.sql"
 
-# Load sample data
+# Charger les données de test
 psql -U postgres -d postgres -f "sql/Creation données test.sql"
 ```
 
 ### 2. Backend (2 minutes)
 ```bash
-# Build application
+# Compiler l'application
 cd back\PEPs_back
 mvn clean install
 
-# Deploy to application server
-# Copy target/PEPs_back-0.1.war to your server's webapps folder
+# Déployer sur le serveur d'applications
+# Copier target/PEPs_back-0.1.war dans le dossier webapps de votre serveur
 
-# Verify deployment
+# Vérifier le déploiement
 curl http://localhost:8080/PEPs_back/dashboard
 ```
 
 ### 3. Frontend (1 minute)
 ```bash
-# Start development server
+# Démarrer le serveur de développement
 cd front\pepsfront
 npm install
 npm start
 
-# Access application
-# Open http://localhost:4200
+# Accéder à l'application
+# Ouvrir http://localhost:4200
 ```
 
-## Default Credentials
+## Identifiants par Défaut
 
-- **Username:** (none required)
-- **Password:** `admin`
+- **Nom d'utilisateur:** (aucun requis)
+- **Mot de passe:** `admin`
 
-## Main Features
+## Fonctionnalités Principales
 
-### Dashboard
-- Real-time interaction statistics
-- Active module count
-- Last interaction timestamp
-- Hourly activity chart
+### Tableau de Bord
+- Statistiques d'interactions en temps réel
+- Nombre de modules actifs
+- Horodatage de la dernière interaction
+- Graphique d'activité horaire
 
 ### Interactions
-- Complete interaction history
-- Date-based filtering
-- CSV export capability
+- Historique complet des interactions
+- Filtrage par date
+- Capacité d'export CSV
 
 ### Modules
-- Module status monitoring
-- Configuration management
-- Real-time updates
+- Surveillance de l'état des modules
+- Gestion de configuration
+- Mises à jour en temps réel
 
-### Sound Library
-- Browse available sounds
-- View sound metadata
+### Bibliothèque de Sons
+- Parcourir les sons disponibles
+- Écouter les sons
+- Ajouter de nouveaux sons avec upload de fichiers
+- Supprimer des sons avec confirmation
 
-## Default Ports
+## Ports par Défaut
 
-- Backend API: `http://localhost:8080`
-- Frontend UI: `http://localhost:4200`
-- Database: `localhost:5432`
+- API Backend: `http://localhost:8080`
+- Interface Frontend: `http://localhost:4200`
+- Base de données: `localhost:5432`
 
-## Minimum Requirements
+## Exigences Minimales
 
 - PostgreSQL 12+
 - Java 8+
 - Node.js 18+
 - 2GB RAM
-- Modern web browser
+- Navigateur web moderne
 
-## Common Issues
+## Problèmes Courants
 
-**Can't connect to backend?**
-- Ensure Tomcat/GlassFish is running
-- Verify deployment at `/PEPs_back` context
+**Impossible de se connecter au backend?**
+- Assurez-vous que Tomcat/GlassFish est en cours d'exécution
+- Vérifiez le déploiement au contexte `/PEPs_back`
 
-**No data showing?**
-- Run the test data SQL script
-- Check backend endpoints return data
+**Aucune donnée affichée?**
+- Exécutez le script SQL de données de test
+- Vérifiez que les endpoints backend retournent des données
 
-**CORS errors?**
-- Frontend must run on port 4200
-- Or update CORS settings in backend controllers
+**Erreurs CORS?**
+- Le frontend doit s'exécuter sur le port 4200
+- Ou mettez à jour les paramètres CORS dans les contrôleurs backend
 
-## Project Structure
+**Problèmes d'upload de son?**
+- Formats supportés: mp3, wav, ogg, m4a
+- Vérifiez que le dossier `sons` existe et est accessible
+- Vérifiez les permissions d'écriture
+
+## Structure du Projet
 
 ```
 PEPs/
-├── back/PEPs_back/         # Java Spring backend
-├── front/pepsfront/        # Angular frontend  
-├── sql/                    # Database scripts
-└── SETUP_GUIDE.md          # Detailed documentation
+├── back/PEPs_back/         # Backend Java Spring
+├── front/pepsfront/        # Frontend Angular  
+├── sons/                   # Fichiers audio
+├── sql/                    # Scripts de base de données
+├── QUICKSTART_FR.md        # Ce fichier
+└── SETUP_GUIDE_FR.md       # Documentation détaillée
 ```
 
-## Next Steps
+## Prochaines Étapes
 
-After successful setup:
-1. Login with default credentials
-2. Explore the dashboard
-3. Review sample data in Interactions page
-4. Configure a test module
-5. Review SETUP_GUIDE.md for advanced configuration
+Après une installation réussie:
+1. Connectez-vous avec les identifiants par défaut
+2. Explorez le tableau de bord
+3. Consultez les données d'exemple dans la page Interactions
+4. Configurez un module de test
+5. Ajoutez un nouveau son dans la bibliothèque
+6. Consultez SETUP_GUIDE_FR.md pour la configuration avancée
 
 ## Support
 
-For detailed troubleshooting and configuration options, refer to SETUP_GUIDE.md in the project root directory.
+Pour un dépannage détaillé et des options de configuration, consultez SETUP_GUIDE_FR.md dans le répertoire racine du projet.
 
 ---
 
 **Version:** 1.0  
-**Last Updated:** 2025-11-18
+**Dernière mise à jour:** 2025-11-18

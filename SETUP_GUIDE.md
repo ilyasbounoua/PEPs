@@ -1,66 +1,68 @@
-# PEPs - Backend/Frontend Connection Setup Guide
+# PEPs - Guide de Configuration Backend/Frontend
 
-## Application Overview
+## Vue d'ensemble de l'Application
 
-This application connects an Angular frontend with a Java Spring backend to fetch and update real data from a PostgreSQL database.
+Cette application connecte un frontend Angular avec un backend Java Spring pour récupérer et mettre à jour des données réelles depuis une base de données PostgreSQL.
 
-### Application Architecture:
+### Architecture de l'Application:
 
 #### Backend (Java Spring)
 
-The backend provides REST API endpoints for data access and manipulation:
+Le backend fournit des endpoints API REST pour l'accès et la manipulation des données:
 
-**Controllers:**
-- `DashBoardController.java` - Provides dashboard statistics
-- `InteractionController.java` - Manages interaction history
-- `ModuleController.java` - Manages module data and configuration
-- `SoundController.java` - Manages sound library
-- `DailyStatsController.java` - Provides hourly statistics
+**Contrôleurs:**
+- `DashBoardController.java` - Fournit les statistiques du tableau de bord
+- `InteractionController.java` - Gère l'historique des interactions
+- `ModuleController.java` - Gère les données et la configuration des modules
+- `SoundController.java` - Gère la bibliothèque de sons avec upload/suppression de fichiers
+- `DailyStatsController.java` - Fournit les statistiques horaires
 
-**Data Transfer Objects:**
-- `DashboardStats.java` - Dashboard statistics structure
-- `InteractionDTO.java` - Interaction data structure
-- `ModuleDTO.java`, `ModuleConfigDTO.java` - Module data structure
-- `SoundDTO.java` - Sound data structure
-- `DailyDataDTO.java` - Daily statistics structure
+**Objets de Transfert de Données:**
+- `DashboardStats.java` - Structure des statistiques du tableau de bord
+- `InteractionDTO.java` - Structure des données d'interaction
+- `ModuleDTO.java`, `ModuleConfigDTO.java` - Structure des données de module
+- `SoundDTO.java` - Structure des données de son
+- `DailyDataDTO.java` - Structure des statistiques quotidiennes
 
 **Configuration:**
-- `web.xml` - Servlet mapping configured to handle REST endpoints at root path
+- `web.xml` - Mappage de servlet configuré pour gérer les endpoints REST au chemin racine
 
 #### Frontend (Angular)
 
-The frontend is a single-page application with the following features:
+Le frontend est une application monopage avec les fonctionnalités suivantes:
 
-**Main Components:**
-- Dashboard with real-time statistics
-- Interaction history with date filtering
-- Module management with configuration
-- Sound library display
+**Composants Principaux:**
+- Tableau de bord avec statistiques en temps réel
+- Historique des interactions avec filtrage par date
+- Gestion des modules avec configuration
+- Affichage de la bibliothèque de sons avec lecture et gestion
 
-**Features:**
-- Real-time data synchronization with backend
-- Dynamic date filtering for current time periods
-- Module configuration persistence
-- CSV export functionality
-
----
-
-## System Requirements
-
-- PostgreSQL 12 or higher
-- Java JDK 8 or higher
-- Apache Maven 3.6 or higher
-- Node.js 18 or higher with npm
-- Application Server (Apache Tomcat 9+ or GlassFish 5+)
-- Modern web browser (Chrome, Firefox, Edge)
+**Fonctionnalités:**
+- Synchronisation des données en temps réel avec le backend
+- Filtrage dynamique des dates pour les périodes actuelles
+- Persistance de la configuration des modules avec validation
+- Upload et suppression de fichiers son
+- Lecture audio intégrée
+- Fonctionnalité d'export CSV
 
 ---
 
-## Installation Guide
+## Configuration Système Requise
 
-### Step 1: Database Setup
+- PostgreSQL 12 ou supérieur
+- Java JDK 8 ou supérieur
+- Apache Maven 3.6 ou supérieur
+- Node.js 18 ou supérieur avec npm
+- Serveur d'Application (Apache Tomcat 9+ ou GlassFish 5+)
+- Navigateur web moderne (Chrome, Firefox, Edge)
 
-1. Start your PostgreSQL service
+---
+
+## Guide d'Installation
+
+### Étape 1: Configuration de la Base de Données
+
+1. Démarrez votre service PostgreSQL
    ```bash
    # Windows
    pg_ctl -D "C:\Program Files\PostgreSQL\XX\data" start
@@ -69,161 +71,183 @@ The frontend is a single-page application with the following features:
    sudo service postgresql start
    ```
 
-2. Create and populate the database
+2. Créez et peupler la base de données
    ```bash
-   # Connect to PostgreSQL
+   # Se connecter à PostgreSQL
    psql -U postgres -d postgres
    
-   # Execute table creation script
+   # Exécuter le script de création de tables
    \i sql/requete creation tables.sql
    
-   # Execute test data script
+   # Exécuter le script de données de test
    \i sql/Creation données test.sql
    
-   # Exit psql
+   # Quitter psql
    \q
    ```
 
-3. Verify database setup
+3. Vérifiez la configuration de la base de données
    ```bash
    psql -U postgres -d postgres -c "\dt"
    psql -U postgres -d postgres -c "SELECT COUNT(*) FROM interaction;"
    ```
 
-**Database Configuration:**
-If your PostgreSQL credentials differ from defaults (user: postgres, password: postgres, port: 5432), update the connection settings in:
+4. Créez le dossier pour les fichiers son
+   ```bash
+   # À la racine du projet
+   mkdir sons
+   # Ou assurez-vous qu'il existe déjà
+   ```
+
+**Configuration de la Base de Données:**
+Si vos identifiants PostgreSQL diffèrent des valeurs par défaut (utilisateur: postgres, mot de passe: postgres, port: 5432), mettez à jour les paramètres de connexion dans:
 ```
 back/PEPs_back/src/main/resources/META-INF/persistence.xml
 ```
 
-### Step 2: Backend Deployment
+### Étape 2: Déploiement du Backend
 
-1. Stop any running application server instance
+1. Arrêtez toute instance de serveur d'application en cours d'exécution
 
-2. Navigate to backend directory
+2. Naviguez vers le répertoire backend
    ```bash
    cd back\PEPs_back
    ```
 
-3. Build the application
+3. Compilez l'application
    ```bash
    mvn clean install
    ```
 
-4. Deploy the WAR file
-   - Locate the WAR file: `target/PEPs_back-0.1.war`
-   - Copy to your application server's deployment directory:
+4. Déployez le fichier WAR
+   - Localisez le fichier WAR: `target/PEPs_back-0.1.war`
+   - Copiez-le dans le répertoire de déploiement de votre serveur d'applications:
      - Tomcat: `<TOMCAT_HOME>/webapps/`
-     - GlassFish: Deploy via admin console or CLI
-   - Ensure deployment context path is `/PEPs_back`
+     - GlassFish: Déployez via la console d'administration ou CLI
+   - Assurez-vous que le chemin de contexte de déploiement est `/PEPs_back`
 
-5. Start the application server
+5. Démarrez le serveur d'applications
 
-6. Verify backend functionality
+6. Vérifiez la fonctionnalité du backend
    
-   Test each endpoint in your browser or with curl:
+   Testez chaque endpoint dans votre navigateur ou avec curl:
    
-   **Dashboard Statistics:**
+   **Statistiques du Tableau de Bord:**
    ```
    http://localhost:8080/PEPs_back/dashboard
    ```
-   Expected response:
+   Réponse attendue:
    ```json
    {"totalInteractions":4,"activeModules":2,"lastInteraction":"2025-01-18 10:30:45"}
    ```
    
-   **Interactions List:**
+   **Liste des Interactions:**
    ```
    http://localhost:8080/PEPs_back/interactions
    ```
    
-   **Modules List:**
+   **Liste des Modules:**
    ```
    http://localhost:8080/PEPs_back/modules
    ```
    
-   **Sounds List:**
+   **Liste des Sons:**
    ```
    http://localhost:8080/PEPs_back/sounds
    ```
    
-   **Daily Statistics:**
+   **Statistiques Quotidiennes:**
    ```
    http://localhost:8080/PEPs_back/daily-stats
    ```
 
-### Step 3: Frontend Setup
+### Étape 3: Configuration du Frontend
 
-1. Navigate to frontend directory
+1. Naviguez vers le répertoire frontend
    ```bash
    cd front\pepsfront
    ```
 
-2. Install dependencies
+2. Installez les dépendances
    ```bash
    npm install
    ```
 
-3. Start development server
+3. Démarrez le serveur de développement
    ```bash
    npm start
    ```
 
-4. Access the application
+4. Accédez à l'application
    ```
    http://localhost:4200
    ```
 
-### Step 4: Application Usage
+### Étape 4: Utilisation de l'Application
 
-1. **Login**
-   - Password: `admin`
-   - The system uses SHA-256 password hashing
+1. **Connexion**
+   - Mot de passe: `admin`
+   - Le système utilise le hachage de mot de passe SHA-256
 
-2. **Dashboard View**
-   - Displays total interaction count
-   - Shows number of active modules
-   - Shows most recent interaction timestamp
-   - Displays hourly interaction distribution chart
+2. **Vue Tableau de Bord**
+   - Affiche le nombre total d'interactions
+   - Affiche le nombre de modules actifs
+   - Affiche l'horodatage de l'interaction la plus récente
+   - Affiche le graphique de distribution des interactions horaires
 
-3. **Interactions Page**
-   - View complete interaction history
-   - Filter by time period:
-     - **Toutes**: All interactions
-     - **Aujourd'hui**: Today's interactions
-     - **Hier**: Yesterday's interactions
-     - **Semaine**: Last 7 days
-   - Export data to CSV format
+3. **Page Interactions**
+   - Voir l'historique complet des interactions
+   - Filtrer par période:
+     - **Toutes**: Toutes les interactions
+     - **Aujourd'hui**: Interactions d'aujourd'hui
+     - **Hier**: Interactions d'hier
+     - **Semaine**: 7 derniers jours
+   - Exporter les données au format CSV
 
-4. **Modules Page**
-   - View all registered modules
-   - Access module configuration:
-     - Volume control (0-100%)
-     - Operation mode (Manuel/Automatique)
-     - Active status toggle
-     - Sound enable/disable
-   - Save configuration changes to database
+4. **Page Modules**
+   - Voir tous les modules enregistrés
+   - Accéder à la configuration du module:
+     - Contrôle du volume (0-100%)
+     - Mode de fonctionnement (Manuel/Automatique)
+     - Basculer l'état actif
+     - Activer/désactiver le son
+   - Enregistrer les modifications de configuration dans la base de données
+   - **Validation:** Le système valide:
+     - Nom obligatoire
+     - Adresse IP obligatoire et format valide
+     - Volume entre 0 et 100
+     - Mode valide (Manuel ou Automatique)
 
-5. **Sounds Library**
-   - Browse available sounds
-   - View sound names and types
+5. **Bibliothèque de Sons**
+   - Parcourir les sons disponibles
+   - Écouter les sons (bouton lecture/arrêt)
+   - Ajouter de nouveaux sons:
+     - Cliquer sur "Ajouter un son"
+     - Entrer le nom du son
+     - Sélectionner le type (Vocal, Ambiance, Naturel, Autre)
+     - Choisir un fichier audio (mp3, wav, ogg, m4a)
+     - Cliquer sur "Enregistrer"
+   - Supprimer des sons:
+     - Cliquer sur le bouton supprimer
+     - Confirmer la suppression
+     - Le fichier et l'entrée de base de données sont supprimés
 
-6. **Refresh Data**
-   - Use the refresh button to reload data from backend
-   - All pages automatically fetch current data on load
+6. **Actualiser les Données**
+   - Utilisez le bouton d'actualisation pour recharger les données du backend
+   - Toutes les pages récupèrent automatiquement les données actuelles au chargement
 
 ---
 
-## API Documentation
+## Documentation de l'API
 
-The backend exposes the following REST API endpoints:
+Le backend expose les endpoints API REST suivants:
 
-### Dashboard Statistics
+### Statistiques du Tableau de Bord
 **Endpoint:** `GET /dashboard`
 
-**Description:** Returns overall system statistics
+**Description:** Retourne les statistiques globales du système
 
-**Response:**
+**Réponse:**
 ```json
 {
   "totalInteractions": 4,
@@ -232,12 +256,12 @@ The backend exposes the following REST API endpoints:
 }
 ```
 
-### Interactions List
+### Liste des Interactions
 **Endpoint:** `GET /interactions`
 
-**Description:** Returns all interaction records sorted by date (newest first)
+**Description:** Retourne tous les enregistrements d'interaction triés par date (plus récent en premier)
 
-**Response:**
+**Réponse:**
 ```json
 [
   {
@@ -245,22 +269,16 @@ The backend exposes the following REST API endpoints:
     "date": "2025-01-18T10:25:00",
     "module": "Module Perchoir 1",
     "type": "Bec"
-  },
-  {
-    "id": 2,
-    "date": "2025-01-18T10:20:00",
-    "module": "Module Nid 2",
-    "type": "Patte"
   }
 ]
 ```
 
-### Modules List
+### Liste des Modules
 **Endpoint:** `GET /modules`
 
-**Description:** Returns all module configurations
+**Description:** Retourne toutes les configurations de module
 
-**Response:**
+**Réponse:**
 ```json
 [
   {
@@ -279,25 +297,15 @@ The backend exposes the following REST API endpoints:
 ]
 ```
 
-### Module Details
-**Endpoint:** `GET /modules/{id}`
-
-**Description:** Returns specific module details
-
-**Parameters:**
-- `id` (path parameter): Module identifier
-
-**Response:** Same structure as single module object from modules list
-
-### Module Update
+### Mise à Jour de Module
 **Endpoint:** `PUT /modules/{id}`
 
-**Description:** Updates module configuration
+**Description:** Met à jour la configuration du module avec validation
 
-**Parameters:**
-- `id` (path parameter): Module identifier
+**Paramètres:**
+- `id` (paramètre de chemin): Identifiant du module
 
-**Request Body:**
+**Corps de la requête:**
 ```json
 {
   "id": 1,
@@ -314,35 +322,100 @@ The backend exposes the following REST API endpoints:
 }
 ```
 
-**Response:** Updated module object
+**Validation:**
+- Nom: obligatoire, ne peut pas être vide
+- IP: obligatoire, doit correspondre au format IP valide (xxx.xxx.xxx.xxx)
+- Volume: doit être entre 0 et 100
+- Mode: doit être "Manuel" ou "Automatique"
 
-### Sounds List
+**Réponse:** Objet module mis à jour
+
+**Erreurs possibles:**
+```json
+{"error": "Le nom du module est obligatoire"}
+{"error": "Format d'adresse IP invalide"}
+{"error": "Le volume doit être entre 0 et 100"}
+```
+
+### Liste des Sons
 **Endpoint:** `GET /sounds`
 
-**Description:** Returns all available sounds
+**Description:** Retourne tous les sons disponibles
 
-**Response:**
+**Réponse:**
 ```json
 [
   {
     "id": 1,
-    "name": "Cri Ara Bleu",
-    "type": "Vocal"
-  },
-  {
-    "id": 2,
-    "name": "Chant Foret Amazonienne",
-    "type": "Ambiance"
+    "name": "Chant Mali",
+    "type": "Ambiance",
+    "extension": "mp3",
+    "fileName": "Chant_Mali.mp3"
   }
 ]
 ```
 
-### Daily Statistics
+### Télécharger un Fichier Son
+**Endpoint:** `GET /sounds/{id}/file`
+
+**Description:** Télécharge le fichier audio d'un son spécifique
+
+**Paramètres:**
+- `id` (paramètre de chemin): Identifiant du son
+
+**Réponse:** Flux de fichier audio avec en-têtes appropriés
+
+### Upload de Son
+**Endpoint:** `POST /sounds`
+
+**Description:** Upload un nouveau son avec validation
+
+**Type de contenu:** `multipart/form-data`
+
+**Paramètres:**
+- `name` (form-data): Nom du son (obligatoire)
+- `type` (form-data): Type de son (obligatoire)
+- `file` (form-data): Fichier audio (obligatoire)
+
+**Validation:**
+- Nom: obligatoire, ne peut pas être vide
+- Type: obligatoire, ne peut pas être vide
+- Fichier: obligatoire, formats acceptés: mp3, wav, ogg, m4a
+
+**Réponse:** Objet son créé
+
+**Erreurs possibles:**
+```json
+{"error": "Le nom est obligatoire"}
+{"error": "Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a"}
+{"error": "Erreur lors de l'enregistrement du fichier"}
+```
+
+### Suppression de Son
+**Endpoint:** `DELETE /sounds/{id}`
+
+**Description:** Supprime un son et son fichier associé
+
+**Paramètres:**
+- `id` (paramètre de chemin): Identifiant du son
+
+**Réponse:**
+```json
+{"message": "Son supprimé avec succès"}
+```
+
+**Erreurs possibles:**
+```json
+{"error": "Son introuvable"}
+{"error": "Erreur lors de la suppression du fichier"}
+```
+
+### Statistiques Quotidiennes
 **Endpoint:** `GET /daily-stats`
 
-**Description:** Returns interaction counts grouped by 2-hour intervals for the current day
+**Description:** Retourne le nombre d'interactions groupées par intervalles de 2 heures pour le jour actuel
 
-**Response:**
+**Réponse:**
 ```json
 [
   {"time": "8h", "count": 0},
@@ -356,19 +429,19 @@ The backend exposes the following REST API endpoints:
 
 ---
 
-## Troubleshooting Guide
+## Guide de Dépannage
 
-### Backend Issues
+### Problèmes Backend
 
-#### Database Connection Failure
+#### Échec de Connexion à la Base de Données
 
-**Symptoms:**
-- Application fails to start
-- Connection timeout errors
-- Authentication failures
+**Symptômes:**
+- L'application ne démarre pas
+- Erreurs de timeout de connexion
+- Échecs d'authentification
 
 **Solutions:**
-1. Verify PostgreSQL service is running
+1. Vérifiez que le service PostgreSQL est en cours d'exécution
    ```bash
    # Windows
    sc query postgresql-x64-XX
@@ -377,180 +450,104 @@ The backend exposes the following REST API endpoints:
    sudo service postgresql status
    ```
 
-2. Check database credentials in `persistence.xml`
-   - Username: postgres
-   - Password: postgres
+2. Vérifiez les identifiants de base de données dans `persistence.xml`
+   - Nom d'utilisateur: postgres
+   - Mot de passe: postgres
    - Port: 5432
-   - Database: postgres
+   - Base de données: postgres
 
-3. Test database connectivity
+3. Testez la connectivité de la base de données
    ```bash
    psql -U postgres -d postgres -c "SELECT 1"
    ```
 
-4. Verify database exists and contains tables
+#### Erreurs HTTP 404 sur les Endpoints API
+
+**Symptômes:**
+- Le navigateur affiche "404 Not Found"
+- Les endpoints API ne sont pas accessibles
+
+**Solutions:**
+1. Vérifiez que le fichier WAR est correctement déployé
+   - Vérifiez le répertoire webapps du serveur d'applications
+   - Confirmez que le chemin de contexte de déploiement est `/PEPs_back`
+
+2. Vérifiez le mappage de servlet dans `web.xml`
+   - Doit être configuré avec `<url-pattern>/</url-pattern>`
+
+3. Consultez les journaux du serveur d'applications
+
+#### Problèmes d'Upload de Fichiers Son
+
+**Symptômes:**
+- Erreurs lors de l'upload
+- Fichiers non sauvegardés
+
+**Solutions:**
+1. Vérifiez que le dossier `sons` existe
    ```bash
-   psql -U postgres -l
-   psql -U postgres -d postgres -c "\dt"
+   ls sons/
    ```
 
-#### HTTP 404 Errors on API Endpoints
-
-**Symptoms:**
-- Browser shows "404 Not Found"
-- API endpoints not accessible
-
-**Solutions:**
-1. Verify WAR file is properly deployed
-   - Check application server's webapps directory
-   - Confirm deployment context path is `/PEPs_back`
-
-2. Check servlet mapping in `web.xml`
-   - Should be configured with `<url-pattern>/</url-pattern>`
-   - Not `<url-pattern>*.do</url-pattern>`
-
-3. Review application server logs
-   - Tomcat: `<TOMCAT_HOME>/logs/catalina.out`
-   - GlassFish: `<GLASSFISH_HOME>/glassfish/domains/domain1/logs/server.log`
-
-4. Verify application server is running
+2. Vérifiez les permissions d'écriture
    ```bash
-   # Check if port 8080 is listening
-   netstat -an | findstr "8080"
+   # Linux/Mac
+   chmod 755 sons/
    ```
 
-#### Empty or Null Data Responses
+3. Vérifiez l'espace disque disponible
 
-**Symptoms:**
-- API returns empty arrays
-- Null values in responses
+4. Vérifiez les limites de taille de fichier du serveur d'applications
 
-**Solutions:**
-1. Verify test data was inserted
-   ```bash
-   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM interaction;"
-   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM module;"
-   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM sound;"
-   ```
+### Problèmes Frontend
 
-2. Check JPA entity mappings match database schema
+#### Erreurs CORS
 
-3. Review application server logs for exceptions
-
-### Frontend Issues
-
-#### CORS (Cross-Origin) Errors
-
-**Symptoms:**
-- Browser console shows CORS policy errors
-- Network requests blocked
+**Symptômes:**
+- La console du navigateur affiche des erreurs de politique CORS
+- Requêtes réseau bloquées
 
 **Solutions:**
-1. Verify CORS configuration in controllers
-   - Should include: `@CrossOrigin(origins = "http://localhost:4200")`
+1. Vérifiez la configuration CORS dans les contrôleurs
+   - Doit inclure: `@CrossOrigin(origins = "http://localhost:4200")`
 
-2. If using non-standard port, update CORS origins in all controllers
+2. Si vous utilisez un port non standard, mettez à jour les origines CORS dans tous les contrôleurs
 
-3. Clear browser cache and restart development server
+#### Problèmes de Lecture Audio
 
-#### Connection Errors
-
-**Symptoms:**
-- "Erreur de connexion" message
-- "Chargement..." never completes
-- Empty data displays
+**Symptômes:**
+- Les sons ne se jouent pas
+- Erreurs dans la console
 
 **Solutions:**
-1. Verify backend is running and accessible
-   ```bash
-   curl http://localhost:8080/PEPs_back/dashboard
-   ```
+1. Vérifiez que le fichier son existe sur le serveur
 
-2. Check browser console (F12) for detailed errors
-   - Network tab: Verify request URLs
-   - Console tab: Look for JavaScript errors
+2. Vérifiez les types MIME du serveur
 
-3. Verify BASE_URL constant in `app.ts`
-   ```typescript
-   private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
-   ```
+3. Essayez différents navigateurs
 
-4. Test API endpoints directly in browser
+4. Vérifiez la console du navigateur pour des erreurs détaillées
 
-#### Data Not Updating
+#### Problèmes de Validation de Configuration Module
 
-**Symptoms:**
-- Old data persists
-- Changes not reflected
-- Empty lists
+**Symptômes:**
+- Impossible de sauvegarder la configuration
+- Messages d'erreur de validation
 
 **Solutions:**
-1. Clear browser cache
-   - Chrome: Ctrl+Shift+Delete
-   - Firefox: Ctrl+Shift+Delete
-   - Edge: Ctrl+Shift+Delete
+1. Vérifiez que tous les champs obligatoires sont remplis
 
-2. Hard refresh page
-   - Chrome/Firefox/Edge: Ctrl+Shift+R
+2. Vérifiez le format de l'adresse IP (doit être xxx.xxx.xxx.xxx)
 
-3. Check browser console for HTTP errors
+3. Vérifiez que le volume est entre 0 et 100
 
-4. Verify backend endpoints return current data
-
-5. Clear browser local storage
-   ```javascript
-   // In browser console
-   localStorage.clear();
-   sessionStorage.clear();
-   ```
-
-#### Date Filtering Issues
-
-**Symptoms:**
-- Filters show incorrect data
-- "Aujourd'hui" shows no results when data exists
-
-**Solutions:**
-1. Verify system clock is correct
-
-2. Check database timestamps
-   ```bash
-   psql -U postgres -d postgres -c "SELECT time_lancement FROM interaction ORDER BY time_lancement DESC LIMIT 5;"
-   ```
-
-3. Verify date format consistency between frontend and backend
-
-4. Check browser console for date parsing errors
-
-### Performance Issues
-
-#### Slow Page Load
-
-**Solutions:**
-1. Check database query performance
-   - Add indexes on frequently queried columns
-
-2. Verify network connectivity
-   - Test latency between frontend and backend
-
-3. Monitor application server resources
-   - CPU usage
-   - Memory consumption
-
-#### Large Data Sets
-
-**Solutions:**
-1. Implement pagination for large lists
-
-2. Add date range filters to limit query results
-
-3. Consider implementing lazy loading
+4. Vérifiez que le mode est "Manuel" ou "Automatique"
 
 ---
 
-## Database Schema Reference
+## Schéma de Base de Données
 
-### Module Table
+### Table Module
 ```sql
 CREATE TABLE module (
   idmodule SERIAL PRIMARY KEY,
@@ -564,7 +561,7 @@ CREATE TABLE module (
 );
 ```
 
-### Interaction Table
+### Table Interaction
 ```sql
 CREATE TABLE interaction (
   idinteraction SERIAL PRIMARY KEY,
@@ -575,82 +572,98 @@ CREATE TABLE interaction (
 );
 ```
 
-### Sound Table
+### Table Sound
 ```sql
 CREATE TABLE sound (
   idsound SERIAL PRIMARY KEY,
   nom VARCHAR(255) NOT NULL,
-  type_son VARCHAR(50) NOT NULL
+  type_son VARCHAR(50) NOT NULL,
+  extension VARCHAR(10) NOT NULL
 );
 ```
 
 ---
 
-## Development Notes
+## Notes de Développement
 
-### Project Structure
+### Structure du Projet
 
 **Backend:**
 ```
 back/PEPs_back/
 ├── src/main/java/peps/peps_back/
-│   ├── controllers/       # REST API controllers
-│   ├── items/             # JPA entities
-│   ├── repositories/      # Data access layer
-│   └── resources/         # Configuration files
+│   ├── controllers/       # Contrôleurs API REST
+│   ├── items/             # Entités JPA
+│   ├── repositories/      # Couche d'accès aux données
+│   └── resources/         # Fichiers de configuration
 ├── src/main/webapp/
 │   └── WEB-INF/
-│       ├── web.xml        # Servlet configuration
+│       ├── web.xml        # Configuration servlet
 │       ├── dispatcher-servlet.xml
 │       └── applicationContext.xml
-└── pom.xml                # Maven dependencies
+└── pom.xml                # Dépendances Maven
 ```
 
 **Frontend:**
 ```
 front/pepsfront/
 ├── src/app/
-│   ├── app.ts             # Main component logic
-│   ├── app.html           # Main component template
-│   ├── app.css            # Component styles
-│   ├── app.config.ts      # Application configuration
-│   └── app.routes.ts      # Routing configuration
-└── package.json           # NPM dependencies
+│   ├── app.ts             # Logique du composant principal
+│   ├── app.html           # Template du composant principal
+│   ├── app.css            # Styles du composant
+│   ├── app.config.ts      # Configuration de l'application
+│   └── app.routes.ts      # Configuration du routage
+└── package.json           # Dépendances NPM
 ```
 
-### Technology Stack
+**Fichiers Son:**
+```
+sons/
+├── Chant_Mali.mp3
+├── parrot_cry_and_communication.mp3
+└── water_flowing.wav
+```
+
+### Stack Technologique
 
 **Backend:**
 - Java 8+
 - Spring Framework 5.3
 - Spring Data JPA
-- PostgreSQL JDBC Driver
-- Jackson for JSON serialization
+- Pilote JDBC PostgreSQL
+- Jackson pour la sérialisation JSON
 
 **Frontend:**
 - Angular 20+
 - Angular Material 20+
 - TypeScript 5+
-- RxJS for reactive programming
+- RxJS pour la programmation réactive
 
-### Build Tools
+### Outils de Build
 - Maven 3.6+ (Backend)
 - npm (Frontend)
 
 ---
 
-## Support and Maintenance
+## Support et Maintenance
 
-For issues and questions:
-1. Check application server logs for detailed error messages
-2. Review PostgreSQL logs for database-related issues
-3. Use browser developer tools (F12) to inspect network requests and console errors
-4. Verify all services are running on expected ports
-5. Test API endpoints individually to isolate issues
+Pour les problèmes et questions:
+1. Vérifiez les journaux du serveur d'applications pour des messages d'erreur détaillés
+2. Consultez les journaux PostgreSQL pour les problèmes liés à la base de données
+3. Utilisez les outils de développement du navigateur (F12) pour inspecter les requêtes réseau et les erreurs de console
+4. Vérifiez que tous les services s'exécutent sur les ports attendus
+5. Testez les endpoints API individuellement pour isoler les problèmes
 
-Regular maintenance tasks:
-- Monitor database size and performance
-- Review and archive old interaction records
-- Update dependencies for security patches
-- Backup database regularly
-- Monitor application server resources
+Tâches de maintenance régulières:
+- Surveiller la taille et les performances de la base de données
+- Réviser et archiver les anciens enregistrements d'interaction
+- Mettre à jour les dépendances pour les correctifs de sécurité
+- Sauvegarder régulièrement la base de données et les fichiers son
+- Surveiller les ressources du serveur d'applications
+- Nettoyer les fichiers son inutilisés
+
+---
+
+**Version:** 1.0  
+**Dernière mise à jour:** 2025-11-18
+
