@@ -25,14 +25,14 @@ public class ModuleController {
             .map(m -> new ModuleDTO(
                 m.getIdmodule(),
                 m.getNom(),
-                "", // location not in DB
+                "",
                 m.getActif() ? "Actif" : "Inactif",
                 m.getIpAdress(),
                 new ModuleConfigDTO(
                     m.getVolume(),
                     m.getCurrentMode(),
                     m.getActif(),
-                    false // son not in DB
+                    false
                 )
             ))
             .collect(Collectors.toList());

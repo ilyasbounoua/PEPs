@@ -1,8 +1,8 @@
 -- 1. INSERER DES SONS
-INSERT INTO public.Sound (nom, type_son) VALUES
-('Cri Ara Bleu', 'Vocal'),
-('Chant Foret Amazonienne', 'Ambiance'),
-('Son Eau Qui Coule', 'Naturel');
+INSERT INTO public.Sound (nom, type_son, extension) VALUES
+('Chant Mali', 'Ambiance', 'mp3'),
+('Cri et Communication Perroquet', 'Vocal', 'mp3'),
+('Son Eau Qui Coule', 'Naturel', 'wav');
 
 -- 2. INSERER DES MODULES
 INSERT INTO public.Module (nom, ip_adress, status, volume, current_mode, actif, last_seen) VALUES

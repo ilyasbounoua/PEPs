@@ -1,288 +1,656 @@
 # PEPs - Backend/Frontend Connection Setup Guide
 
-## Update Overview
+## Application Overview
 
-The application now fully connects the Angular frontend with the Java Spring backend to fetch and update real data from PostgreSQL database.
+This application connects an Angular frontend with a Java Spring backend to fetch and update real data from a PostgreSQL database.
 
-### Changes Made:
+### Application Architecture:
 
-#### 1. Backend Changes (Java Spring)
+#### Backend (Java Spring)
 
-**File: `web.xml`**
-- Changed servlet mapping from `*.do` to `/` to handle REST endpoints
+The backend provides REST API endpoints for data access and manipulation:
 
-**File: `DashBoardController.java`**
-- Fetches dashboard statistics from database
+**Controllers:**
+- `DashBoardController.java` - Provides dashboard statistics
+- `InteractionController.java` - Manages interaction history
+- `ModuleController.java` - Manages module data and configuration
+- `SoundController.java` - Manages sound library
+- `DailyStatsController.java` - Provides hourly statistics
 
-**New Controllers:**
-- `InteractionController.java` - GET `/interactions` returns all interactions with module names
-- `ModuleController.java` - GET/PUT `/modules` manages module data and configuration
-- `SoundController.java` - GET `/sounds` returns all sounds from database
-- `DailyStatsController.java` - GET `/daily-stats` returns hourly interaction counts for today
+**Data Transfer Objects:**
+- `DashboardStats.java` - Dashboard statistics structure
+- `InteractionDTO.java` - Interaction data structure
+- `ModuleDTO.java`, `ModuleConfigDTO.java` - Module data structure
+- `SoundDTO.java` - Sound data structure
+- `DailyDataDTO.java` - Daily statistics structure
 
-**DTOs Created:**
-- `DashboardStats.java` - Dashboard statistics
-- `InteractionDTO.java` - Interaction data transfer
-- `ModuleDTO.java`, `ModuleConfigDTO.java` - Module data and configuration
-- `SoundDTO.java` - Sound data
-- `DailyDataDTO.java` - Daily statistics
+**Configuration:**
+- `web.xml` - Servlet mapping configured to handle REST endpoints at root path
 
-#### 2. Frontend Changes (Angular)
+#### Frontend (Angular)
 
-**File: `app.ts`**
-- Added BASE_URL constant for API endpoint
-- Removed all mock/static data
-- All data is now fetched from backend API
-- Implemented date filtering that works with current dates (not hardcoded)
-- Module configuration now saves to backend via PUT request
-- Added sounds signal to store and display database sounds
-- Refresh button now reloads all data from backend
+The frontend is a single-page application with the following features:
 
-**File: `app.html`**
-- Fixed last interaction display to show full date and time
-- Changed dailyChartData to use signal
-- Updated sounds page to display all sounds from database
+**Main Components:**
+- Dashboard with real-time statistics
+- Interaction history with date filtering
+- Module management with configuration
+- Sound library display
 
-**File: `app.css`**
-- Added styling for sounds grid display
+**Features:**
+- Real-time data synchronization with backend
+- Dynamic date filtering for current time periods
+- Module configuration persistence
+- CSV export functionality
 
 ---
 
-## Setup Instructions
+## System Requirements
 
-### Prerequisites
-1. PostgreSQL installed and running on localhost:5432
-2. Java 8+ and Maven installed
-3. Node.js and npm installed
-4. Application server (like Apache Tomcat or GlassFish)
+- PostgreSQL 12 or higher
+- Java JDK 8 or higher
+- Apache Maven 3.6 or higher
+- Node.js 18 or higher with npm
+- Application Server (Apache Tomcat 9+ or GlassFish 5+)
+- Modern web browser (Chrome, Firefox, Edge)
 
-### Step 1: Setup Database
+---
 
-1. Start PostgreSQL
-2. Connect to PostgreSQL (default database: postgres, user: postgres, password: postgres)
-3. Create tables by running:
+## Installation Guide
+
+### Step 1: Database Setup
+
+1. Start your PostgreSQL service
    ```bash
-   psql -U postgres -d postgres -f "sql/requete creation tables.sql"
+   # Windows
+   pg_ctl -D "C:\Program Files\PostgreSQL\XX\data" start
+   
+   # Linux/Mac
+   sudo service postgresql start
    ```
-4. Insert test data:
+
+2. Create and populate the database
    ```bash
-   psql -U postgres -d postgres -f "sql/Creation données test.sql"
+   # Connect to PostgreSQL
+   psql -U postgres -d postgres
+   
+   # Execute table creation script
+   \i sql/requete creation tables.sql
+   
+   # Execute test data script
+   \i sql/Creation données test.sql
+   
+   # Exit psql
+   \q
    ```
 
-**Note:** If PostgreSQL credentials are different, update them in:
-`back/PEPs_back/src/main/resources/META-INF/persistence.xml`
+3. Verify database setup
+   ```bash
+   psql -U postgres -d postgres -c "\dt"
+   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM interaction;"
+   ```
 
-### Step 2: Build and Deploy Backend
+**Database Configuration:**
+If your PostgreSQL credentials differ from defaults (user: postgres, password: postgres, port: 5432), update the connection settings in:
+```
+back/PEPs_back/src/main/resources/META-INF/persistence.xml
+```
 
-**IMPORTANT:** Stop your running Tomcat/GlassFish server first!
+### Step 2: Backend Deployment
 
-Run the Peps_back project in Netbeans, or via command line:
+1. Stop any running application server instance
 
-1. Navigate to backend directory:
+2. Navigate to backend directory
    ```bash
    cd back\PEPs_back
    ```
 
-2. Build the project:
+3. Build the application
    ```bash
    mvn clean install
    ```
 
-3. Deploy the generated WAR file:
-   - Find the WAR file in `target/PEPs_back-0.1.war`
-   - Deploy it to your application server (Tomcat/GlassFish)
-   - Make sure it's deployed at context path `/PEPs_back`
+4. Deploy the WAR file
+   - Locate the WAR file: `target/PEPs_back-0.1.war`
+   - Copy to your application server's deployment directory:
+     - Tomcat: `<TOMCAT_HOME>/webapps/`
+     - GlassFish: Deploy via admin console or CLI
+   - Ensure deployment context path is `/PEPs_back`
 
-4. Verify backend is running:
-   - Dashboard: `http://localhost:8080/PEPs_back/dashboard`
-   - Should return JSON like: `{"totalInteractions":4,"activeModules":2,"lastInteraction":"2025-01-18 10:30:45"}`
-   - Interactions: `http://localhost:8080/PEPs_back/interactions`
-   - Modules: `http://localhost:8080/PEPs_back/modules`
-   - Sounds: `http://localhost:8080/PEPs_back/sounds`
-   - Daily Stats: `http://localhost:8080/PEPs_back/daily-stats`
+5. Start the application server
 
-### Step 3: Run Frontend
+6. Verify backend functionality
+   
+   Test each endpoint in your browser or with curl:
+   
+   **Dashboard Statistics:**
+   ```
+   http://localhost:8080/PEPs_back/dashboard
+   ```
+   Expected response:
+   ```json
+   {"totalInteractions":4,"activeModules":2,"lastInteraction":"2025-01-18 10:30:45"}
+   ```
+   
+   **Interactions List:**
+   ```
+   http://localhost:8080/PEPs_back/interactions
+   ```
+   
+   **Modules List:**
+   ```
+   http://localhost:8080/PEPs_back/modules
+   ```
+   
+   **Sounds List:**
+   ```
+   http://localhost:8080/PEPs_back/sounds
+   ```
+   
+   **Daily Statistics:**
+   ```
+   http://localhost:8080/PEPs_back/daily-stats
+   ```
 
-1. Navigate to frontend directory:
+### Step 3: Frontend Setup
+
+1. Navigate to frontend directory
    ```bash
    cd front\pepsfront
    ```
 
-2. Install dependencies (if not already done):
+2. Install dependencies
    ```bash
    npm install
    ```
 
-3. Start the development server:
+3. Start development server
    ```bash
    npm start
    ```
 
-4. Open browser: `http://localhost:4200`
+4. Access the application
+   ```
+   http://localhost:4200
+   ```
 
-### Step 4: Test the Connection
+### Step 4: Application Usage
 
-1. Login with password: `admin`
-2. The application will fetch all data from the database:
-   - **Dashboard**: Shows real interaction counts, active modules, and last interaction timestamp
-   - **Daily Chart**: Shows hourly interaction counts for today
-   - **Interactions Page**: Shows all interactions from database
-     - Filters work with current date (not hardcoded)
-     - "Aujourd'hui" shows today's interactions
-     - "Hier" shows yesterday's interactions
-     - "Semaine" shows last 7 days
-   - **Modules Page**: Shows all modules from database with their configuration
-     - Click on a module to edit its configuration
-     - Changes are saved to database
-   - **Sons Page**: Shows all sounds from database
+1. **Login**
+   - Password: `admin`
+   - The system uses SHA-256 password hashing
+
+2. **Dashboard View**
+   - Displays total interaction count
+   - Shows number of active modules
+   - Shows most recent interaction timestamp
+   - Displays hourly interaction distribution chart
+
+3. **Interactions Page**
+   - View complete interaction history
+   - Filter by time period:
+     - **Toutes**: All interactions
+     - **Aujourd'hui**: Today's interactions
+     - **Hier**: Yesterday's interactions
+     - **Semaine**: Last 7 days
+   - Export data to CSV format
+
+4. **Modules Page**
+   - View all registered modules
+   - Access module configuration:
+     - Volume control (0-100%)
+     - Operation mode (Manuel/Automatique)
+     - Active status toggle
+     - Sound enable/disable
+   - Save configuration changes to database
+
+5. **Sounds Library**
+   - Browse available sounds
+   - View sound names and types
+
+6. **Refresh Data**
+   - Use the refresh button to reload data from backend
+   - All pages automatically fetch current data on load
 
 ---
 
-## API Endpoints
+## API Documentation
 
-Currently implemented:
+The backend exposes the following REST API endpoints:
 
-- **GET** `/dashboard` - Returns dashboard statistics
-  ```json
+### Dashboard Statistics
+**Endpoint:** `GET /dashboard`
+
+**Description:** Returns overall system statistics
+
+**Response:**
+```json
+{
+  "totalInteractions": 4,
+  "activeModules": 2,
+  "lastInteraction": "2025-01-18 10:30:45"
+}
+```
+
+### Interactions List
+**Endpoint:** `GET /interactions`
+
+**Description:** Returns all interaction records sorted by date (newest first)
+
+**Response:**
+```json
+[
   {
-    "totalInteractions": 4,
-    "activeModules": 2,
-    "lastInteraction": "2025-01-18 10:30:45"
+    "id": 1,
+    "date": "2025-01-18T10:25:00",
+    "module": "Module Perchoir 1",
+    "type": "Bec"
+  },
+  {
+    "id": 2,
+    "date": "2025-01-18T10:20:00",
+    "module": "Module Nid 2",
+    "type": "Patte"
   }
-  ```
+]
+```
 
-- **GET** `/interactions` - Returns list of all interactions
-  ```json
-  [
-    {
-      "id": 1,
-      "date": "2025-01-18T10:25:00",
-      "module": "Module Perchoir 1",
-      "type": "Bec"
+### Modules List
+**Endpoint:** `GET /modules`
+
+**Description:** Returns all module configurations
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Module Perchoir 1",
+    "location": "",
+    "status": "Actif",
+    "ip": "192.168.1.10",
+    "config": {
+      "volume": 80,
+      "mode": "Automatique",
+      "actif": true,
+      "son": false
     }
-  ]
-  ```
+  }
+]
+```
 
-- **GET** `/modules` - Returns list of all modules
-  ```json
-  [
-    {
-      "id": 1,
-      "name": "Module Perchoir 1",
-      "location": "",
-      "status": "Actif",
-      "ip": "192.168.1.10",
-      "config": {
-        "volume": 80,
-        "mode": "Automatique",
-        "actif": true,
-        "son": false
-      }
-    }
-  ]
-  ```
+### Module Details
+**Endpoint:** `GET /modules/{id}`
 
-- **GET** `/modules/{id}` - Returns specific module details
+**Description:** Returns specific module details
 
-- **PUT** `/modules/{id}` - Updates module configuration
-  
-- **GET** `/sounds` - Returns list of all sounds
-  ```json
-  [
-    {
-      "id": 1,
-      "name": "Cri Ara Bleu",
-      "type": "Vocal"
-    }
-  ]
-  ```
+**Parameters:**
+- `id` (path parameter): Module identifier
 
-- **GET** `/daily-stats` - Returns hourly statistics for today
-  ```json
-  [
-    {"time": "8h", "count": 0},
-    {"time": "10h", "count": 2},
-    {"time": "12h", "count": 1}
-  ]
-  ```
+**Response:** Same structure as single module object from modules list
+
+### Module Update
+**Endpoint:** `PUT /modules/{id}`
+
+**Description:** Updates module configuration
+
+**Parameters:**
+- `id` (path parameter): Module identifier
+
+**Request Body:**
+```json
+{
+  "id": 1,
+  "name": "Module Perchoir 1",
+  "location": "Enclos Nord",
+  "status": "Actif",
+  "ip": "192.168.1.10",
+  "config": {
+    "volume": 85,
+    "mode": "Manuel",
+    "actif": true,
+    "son": true
+  }
+}
+```
+
+**Response:** Updated module object
+
+### Sounds List
+**Endpoint:** `GET /sounds`
+
+**Description:** Returns all available sounds
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Cri Ara Bleu",
+    "type": "Vocal"
+  },
+  {
+    "id": 2,
+    "name": "Chant Foret Amazonienne",
+    "type": "Ambiance"
+  }
+]
+```
+
+### Daily Statistics
+**Endpoint:** `GET /daily-stats`
+
+**Description:** Returns interaction counts grouped by 2-hour intervals for the current day
+
+**Response:**
+```json
+[
+  {"time": "8h", "count": 0},
+  {"time": "10h", "count": 2},
+  {"time": "12h", "count": 1},
+  {"time": "14h", "count": 0},
+  {"time": "16h", "count": 0},
+  {"time": "18h", "count": 1}
+]
+```
 
 ---
 
-## Troubleshooting
+## Troubleshooting Guide
 
 ### Backend Issues
 
-**Problem: Cannot connect to database**
-- Check PostgreSQL is running: `pg_ctl status`
-- Verify credentials in `persistence.xml`
-- Check database exists: `psql -U postgres -l`
+#### Database Connection Failure
 
-**Problem: 404 error on endpoints**
-- Verify WAR is deployed correctly
-- Check application server logs
-- Ensure context path is `/PEPs_back`
-- Verify web.xml servlet mapping is set to `/` not `*.do`
+**Symptoms:**
+- Application fails to start
+- Connection timeout errors
+- Authentication failures
 
-**Problem: Backend returns null or errors**
-- Check application server logs
-- Verify tables exist: `psql -U postgres -d postgres -c "\dt"`
-- Verify data exists: `psql -U postgres -d postgres -c "SELECT COUNT(*) FROM interaction;"`
+**Solutions:**
+1. Verify PostgreSQL service is running
+   ```bash
+   # Windows
+   sc query postgresql-x64-XX
+   
+   # Linux/Mac
+   sudo service postgresql status
+   ```
+
+2. Check database credentials in `persistence.xml`
+   - Username: postgres
+   - Password: postgres
+   - Port: 5432
+   - Database: postgres
+
+3. Test database connectivity
+   ```bash
+   psql -U postgres -d postgres -c "SELECT 1"
+   ```
+
+4. Verify database exists and contains tables
+   ```bash
+   psql -U postgres -l
+   psql -U postgres -d postgres -c "\dt"
+   ```
+
+#### HTTP 404 Errors on API Endpoints
+
+**Symptoms:**
+- Browser shows "404 Not Found"
+- API endpoints not accessible
+
+**Solutions:**
+1. Verify WAR file is properly deployed
+   - Check application server's webapps directory
+   - Confirm deployment context path is `/PEPs_back`
+
+2. Check servlet mapping in `web.xml`
+   - Should be configured with `<url-pattern>/</url-pattern>`
+   - Not `<url-pattern>*.do</url-pattern>`
+
+3. Review application server logs
+   - Tomcat: `<TOMCAT_HOME>/logs/catalina.out`
+   - GlassFish: `<GLASSFISH_HOME>/glassfish/domains/domain1/logs/server.log`
+
+4. Verify application server is running
+   ```bash
+   # Check if port 8080 is listening
+   netstat -an | findstr "8080"
+   ```
+
+#### Empty or Null Data Responses
+
+**Symptoms:**
+- API returns empty arrays
+- Null values in responses
+
+**Solutions:**
+1. Verify test data was inserted
+   ```bash
+   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM interaction;"
+   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM module;"
+   psql -U postgres -d postgres -c "SELECT COUNT(*) FROM sound;"
+   ```
+
+2. Check JPA entity mappings match database schema
+
+3. Review application server logs for exceptions
 
 ### Frontend Issues
 
-**Problem: CORS errors**
-- Backend already has `@CrossOrigin(origins = "http://localhost:4200")`
-- If using different port, update the annotation in all controllers
+#### CORS (Cross-Origin) Errors
 
-**Problem: "Erreur de connexion" message**
-- Check backend is running and accessible
-- Open browser console (F12) to see detailed error
-- Verify URL is correct: `http://localhost:8080/PEPs_back/`
+**Symptoms:**
+- Browser console shows CORS policy errors
+- Network requests blocked
 
-**Problem: Still showing old data or empty data**
-- Clear browser cache
-- Hard refresh: Ctrl+Shift+R
-- Check browser console for HTTP errors
-- Verify backend endpoints return data (test in browser or with curl)
+**Solutions:**
+1. Verify CORS configuration in controllers
+   - Should include: `@CrossOrigin(origins = "http://localhost:4200")`
 
-**Problem: Date filters not working correctly**
-- Filters now use current date, not hardcoded dates
-- Verify backend is returning dates in correct format
-- Check browser console for date parsing errors
+2. If using non-standard port, update CORS origins in all controllers
+
+3. Clear browser cache and restart development server
+
+#### Connection Errors
+
+**Symptoms:**
+- "Erreur de connexion" message
+- "Chargement..." never completes
+- Empty data displays
+
+**Solutions:**
+1. Verify backend is running and accessible
+   ```bash
+   curl http://localhost:8080/PEPs_back/dashboard
+   ```
+
+2. Check browser console (F12) for detailed errors
+   - Network tab: Verify request URLs
+   - Console tab: Look for JavaScript errors
+
+3. Verify BASE_URL constant in `app.ts`
+   ```typescript
+   private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
+   ```
+
+4. Test API endpoints directly in browser
+
+#### Data Not Updating
+
+**Symptoms:**
+- Old data persists
+- Changes not reflected
+- Empty lists
+
+**Solutions:**
+1. Clear browser cache
+   - Chrome: Ctrl+Shift+Delete
+   - Firefox: Ctrl+Shift+Delete
+   - Edge: Ctrl+Shift+Delete
+
+2. Hard refresh page
+   - Chrome/Firefox/Edge: Ctrl+Shift+R
+
+3. Check browser console for HTTP errors
+
+4. Verify backend endpoints return current data
+
+5. Clear browser local storage
+   ```javascript
+   // In browser console
+   localStorage.clear();
+   sessionStorage.clear();
+   ```
+
+#### Date Filtering Issues
+
+**Symptoms:**
+- Filters show incorrect data
+- "Aujourd'hui" shows no results when data exists
+
+**Solutions:**
+1. Verify system clock is correct
+
+2. Check database timestamps
+   ```bash
+   psql -U postgres -d postgres -c "SELECT time_lancement FROM interaction ORDER BY time_lancement DESC LIMIT 5;"
+   ```
+
+3. Verify date format consistency between frontend and backend
+
+4. Check browser console for date parsing errors
+
+### Performance Issues
+
+#### Slow Page Load
+
+**Solutions:**
+1. Check database query performance
+   - Add indexes on frequently queried columns
+
+2. Verify network connectivity
+   - Test latency between frontend and backend
+
+3. Monitor application server resources
+   - CPU usage
+   - Memory consumption
+
+#### Large Data Sets
+
+**Solutions:**
+1. Implement pagination for large lists
+
+2. Add date range filters to limit query results
+
+3. Consider implementing lazy loading
 
 ---
 
-## Database Schema
+## Database Schema Reference
 
-**Module Table:**
-- idmodule (PK)
-- nom (name)
-- ip_adress
-- status
-- volume
-- current_mode (Manual/Automatic)
-- actif (active boolean)
-- last_seen (timestamp)
+### Module Table
+```sql
+CREATE TABLE module (
+  idmodule SERIAL PRIMARY KEY,
+  nom VARCHAR(255) NOT NULL,
+  ip_adress VARCHAR(50) NOT NULL,
+  status VARCHAR(50) NOT NULL,
+  volume INTEGER NOT NULL,
+  current_mode VARCHAR(50) NOT NULL,
+  actif BOOLEAN NOT NULL,
+  last_seen TIMESTAMP NOT NULL
+);
+```
 
-**Interaction Table:**
-- idinteraction (PK)
-- idsound (FK)
-- idmodule (FK)
-- typeInteraction (Bec/Patte)
-- time_lancement (timestamp)
+### Interaction Table
+```sql
+CREATE TABLE interaction (
+  idinteraction SERIAL PRIMARY KEY,
+  idsound INTEGER REFERENCES sound(idsound),
+  idmodule INTEGER REFERENCES module(idmodule),
+  typeInteraction VARCHAR(50) NOT NULL,
+  time_lancement TIMESTAMP NOT NULL
+);
+```
 
-**Sound Table:**
-- idsound (PK)
-- nom (name)
-- type_son (type)
+### Sound Table
+```sql
+CREATE TABLE sound (
+  idsound SERIAL PRIMARY KEY,
+  nom VARCHAR(255) NOT NULL,
+  type_son VARCHAR(50) NOT NULL
+);
+```
 
 ---
 
-## Contact & Support
+## Development Notes
 
-If you encounter issues:
-1. Check application server logs
-2. Check PostgreSQL logs
-3. Check browser console (F12)
-4. Verify all services are running on correct ports
-5. Test each endpoint individually with curl or browser
+### Project Structure
+
+**Backend:**
+```
+back/PEPs_back/
+├── src/main/java/peps/peps_back/
+│   ├── controllers/       # REST API controllers
+│   ├── items/             # JPA entities
+│   ├── repositories/      # Data access layer
+│   └── resources/         # Configuration files
+├── src/main/webapp/
+│   └── WEB-INF/
+│       ├── web.xml        # Servlet configuration
+│       ├── dispatcher-servlet.xml
+│       └── applicationContext.xml
+└── pom.xml                # Maven dependencies
+```
+
+**Frontend:**
+```
+front/pepsfront/
+├── src/app/
+│   ├── app.ts             # Main component logic
+│   ├── app.html           # Main component template
+│   ├── app.css            # Component styles
+│   ├── app.config.ts      # Application configuration
+│   └── app.routes.ts      # Routing configuration
+└── package.json           # NPM dependencies
+```
+
+### Technology Stack
+
+**Backend:**
+- Java 8+
+- Spring Framework 5.3
+- Spring Data JPA
+- PostgreSQL JDBC Driver
+- Jackson for JSON serialization
+
+**Frontend:**
+- Angular 20+
+- Angular Material 20+
+- TypeScript 5+
+- RxJS for reactive programming
+
+### Build Tools
+- Maven 3.6+ (Backend)
+- npm (Frontend)
+
+---
+
+## Support and Maintenance
+
+For issues and questions:
+1. Check application server logs for detailed error messages
+2. Review PostgreSQL logs for database-related issues
+3. Use browser developer tools (F12) to inspect network requests and console errors
+4. Verify all services are running on expected ports
+5. Test API endpoints individually to isolate issues
+
+Regular maintenance tasks:
+- Monitor database size and performance
+- Review and archive old interaction records
+- Update dependencies for security patches
+- Backup database regularly
+- Monitor application server resources
