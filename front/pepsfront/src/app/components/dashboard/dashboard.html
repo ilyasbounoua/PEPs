@@ -1,0 +1,44 @@
+<div class="page-content dashboard-page">
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>touch_app</mat-icon>
+        <mat-card-title>{{ stats().totalInteractions }}</mat-card-title>
+        <mat-card-subtitle>Interactions du jour</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-active">sensors</mat-icon>
+        <mat-card-title>{{ stats().activeModules }}</mat-card-title>
+        <mat-card-subtitle>Modules actifs</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>schedule</mat-icon>
+        <mat-card-title>{{ stats().lastInteraction }}</mat-card-title>
+        <mat-card-subtitle>Dernière interaction</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+  </div>
+
+  <mat-card class="chart-card">
+    <mat-card-header>
+      <mat-card-title>Utilisations du jour</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="chart-placeholder">
+        <div class="chart-mock">
+          @for(item of dailyChartData(); track item.time) {
+          <div class="bar" [style.height.%]="(item.count / 30) * 100"
+            [matTooltip]="item.time + ': ' + item.count">
+          </div>
+          }
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

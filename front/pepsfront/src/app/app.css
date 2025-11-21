@@ -286,6 +286,12 @@
 }
 
 /* --- PAGE: MODULES (F4) --- */
+.modules-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -334,7 +340,171 @@
   padding: 8px 16px !important;
 }
 
+.module-error {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 8px;
+  display: block;
+}
+
 /* --- PAGE: SONS --- */
-.sounds-page {
+.sounds-page mat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.sounds-page mat-card-title {
+  margin: 0;
+}
+
+.add-sound-btn {
+  margin-left: auto;
+}
+
+.add-sound-card {
+  margin-bottom: 24px;
+  background-color: #f5f5f5;
+}
+
+.sound-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.file-name {
+  font-size: 14px;
+  color: #666;
+}
+
+.upload-error {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.sounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sound-item {
+  transition: box-shadow 0.2s ease;
+}
+
+.sound-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sound-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sound-details h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.sound-type,
+.sound-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.sound-type mat-icon,
+.sound-file mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.sound-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.no-data {
   text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* --- Filter buttons for sounds --- */
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.filter-buttons button {
+  border-radius: 20px;
+  padding: 4px 16px;
+  transition: all 0.2s ease;
+}
+
+.filter-buttons button.active-filter {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* --- Edit sound form --- */
+.sound-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.edit-error {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: -8px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.sound-card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.sound-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }

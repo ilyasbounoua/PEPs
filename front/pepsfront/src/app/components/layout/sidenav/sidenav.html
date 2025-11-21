@@ -1,0 +1,26 @@
+<div class="sidenav-header">
+  <img src="favicon-96x96.png" alt="Logo PEP'S" class="logo">
+  <span class="logo-title">PEP'S</span>
+</div>
+
+<mat-nav-list>
+  <mat-list-item (click)="onPageClick('dashboard')" [class.active]="currentPage() === 'dashboard'">
+    <mat-icon matListItemIcon>dashboard</mat-icon>
+    <span matListItemTitle>Tableau de Bord</span>
+  </mat-list-item>
+
+  <mat-list-item (click)="onPageClick('interactions')" [class.active]="currentPage() === 'interactions'">
+    <mat-icon matListItemIcon>history</mat-icon>
+    <span matListItemTitle>Interactions</span>
+  </mat-list-item>
+
+  <mat-list-item (click)="onPageClick('modules')" [class.active]="currentPage() === 'modules'">
+    <mat-icon matListItemIcon>developer_board</mat-icon>
+    <span matListItemTitle>Modules</span>
+  </mat-list-item>
+
+  <mat-list-item (click)="onPageClick('sounds')" [class.active]="currentPage() === 'sounds'">
+    <mat-icon matListItemIcon>music_note</mat-icon>
+    <span matListItemTitle>Sons</span>
+  </mat-list-item>
+</mat-nav-list>

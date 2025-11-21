@@ -1,0 +1,165 @@
+<div class="page-content sounds-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Bibliothèque de Sons</mat-card-title>
+      <button mat-raised-button color="primary" (click)="toggleAddForm()" class="add-sound-btn">
+        <mat-icon>{{ showAddSoundForm() ? 'close' : 'add' }}</mat-icon>
+        {{ showAddSoundForm() ? 'Annuler' : 'Ajouter un son' }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Filter buttons -->
+      <div class="filter-buttons">
+        <button mat-button [class.active-filter]="soundFilter() === 'all'" (click)="setSoundFilter('all')">
+          Tous
+        </button>
+        <button mat-button [class.active-filter]="soundFilter() === 'Vocal'" (click)="setSoundFilter('Vocal')">
+          Vocal
+        </button>
+        <button mat-button [class.active-filter]="soundFilter() === 'Ambiance'" (click)="setSoundFilter('Ambiance')">
+          Ambiance
+        </button>
+        <button mat-button [class.active-filter]="soundFilter() === 'Naturel'" (click)="setSoundFilter('Naturel')">
+          Naturel
+        </button>
+        <button mat-button [class.active-filter]="soundFilter() === 'Autre'" (click)="setSoundFilter('Autre')">
+          Autre
+        </button>
+      </div>
+
+      @if (showAddSoundForm()) {
+      <mat-card class="add-sound-card">
+        <mat-card-content>
+          <h3>Nouveau Son</h3>
+          <form class="sound-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Nom du son</mat-label>
+              <input matInput [value]="newSound().name" (input)="updateSoundName($any($event.target).value)"
+                name="soundName" placeholder="Ex: Chant d'oiseau">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)"
+                name="soundType">
+                <mat-option value="Vocal">Vocal</mat-option>
+                <mat-option value="Ambiance">Ambiance</mat-option>
+                <mat-option value="Naturel">Naturel</mat-option>
+                <mat-option value="Autre">Autre</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="file-input-container">
+              <input type="file" #fileInput accept=".mp3,.wav,.ogg,.m4a" (change)="onFileSelected($event)"
+                style="display: none">
+              <button mat-stroked-button type="button" (click)="fileInput.click()">
+                <mat-icon>upload_file</mat-icon>
+                Choisir un fichier
+              </button>
+              @if (newSound().file) {
+              <span class="file-name">{{ newSound().file?.name }}</span>
+              }
+            </div>
+
+            @if (uploadError()) {
+            <mat-error class="upload-error">{{ uploadError() }}</mat-error>
+            }
+
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="button" (click)="uploadSound()"
+                [disabled]="isUploading()">
+                @if (isUploading()) {
+                <span>Upload en cours...</span>
+                } @else {
+                <ng-container>
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Télécharger</span>
+                </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+      }
+
+      @if (filteredSounds().length === 0 && sounds().length === 0) {
+      <p class="no-data">Aucun son disponible. Ajoutez-en un!</p>
+      } @else if (filteredSounds().length === 0) {
+      <p class="no-data">Aucun son trouvé avec ce filtre.</p>
+      } @else {
+      <div class="sounds-list">
+        @for (sound of filteredSounds(); track sound.id) {
+        <mat-card class="sound-item">
+          <mat-card-content>
+            @if (editingSoundId() === sound.id) {
+            <!-- Edit mode -->
+            <div class="sound-edit-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Nom du son</mat-label>
+                <input matInput [value]="editSoundData().name" 
+                  (input)="updateEditSoundName($any($event.target).value)">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Type</mat-label>
+                <mat-select [value]="editSoundData().type" 
+                  (selectionChange)="updateEditSoundType($event.value)">
+                  <mat-option value="Vocal">Vocal</mat-option>
+                  <mat-option value="Ambiance">Ambiance</mat-option>
+                  <mat-option value="Naturel">Naturel</mat-option>
+                  <mat-option value="Autre">Autre</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              @if (editSoundError()) {
+              <mat-error class="edit-error">{{ editSoundError() }}</mat-error>
+              }
+
+              <div class="edit-actions">
+                <button mat-raised-button color="primary" (click)="saveEditSound(sound.id)">
+                  <mat-icon>save</mat-icon>
+                  Sauvegarder
+                </button>
+                <button mat-button (click)="cancelEditSound()">
+                  Annuler
+                </button>
+              </div>
+            </div>
+            } @else {
+            <!-- Display mode -->
+            <div class="sound-info">
+              <div class="sound-details">
+                <h3>{{ sound.name }}</h3>
+                <p class="sound-type">
+                  <mat-icon>label</mat-icon>
+                  {{ sound.type }}
+                </p>
+                <p class="sound-file">
+                  <mat-icon>audiotrack</mat-icon>
+                  {{ sound.fileName }}
+                </p>
+              </div>
+              <div class="sound-actions">
+                <button mat-icon-button [color]="currentlyPlayingId() === sound.id ? 'accent' : 'primary'"
+                  (click)="playSound(sound)"
+                  matTooltip="{{ currentlyPlayingId() === sound.id ? 'Arrêter' : 'Écouter' }}">
+                  <mat-icon>{{ currentlyPlayingId() === sound.id ? 'stop' : 'play_arrow' }}</mat-icon>
+                </button>
+                <button mat-icon-button (click)="startEditSound(sound)" matTooltip="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteSound(sound)" matTooltip="Supprimer">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            }
+          </mat-card-content>
+        </mat-card>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -48,6 +48,14 @@ public class Sound implements Serializable {
     @Size(min = 1, max = 50)
     @Column(name = "type_son")
     private String typeSon;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 10)
+    @Column(name = "extension")
+    private String extension;
+    @Size(max = 500)
+    @Column(name = "chemin")
+    private String chemin;
     @OneToMany(mappedBy = "idsound")
     private Collection<Interaction> interactionCollection;
 
@@ -58,10 +66,11 @@ public class Sound implements Serializable {
         this.idsound = idsound;
     }
 
-    public Sound(Integer idsound, String nom, String typeSon) {
+    public Sound(Integer idsound, String nom, String typeSon, String extension) {
         this.idsound = idsound;
         this.nom = nom;
         this.typeSon = typeSon;
+        this.extension = extension;
     }
 
     public Integer getIdsound() {
@@ -86,6 +95,22 @@ public class Sound implements Serializable {
 
     public void setTypeSon(String typeSon) {
         this.typeSon = typeSon;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
+    public String getChemin() {
+        return chemin;
+    }
+
+    public void setChemin(String chemin) {
+        this.chemin = chemin;
     }
 
     public Collection<Interaction> getInteractionCollection() {

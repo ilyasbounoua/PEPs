@@ -1,0 +1,55 @@
+<div class="page-content">
+  <mat-card class="config-card">
+    <mat-card-header>
+      <mat-card-title>Configuration: {{ module().name }}</mat-card-title>
+      <mat-card-subtitle>{{ module().location }} - {{ module().ip }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="config-form" #configForm="ngForm" (ngSubmit)="onSave()">
+
+        <!-- Nom -->
+        <mat-form-field appearance="outline">
+          <mat-label>Nom du module</mat-label>
+          <input matInput [(ngModel)]="module().name" name="name" required>
+        </mat-form-field>
+
+        <!-- IP -->
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse IP</mat-label>
+          <input matInput [(ngModel)]="module().ip" name="ip" required>
+        </mat-form-field>
+
+        <!-- Actif -->
+        <mat-slide-toggle [(ngModel)]="module().config.actif" name="actif" color="primary">
+          Module Actif
+        </mat-slide-toggle>
+
+        <!-- Volume -->
+        <mat-label>Volume</mat-label>
+        <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel">
+          <input matSliderThumb [(ngModel)]="module().config.volume" name="volume">
+        </mat-slider>
+
+        <!-- Mode -->
+        <mat-form-field>
+          <mat-label>Mode de fonctionnement</mat-label>
+          <mat-select [(ngModel)]="module().config.mode" name="mode">
+            <mat-option value="Manuel">Manuel</mat-option>
+            <mat-option value="Automatique">Automatique</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Son -->
+        <mat-slide-toggle [(ngModel)]="module().config.son" name="son" color="primary">
+          Son activé
+        </mat-slide-toggle>
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" type="submit">Sauvegarder</button>
+          <button mat-button type="button" (click)="onCancel()">Annuler</button>
+          <button mat-button color="warn" type="button" (click)="onDelete()">Supprimer</button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

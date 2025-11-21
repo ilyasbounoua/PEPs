@@ -1,260 +1,60 @@
-@if (isLoggedIn()) {
+@if (!isLoggedIn()) {
+  <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+} @else {
   <mat-sidenav-container class="app-container">
-    
     <!-- MENU LATÉRAL (SIDENAV) -->
     <mat-sidenav [opened]="isSidenavOpen()" [mode]="'side'" class="sidenav">
-      <div class="sidenav-header">
-        <img src="favicon-96x96.png" alt="Logo PEP'S" class="logo">
-        <span class="logo-title">PEP'S</span>
-      </div>
-
-      <mat-nav-list>
-        <mat-list-item (click)="setCurrentPage('dashboard')" [class.active]="currentPage() === 'dashboard'">
-          <mat-icon matListItemIcon>dashboard</mat-icon>
-          <span matListItemTitle>Tableau de Bord</span>
-        </mat-list-item>
-        
-        <mat-list-item (click)="setCurrentPage('interactions')" [class.active]="currentPage() === 'interactions'">
-          <mat-icon matListItemIcon>history</mat-icon>
-          <span matListItemTitle>Interactions</span>
-        </mat-list-item>
-        
-        <mat-list-item (click)="setCurrentPage('modules')" [class.active]="currentPage() === 'modules'">
-          <mat-icon matListItemIcon>developer_board</mat-icon>
-          <span matListItemTitle>Modules</span>
-        </mat-list-item>
-
-        <mat-list-item (click)="setCurrentPage('sounds')" [class.active]="currentPage() === 'sounds'">
-          <mat-icon matListItemIcon>music_note</mat-icon>
-          <span matListItemTitle>Sons</span>
-        </mat-list-item>
-      </mat-nav-list>
+      <app-sidenav 
+        [currentPage]="currentPage()" 
+        (pageChange)="onPageChange($event)">
+      </app-sidenav>
     </mat-sidenav>
 
     <!-- CONTENU PRINCIPAL -->
     <mat-sidenav-content class="main-content">
-      
       <!-- BARRE DE NAVIGATION (TOOLBAR) -->
-      <mat-toolbar color="primary" class="toolbar">
-        <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menu">
-          <mat-icon>menu</mat-icon>
-        </button>
-        <span>{{ pageTitle() }}</span>
-      </mat-toolbar>
+      <app-toolbar 
+        [pageTitle]="pageTitle()" 
+        (toggleMenu)="toggleSidenav()">
+      </app-toolbar>
 
       <!-- Zone d'affichage des pages -->
       <div class="page-area">
         @switch (currentPage()) {
-          
-          <!-- PAGE: DASHBOARD (F2) -->
           @case ('dashboard') {
-            <div class="page-content dashboard-page">
-              <div class="stats-grid">
-                <mat-card class="stat-card">
-                  <mat-card-header>
-                    <mat-icon mat-card-avatar>touch_app</mat-icon>
-                    <mat-card-title>{{ stats().totalInteractions }}</mat-card-title>
-                    <mat-card-subtitle>Interactions du jour</mat-card-subtitle>
-                  </mat-card-header>
-                </mat-card>
-                
-                <mat-card class="stat-card">
-                  <mat-card-header>
-                    <mat-icon mat-card-avatar class="icon-active">sensors</mat-icon>
-                    <mat-card-title>{{ stats().activeModules }}</mat-card-title>
-                    <mat-card-subtitle>Modules actifs</mat-card-subtitle>
-                  </mat-card-header>
-                </mat-card>
-                
-                <mat-card class="stat-card">
-                  <mat-card-header>
-                    <mat-icon mat-card-avatar>schedule</mat-icon>
-                    <mat-card-title>{{ stats().lastInteraction.split(' ')[1] }}</mat-card-title>
-                    <mat-card-subtitle>Dernière interaction</mat-card-subtitle>
-                  </mat-card-header>
-                </mat-card>
-              </div>
-
-              <mat-card class="chart-card">
-                <mat-card-header>
-                  <mat-card-title>Utilisations du jour</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="chart-placeholder">
-                    <div class="chart-mock">
-                      @for(item of dailyChartData; track item.time) {
-                        <div class="bar" 
-                             [style.height.%]="(item.count / 30) * 100" 
-                             [matTooltip]="item.time + ': ' + item.count">
-                        </div>
-                      }
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
+            <app-dashboard></app-dashboard>
           }
-
-          <!-- PAGE: INTERACTIONS (F3) -->
           @case ('interactions') {
-            <div class="page-content">
-              <mat-card>
-                <mat-card-header>
-                  <mat-radio-group [(ngModel)]="filter" (ngModelChange)="setFilter($event)">
-                    <mat-radio-button value="all" checked>Toutes</mat-radio-button>
-                    <mat-radio-button value="today">Aujourd'hui</mat-radio-button>
-                    <mat-radio-button value="yesterday">Hier</mat-radio-button>
-                    <mat-radio-button value="week">Semaine</mat-radio-button>
-                  </mat-radio-group>
-                  <span class="spacer"></span>
-                  <button mat-flat-button color="primary" (click)="exportAsCsv()" [disabled]="filteredInteractions().length === 0">
-                    <mat-icon>download</mat-icon>
-                    Exporter CSV
-                  </button>
-                </mat-card-header>
-                <mat-card-content class="table-container">
-                  <table mat-table [dataSource]="filteredInteractions()">
-                    <!-- Colonne Date/Heure -->
-                    <ng-container matColumnDef="date">
-                      <th mat-header-cell *matHeaderCellDef> Date/Heure </th>
-                      <td mat-cell *matCellDef="let item"> {{item.date}} </td>
-                    </ng-container>
-                    <!-- Colonne Module -->
-                    <ng-container matColumnDef="module">
-                      <th mat-header-cell *matHeaderCellDef> Module </th>
-                      <td mat-cell *matCellDef="let item"> {{item.module}} </td>
-                    </ng-container>
-                    <!-- Colonne Type -->
-                    <ng-container matColumnDef="type">
-                      <th mat-header-cell *matHeaderCellDef> Type </th>
-                      <td mat-cell *matCellDef="let item"> {{item.type}} </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                  </table>
-                </mat-card-content>
-              </mat-card>
-            </div>
+            <app-interactions></app-interactions>
           }
-
-          <!-- PAGE: LISTE DES MODULES (F4) -->
           @case ('modules') {
-            <div class="page-content modules-grid">
-              @for (module of modules(); track module.id) {
-                <mat-card class="module-card" (click)="selectModule(module)">
-                  <mat-card-header>
-                    <mat-icon mat-card-avatar 
-                              [class]="module.status === 'Actif' ? 'icon-active' : 'icon-inactive'">
-                      developer_board
-                    </mat-icon>
-                    <mat-card-title>{{ module.name }}</mat-card-title>
-                    <mat-card-subtitle>{{ module.location }}</mat-card-subtitle>
-                  </mat-card-header>
-                  <mat-card-content>
-                    <p><strong>IP:</strong> {{ module.ip }}</p>
-                    <p><strong>Statut:</strong> 
-                      <span [class]="module.status === 'Actif' ? 'status-active' : 'status-inactive'">
-                        {{ module.status }}
-                      </span>
-                    </p>
-                  </mat-card-content>
-                </mat-card>
-              }
-            </div>
+            <app-modules-list 
+              #modulesList
+              (selectModule)="onModuleSelect($event)"
+              (addModule)="onModuleAdd()">
+            </app-modules-list>
           }
-
-          <!-- PAGE: DÉTAIL/CONFIG MODULE (F5) -->
           @case ('module-detail') {
-            <div class="page-content">
-              @if (selectedModule(); as module) {
-                <mat-card class="config-card">
-                  <mat-card-header>
-                    <mat-card-title>Configuration: {{ module.name }}</mat-card-title>
-                    <mat-card-subtitle>{{ module.location }} - {{ module.ip }}</mat-card-subtitle>
-                  </mat-card-header>
-                  <mat-card-content>
-                    <form class="config-form" #configForm="ngForm" 
-                          (ngSubmit)="saveModuleConfig(configForm.value)">
-                      
-                      <!-- Actif -->
-                      <mat-slide-toggle name="actif" [ngModel]="module.config.actif" color="primary">
-                        Module Actif
-                      </mat-slide-toggle>
-                      
-                      <!-- Volume -->
-                      <mat-label>Volume</mat-label>
-                      <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel">
-                        <input matSliderThumb name="volume" [ngModel]="module.config.volume">
-                      </mat-slider>
-
-                      <!-- Mode -->
-                      <mat-form-field>
-                        <mat-label>Mode de fonctionnement</mat-label>
-                        <mat-select name="mode" [ngModel]="module.config.mode">
-                          <mat-option value="Manuel">Manuel</mat-option>
-                          <mat-option value="Automatique">Automatique</mat-option>
-                        </mat-select>
-                      </mat-form-field>
-
-                      <!-- Son -->
-                      <mat-slide-toggle name="son" [ngModel]="module.config.son" color="primary">
-                        Son activé
-                      </mat-slide-toggle>
-
-                      <mat-card-actions>
-                        <button mat-flat-button color="primary" type="submit">Sauvegarder</button>
-                        <button mat-button type="button" (click)="setCurrentPage('modules')">Annuler</button>
-                      </mat-card-actions>
-                    </form>
-                  </mat-card-content>
-                </mat-card>
-              }
-            </div>
+            @if (selectedModule(); as module) {
+              <app-module-detail 
+                [module]="module"
+                (saveSuccess)="onModuleSaveSuccess()"
+                (deleteSuccess)="onModuleDeleteSuccess()"
+                (cancel)="onCancel()">
+              </app-module-detail>
+            }
           }
-
-          <!-- PAGE: SONS -->
+          @case ('add-module') {
+            <app-module-form 
+              (createSuccess)="onModuleFormSuccess()"
+              (cancel)="onCancel()">
+            </app-module-form>
+          }
           @case ('sounds') {
-            <div class="page-content sounds-page">
-              <mat-card>
-                <mat-card-header>
-                  <mat-card-title>Bibliothèque de Sons</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <p>Module en cours de développement (F5)</p>
-                </mat-card-content>
-              </mat-card>
-            </div>
+            <app-sounds></app-sounds>
           }
         }
       </div>
-
     </mat-sidenav-content>
   </mat-sidenav-container>
-
-} @else {
-  <!-- FORMULAIRE DE CONNEXION (F1) -->
-  <div class="login-container">
-    <mat-card class="login-card">
-      <mat-card-header>
-        <mat-card-title>PEP'S Login</mat-card-title>
-        <mat-card-subtitle>Accès au panneau de supervision</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <form class="login-form" (submit)="checkPassword($event)">
-          <mat-form-field appearance="outline">
-            <mat-label>Mot de passe</mat-label>
-            <input matInput type="password" name="password" required autocomplete="current-password">
-          </mat-form-field>
-
-          @if (loginError()) {
-            <mat-error class="login-general-error">{{ loginError() }}</mat-error>
-          }
-          
-          <mat-card-actions>
-            <button mat-flat-button color="primary" type="submit">Entrer</button>
-          </mat-card-actions>
-        </form>
-      </mat-card-content>
-    </mat-card>
-  </div>
 }

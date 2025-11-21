@@ -12,7 +12,9 @@ CREATE TABLE public.Module (
 CREATE TABLE public.Sound (
     idsound SERIAL NOT NULL PRIMARY KEY,
     nom character varying(255) NOT NULL,
-    type_son character varying(50) NOT NULL
+    type_son character varying(50) NOT NULL,
+    extension character varying(10) NOT NULL,
+    chemin character varying(500)
 );
 
 CREATE TABLE public.Interaction (

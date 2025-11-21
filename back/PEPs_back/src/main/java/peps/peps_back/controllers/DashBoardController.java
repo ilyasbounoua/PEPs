@@ -33,20 +33,16 @@ public class DashBoardController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardStats> dashboard() {
-        // Count total interactions
         long totalInteractions = interactionRepository.count();
 
-        // Count active modules
         List<Module> modules = moduleRepository.findAll();
         long activeModules = modules.stream()
                 .filter(Module::getActif)
                 .count();
 
-        // Get last interaction timestamp
         String lastInteraction = "Aucune interaction";
         List<Interaction> interactions = interactionRepository.findAll();
         if (!interactions.isEmpty()) {
-            // Find the most recent interaction
             Interaction latest = interactions.stream()
                     .max((i1, i2) -> i1.getTimeLancement().compareTo(i2.getTimeLancement()))
                     .orElse(null);

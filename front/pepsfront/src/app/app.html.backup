@@ -1,0 +1,500 @@
+@if (isLoggedIn()) {
+<mat-sidenav-container class="app-container">
+
+  <!-- MENU LATÉRAL (SIDENAV) -->
+  <mat-sidenav [opened]="isSidenavOpen()" [mode]="'side'" class="sidenav">
+    <div class="sidenav-header">
+      <img src="favicon-96x96.png" alt="Logo PEP'S" class="logo">
+      <span class="logo-title">PEP'S</span>
+    </div>
+
+    <mat-nav-list>
+      <mat-list-item (click)="setCurrentPage('dashboard')" [class.active]="currentPage() === 'dashboard'">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Tableau de Bord</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="setCurrentPage('interactions')" [class.active]="currentPage() === 'interactions'">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle>Interactions</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="setCurrentPage('modules')" [class.active]="currentPage() === 'modules'">
+        <mat-icon matListItemIcon>developer_board</mat-icon>
+        <span matListItemTitle>Modules</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="setCurrentPage('sounds')" [class.active]="currentPage() === 'sounds'">
+        <mat-icon matListItemIcon>music_note</mat-icon>
+        <span matListItemTitle>Sons</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- CONTENU PRINCIPAL -->
+  <mat-sidenav-content class="main-content">
+
+    <!-- BARRE DE NAVIGATION (TOOLBAR) -->
+    <mat-toolbar color="primary" class="toolbar">
+      <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>{{ pageTitle() }}</span>
+    </mat-toolbar>
+
+    <!-- Zone d'affichage des pages -->
+    <div class="page-area">
+      @switch (currentPage()) {
+
+      <!-- PAGE: DASHBOARD (F2) -->
+      @case ('dashboard') {
+      <div class="page-content dashboard-page">
+        <div class="stats-grid">
+          <mat-card class="stat-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>touch_app</mat-icon>
+              <mat-card-title>{{ stats().totalInteractions }}</mat-card-title>
+              <mat-card-subtitle>Interactions du jour</mat-card-subtitle>
+            </mat-card-header>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="icon-active">sensors</mat-icon>
+              <mat-card-title>{{ stats().activeModules }}</mat-card-title>
+              <mat-card-subtitle>Modules actifs</mat-card-subtitle>
+            </mat-card-header>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>schedule</mat-icon>
+              <mat-card-title>{{ stats().lastInteraction }}</mat-card-title>
+              <mat-card-subtitle>Dernière interaction</mat-card-subtitle>
+            </mat-card-header>
+          </mat-card>
+        </div>
+
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Utilisations du jour</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-placeholder">
+              <div class="chart-mock">
+                @for(item of dailyChartData(); track item.time) {
+                <div class="bar" [style.height.%]="(item.count / 30) * 100"
+                  [matTooltip]="item.time + ': ' + item.count">
+                </div>
+                }
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+
+      <!-- PAGE: INTERACTIONS (F3) -->
+      @case ('interactions') {
+      <div class="page-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-radio-group [(ngModel)]="filter" (ngModelChange)="setFilter($event)">
+              <mat-radio-button value="all" checked>Toutes</mat-radio-button>
+              <mat-radio-button value="today">Aujourd'hui</mat-radio-button>
+              <mat-radio-button value="yesterday">Hier</mat-radio-button>
+              <mat-radio-button value="week">Semaine</mat-radio-button>
+            </mat-radio-group>
+            <span class="spacer"></span>
+            <button mat-flat-button color="primary" (click)="exportAsCsv()"
+              [disabled]="filteredInteractions().length === 0">
+              <mat-icon>download</mat-icon>
+              Exporter CSV
+            </button>
+          </mat-card-header>
+          <mat-card-content class="table-container">
+            <table mat-table [dataSource]="filteredInteractions()">
+              <!-- Colonne Date/Heure -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> Date/Heure </th>
+                <td mat-cell *matCellDef="let item"> {{item.date}} </td>
+              </ng-container>
+              <!-- Colonne Module -->
+              <ng-container matColumnDef="module">
+                <th mat-header-cell *matHeaderCellDef> Module </th>
+                <td mat-cell *matCellDef="let item"> {{item.module}} </td>
+              </ng-container>
+              <!-- Colonne Type -->
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef> Type </th>
+                <td mat-cell *matCellDef="let item"> {{item.type}} </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+
+      <!-- PAGE: LISTE DES MODULES (F4) -->
+      @case ('modules') {
+      <div class="page-content">
+        <div class="modules-header">
+          <button mat-raised-button color="primary" (click)="showAddModuleForm()">
+            <mat-icon>add</mat-icon>
+            Ajouter un module
+          </button>
+        </div>
+        <div class="modules-grid">
+          @for (module of modules(); track module.id) {
+          <mat-card class="module-card" (click)="selectModule(module)">
+            <mat-card-header>
+              <mat-icon mat-card-avatar [class]="module.status === 'Actif' ? 'icon-active' : 'icon-inactive'">
+                developer_board
+              </mat-icon>
+              <mat-card-title>{{ module.name }}</mat-card-title>
+              <mat-card-subtitle>{{ module.location }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>IP:</strong> {{ module.ip }}</p>
+              <p><strong>Statut:</strong>
+                <span [class]="module.status === 'Actif' ? 'status-active' : 'status-inactive'">
+                  {{ module.status }}
+                </span>
+              </p>
+            </mat-card-content>
+          </mat-card>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- PAGE: DÉTAIL/CONFIG MODULE (F5) -->
+      @case ('module-detail') {
+      <div class="page-content">
+        @if (selectedModule(); as module) {
+        <mat-card class="config-card">
+          <mat-card-header>
+            <mat-card-title>Configuration: {{ module.name }}</mat-card-title>
+            <mat-card-subtitle>{{ module.location }} - {{ module.ip }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="config-form" #configForm="ngForm" (ngSubmit)="saveModuleConfig(module)">
+
+              <!-- Nom -->
+              <mat-form-field appearance="outline">
+                <mat-label>Nom du module</mat-label>
+                <input matInput [(ngModel)]="module.name" name="name" required>
+              </mat-form-field>
+
+              <!-- IP -->
+              <mat-form-field appearance="outline">
+                <mat-label>Adresse IP</mat-label>
+                <input matInput [(ngModel)]="module.ip" name="ip" required>
+              </mat-form-field>
+
+              <!-- Actif -->
+              <mat-slide-toggle [(ngModel)]="module.config.actif" name="actif" color="primary">
+                Module Actif
+              </mat-slide-toggle>
+
+              <!-- Volume -->
+              <mat-label>Volume</mat-label>
+              <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel">
+                <input matSliderThumb [(ngModel)]="module.config.volume" name="volume">
+              </mat-slider>
+
+              <!-- Mode -->
+              <mat-form-field>
+                <mat-label>Mode de fonctionnement</mat-label>
+                <mat-select [(ngModel)]="module.config.mode" name="mode">
+                  <mat-option value="Manuel">Manuel</mat-option>
+                  <mat-option value="Automatique">Automatique</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Son -->
+              <mat-slide-toggle [(ngModel)]="module.config.son" name="son" color="primary">
+                Son activé
+              </mat-slide-toggle>
+
+              <mat-card-actions>
+                <button mat-flat-button color="primary" type="submit">Sauvegarder</button>
+                <button mat-button type="button" (click)="setCurrentPage('modules')">Annuler</button>
+                <button mat-button color="warn" type="button" (click)="deleteModule(module)">Supprimer</button>
+              </mat-card-actions>
+            </form>
+          </mat-card-content>
+        </mat-card>
+        }
+      </div>
+      }
+
+      <!-- PAGE: AJOUTER UN MODULE -->
+      @case ('add-module') {
+      <div class="page-content">
+        <mat-card class="config-card">
+          <mat-card-header>
+            <mat-card-title>Ajouter un Module</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="config-form">
+              <!-- Nom -->
+              <mat-form-field appearance="outline">
+                <mat-label>Nom du module</mat-label>
+                <input matInput [value]="newModule().name" (input)="updateNewModuleName($any($event.target).value)"
+                  placeholder="Ex: Module Entrée" required>
+              </mat-form-field>
+
+              <!-- IP -->
+              <mat-form-field appearance="outline">
+                <mat-label>Adresse IP</mat-label>
+                <input matInput [value]="newModule().ip" (input)="updateNewModuleIp($any($event.target).value)"
+                  placeholder="Ex: 192.168.1.100" required>
+              </mat-form-field>
+
+              <!-- Actif -->
+              <mat-slide-toggle [checked]="newModule().config.actif"
+                (change)="updateNewModuleActif($event.checked)" color="primary">
+                Module Actif
+              </mat-slide-toggle>
+
+              <!-- Volume -->
+              <mat-label>Volume</mat-label>
+              <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel">
+                <input matSliderThumb [value]="newModule().config.volume"
+                  (input)="updateNewModuleVolume($any($event.target).value)">
+              </mat-slider>
+
+              <!-- Mode -->
+              <mat-form-field>
+                <mat-label>Mode de fonctionnement</mat-label>
+                <mat-select [value]="newModule().config.mode"
+                  (selectionChange)="updateNewModuleMode($event.value)">
+                  <mat-option value="Manuel">Manuel</mat-option>
+                  <mat-option value="Automatique">Automatique</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Son -->
+              <mat-slide-toggle [checked]="newModule().config.son"
+                (change)="updateNewModuleSon($event.checked)" color="primary">
+                Son activé
+              </mat-slide-toggle>
+
+              @if (addModuleError()) {
+              <mat-error class="module-error">{{ addModuleError() }}</mat-error>
+              }
+
+              <mat-card-actions>
+                <button mat-flat-button color="primary" type="button" (click)="addModule()">Créer</button>
+                <button mat-button type="button" (click)="setCurrentPage('modules')">Annuler</button>
+              </mat-card-actions>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+
+      <!-- PAGE: SONS -->
+      @case ('sounds') {
+      <div class="page-content sounds-page">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Bibliothèque de Sons</mat-card-title>
+            <button mat-raised-button color="primary" (click)="toggleAddSoundForm()" class="add-sound-btn">
+              <mat-icon>{{ showAddSoundForm() ? 'close' : 'add' }}</mat-icon>
+              {{ showAddSoundForm() ? 'Annuler' : 'Ajouter un son' }}
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            <!-- Filter buttons -->
+            <div class="filter-buttons">
+              <button mat-button [class.active-filter]="soundFilter() === 'all'" (click)="setSoundFilter('all')">
+                Tous
+              </button>
+              <button mat-button [class.active-filter]="soundFilter() === 'Vocal'" (click)="setSoundFilter('Vocal')">
+                Vocal
+              </button>
+              <button mat-button [class.active-filter]="soundFilter() === 'Ambiance'" (click)="setSoundFilter('Ambiance')">
+                Ambiance
+              </button>
+              <button mat-button [class.active-filter]="soundFilter() === 'Naturel'" (click)="setSoundFilter('Naturel')">
+                Naturel
+              </button>
+              <button mat-button [class.active-filter]="soundFilter() === 'Autre'" (click)="setSoundFilter('Autre')">
+                Autre
+              </button>
+            </div>
+
+            @if (showAddSoundForm()) {
+            <mat-card class="add-sound-card">
+              <mat-card-content>
+                <h3>Nouveau Son</h3>
+                <form class="sound-form">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nom du son</mat-label>
+                    <input matInput [value]="newSound().name" (input)="updateSoundName($any($event.target).value)"
+                      name="soundName" placeholder="Ex: Chant d'oiseau">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Type</mat-label>
+                    <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)"
+                      name="soundType">
+                      <mat-option value="Vocal">Vocal</mat-option>
+                      <mat-option value="Ambiance">Ambiance</mat-option>
+                      <mat-option value="Naturel">Naturel</mat-option>
+                      <mat-option value="Autre">Autre</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <div class="file-input-container">
+                    <input type="file" #fileInput accept=".mp3,.wav,.ogg,.m4a" (change)="onSoundFileSelected($event)"
+                      style="display: none">
+                    <button mat-stroked-button type="button" (click)="fileInput.click()">
+                      <mat-icon>upload_file</mat-icon>
+                      Choisir un fichier
+                    </button>
+                    @if (newSound().file) {
+                    <span class="file-name">{{ newSound().file?.name }}</span>
+                    }
+                  </div>
+
+                  @if (uploadSoundError()) {
+                  <mat-error class="upload-error">{{ uploadSoundError() }}</mat-error>
+                  }
+
+                  <div class="form-actions">
+                    <button mat-raised-button color="primary" type="button" (click)="uploadSound()"
+                      [disabled]="isUploadingSoundSignal()">
+                      @if (isUploadingSoundSignal()) {
+                      <span>Upload en cours...</span>
+                      } @else {
+                      <ng-container>
+                        <mat-icon>cloud_upload</mat-icon>
+                        <span>Télécharger</span>
+                      </ng-container>
+                      }
+                    </button>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+            }
+
+            @if (filteredSounds().length === 0 && sounds().length === 0) {
+            <p class="no-data">Aucun son disponible. Ajoutez-en un!</p>
+            } @else if (filteredSounds().length === 0) {
+            <p class="no-data">Aucun son trouvé avec ce filtre.</p>
+            } @else {
+            <div class="sounds-list">
+              @for (sound of filteredSounds(); track sound.id) {
+              <mat-card class="sound-item">
+                <mat-card-content>
+                  @if (editingSoundId() === sound.id) {
+                  <!-- Edit mode -->
+                  <div class="sound-edit-form">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nom du son</mat-label>
+                      <input matInput [value]="editSoundData().name" 
+                        (input)="updateEditSoundName($any($event.target).value)">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Type</mat-label>
+                      <mat-select [value]="editSoundData().type" 
+                        (selectionChange)="updateEditSoundType($event.value)">
+                        <mat-option value="Vocal">Vocal</mat-option>
+                        <mat-option value="Ambiance">Ambiance</mat-option>
+                        <mat-option value="Naturel">Naturel</mat-option>
+                        <mat-option value="Autre">Autre</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    @if (editSoundError()) {
+                    <mat-error class="edit-error">{{ editSoundError() }}</mat-error>
+                    }
+
+                    <div class="edit-actions">
+                      <button mat-raised-button color="primary" (click)="saveEditSound(sound.id)">
+                        <mat-icon>save</mat-icon>
+                        Sauvegarder
+                      </button>
+                      <button mat-button (click)="cancelEditSound()">
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                  } @else {
+                  <!-- Display mode -->
+                  <div class="sound-info">
+                    <div class="sound-details">
+                      <h3>{{ sound.name }}</h3>
+                      <p class="sound-type">
+                        <mat-icon>label</mat-icon>
+                        {{ sound.type }}
+                      </p>
+                      <p class="sound-file">
+                        <mat-icon>audiotrack</mat-icon>
+                        {{ sound.fileName }}
+                      </p>
+                    </div>
+                    <div class="sound-actions">
+                      <button mat-icon-button [color]="currentlyPlayingSound() === sound.id ? 'accent' : 'primary'"
+                        (click)="playSound(sound)"
+                        matTooltip="{{ currentlyPlayingSound() === sound.id ? 'Arrêter' : 'Écouter' }}">
+                        <mat-icon>{{ currentlyPlayingSound() === sound.id ? 'stop' : 'play_arrow' }}</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="startEditSound(sound)" matTooltip="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteSound(sound)" matTooltip="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                  }
+                </mat-card-content>
+              </mat-card>
+              }
+            </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+      }
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+} @else {
+<!-- FORMULAIRE DE CONNEXION (F1) -->
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>PEP'S Login</mat-card-title>
+      <mat-card-subtitle>Accès au panneau de supervision</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="login-form" (submit)="checkPassword($event)">
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput type="password" name="password" required autocomplete="current-password">
+        </mat-form-field>
+
+        @if (loginError()) {
+        <mat-error class="login-general-error">{{ loginError() }}</mat-error>
+        }
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" type="submit">Entrer</button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+}

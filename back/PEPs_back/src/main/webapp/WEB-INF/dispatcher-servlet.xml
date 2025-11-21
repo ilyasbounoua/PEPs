@@ -28,5 +28,10 @@
           p:prefix="/WEB-INF/jsp/"
           p:suffix=".jsp" />
 
+    <!-- Configuration pour l'upload de fichiers -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="52428800"/> <!-- 50MB -->
+        <property name="maxInMemorySize" value="1048576"/> <!-- 1MB -->
+    </bean>
 
 </beans>

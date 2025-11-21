@@ -1,0 +1,62 @@
+<div class="page-content">
+  <mat-card class="config-card">
+    <mat-card-header>
+      <mat-card-title>Ajouter un Module</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="config-form">
+        <!-- Nom -->
+        <mat-form-field appearance="outline">
+          <mat-label>Nom du module</mat-label>
+          <input matInput [value]="newModule().name" (input)="updateName($any($event.target).value)"
+            placeholder="Ex: Module Entrée" required>
+        </mat-form-field>
+
+        <!-- IP -->
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse IP</mat-label>
+          <input matInput [value]="newModule().ip" (input)="updateIp($any($event.target).value)"
+            placeholder="Ex: 192.168.1.100" required>
+        </mat-form-field>
+
+        <!-- Actif -->
+        <mat-slide-toggle [checked]="newModule().config.actif"
+          (change)="updateActif($event.checked)" color="primary">
+          Module Actif
+        </mat-slide-toggle>
+
+        <!-- Volume -->
+        <mat-label>Volume</mat-label>
+        <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel">
+          <input matSliderThumb [value]="newModule().config.volume"
+            (input)="updateVolume($any($event.target).value)">
+        </mat-slider>
+
+        <!-- Mode -->
+        <mat-form-field>
+          <mat-label>Mode de fonctionnement</mat-label>
+          <mat-select [value]="newModule().config.mode"
+            (selectionChange)="updateMode($event.value)">
+            <mat-option value="Manuel">Manuel</mat-option>
+            <mat-option value="Automatique">Automatique</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Son -->
+        <mat-slide-toggle [checked]="newModule().config.son"
+          (change)="updateSon($event.checked)" color="primary">
+          Son activé
+        </mat-slide-toggle>
+
+        @if (errorMessage()) {
+        <mat-error class="module-error">{{ errorMessage() }}</mat-error>
+        }
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" type="button" (click)="onCreate()">Créer</button>
+          <button mat-button type="button" (click)="onCancel()">Annuler</button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

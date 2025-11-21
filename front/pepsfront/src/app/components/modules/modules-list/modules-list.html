@@ -1,0 +1,29 @@
+<div class="page-content">
+  <div class="modules-header">
+    <button mat-raised-button color="primary" (click)="onAddClick()">
+      <mat-icon>add</mat-icon>
+      Ajouter un module
+    </button>
+  </div>
+  <div class="modules-grid">
+    @for (module of modules(); track module.id) {
+    <mat-card class="module-card" (click)="onModuleClick(module)">
+      <mat-card-header>
+        <mat-icon mat-card-avatar [class]="module.status === 'Actif' ? 'icon-active' : 'icon-inactive'">
+          developer_board
+        </mat-icon>
+        <mat-card-title>{{ module.name }}</mat-card-title>
+        <mat-card-subtitle>{{ module.location }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>IP:</strong> {{ module.ip }}</p>
+        <p><strong>Statut:</strong>
+          <span [class]="module.status === 'Actif' ? 'status-active' : 'status-inactive'">
+            {{ module.status }}
+          </span>
+        </p>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+</div>

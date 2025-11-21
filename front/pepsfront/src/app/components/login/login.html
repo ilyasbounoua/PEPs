@@ -1,0 +1,24 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>PEP'S Login</mat-card-title>
+      <mat-card-subtitle>Accès au panneau de supervision</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="login-form" (submit)="onSubmit($event)">
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput type="password" name="password" required autocomplete="current-password">
+        </mat-form-field>
+
+        @if (loginError()) {
+        <mat-error class="login-general-error">{{ loginError() }}</mat-error>
+        }
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" type="submit">Entrer</button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
