@@ -1,60 +1,79 @@
-@if (!isLoggedIn()) {
-  <app-login (loginSuccess)="onLoginSuccess()"></app-login>
-} @else {
-  <mat-sidenav-container class="app-container">
-    <!-- MENU LATÉRAL (SIDENAV) -->
-    <mat-sidenav [opened]="isSidenavOpen()" [mode]="'side'" class="sidenav">
-      <app-sidenav 
-        [currentPage]="currentPage()" 
-        (pageChange)="onPageChange($event)">
-      </app-sidenav>
-    </mat-sidenav>
+@if (isLoggedIn()) {
+<mat-sidenav-container class="app-container">
+  <mat-sidenav [opened]="isSidenavOpen()" mode="side" class="sidenav">
+    <div class="sidenav-header">
+      <img src="favicon-96x96.png" alt="Logo PEP'S" class="logo" />
+      <span class="logo-title">PEP'S</span>
+    </div>
 
-    <!-- CONTENU PRINCIPAL -->
-    <mat-sidenav-content class="main-content">
-      <!-- BARRE DE NAVIGATION (TOOLBAR) -->
-      <app-toolbar 
-        [pageTitle]="pageTitle()" 
-        (toggleMenu)="toggleSidenav()">
-      </app-toolbar>
+    <mat-nav-list>
+      <mat-list-item
+        (click)="setCurrentPage('dashboard')"
+        [class.active]="currentPage() === 'dashboard'"
+      >
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Tableau de Bord</span>
+      </mat-list-item>
 
-      <!-- Zone d'affichage des pages -->
-      <div class="page-area">
-        @switch (currentPage()) {
-          @case ('dashboard') {
-            <app-dashboard></app-dashboard>
-          }
-          @case ('interactions') {
-            <app-interactions></app-interactions>
-          }
-          @case ('modules') {
-            <app-modules-list 
-              #modulesList
-              (selectModule)="onModuleSelect($event)"
-              (addModule)="onModuleAdd()">
-            </app-modules-list>
-          }
-          @case ('module-detail') {
-            @if (selectedModule(); as module) {
-              <app-module-detail 
-                [module]="module"
-                (saveSuccess)="onModuleSaveSuccess()"
-                (deleteSuccess)="onModuleDeleteSuccess()"
-                (cancel)="onCancel()">
-              </app-module-detail>
-            }
-          }
-          @case ('add-module') {
-            <app-module-form 
-              (createSuccess)="onModuleFormSuccess()"
-              (cancel)="onCancel()">
-            </app-module-form>
-          }
-          @case ('sounds') {
-            <app-sounds></app-sounds>
-          }
+      <mat-list-item
+        (click)="setCurrentPage('interactions')"
+        [class.active]="currentPage() === 'interactions'"
+      >
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle>Interactions</span>
+      </mat-list-item>
+
+      <mat-list-item
+        (click)="setCurrentPage('modules')"
+        [class.active]="currentPage() === 'modules'"
+      >
+        <mat-icon matListItemIcon>developer_board</mat-icon>
+        <span matListItemTitle>Modules</span>
+      </mat-list-item>
+
+      <mat-list-item
+        (click)="setCurrentPage('sounds')"
+        [class.active]="currentPage() === 'sounds'"
+      >
+        <mat-icon matListItemIcon>music_note</mat-icon>
+        <span matListItemTitle>Sons</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <mat-toolbar color="primary" class="toolbar">
+      <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>{{ pageTitle() }}</span>
+    </mat-toolbar>
+
+    <div class="page-area">
+      @switch (currentPage()) { @case ('dashboard') {
+      <app-dashboard />
+      } @case ('interactions') {
+      <app-interactions />
+      } @case ('modules') {
+      <app-modules-list
+        (selectModule)="onSelectModule($event)"
+        (addModule)="onAddModule()"
+      />
+      } @case ('module-detail') {
+        @if(selectedModule(); as module) {
+          <app-module-detail
+            [module]="module"
+            (moduleSaved)="onModuleSaved()"
+          />
         }
-      </div>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+      } @case ('add-module') {
+      <app-module-form (moduleSaved)="onModuleSaved()" />
+      } @case ('sounds') {
+      <app-sounds />
+      } }
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+} @else {
+<app-login (loginSuccess)="onLoginSuccess()" />
 }
