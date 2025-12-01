@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file contains unit tests for the Login component.
+ */
 import { TestBed } from '@angular/core/testing';
 import { Login } from './login';
 import { AuthService } from '../../services/auth';

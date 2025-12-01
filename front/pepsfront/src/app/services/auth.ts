@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file contains the AuthService, which is responsible for handling user authentication logic, including login and logout.
+ */
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({

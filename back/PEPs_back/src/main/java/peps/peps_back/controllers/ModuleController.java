@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the ModuleController class, which handles CRUD operations for modules.
+ */
 package peps.peps_back.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;

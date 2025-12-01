@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the Module entity, which represents a physical module in the system.
  */
 package peps.peps_back.items;
 
@@ -13,7 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -22,22 +21,17 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/**
- *
- * @author Clément
- */
 @Entity
 @Table(name = "module")
-@NamedQueries({
-    @NamedQuery(name = "Module.findAll", query = "SELECT m FROM Module m"),
-    @NamedQuery(name = "Module.findByIdmodule", query = "SELECT m FROM Module m WHERE m.idmodule = :idmodule"),
-    @NamedQuery(name = "Module.findByNom", query = "SELECT m FROM Module m WHERE m.nom = :nom"),
-    @NamedQuery(name = "Module.findByIpAdress", query = "SELECT m FROM Module m WHERE m.ipAdress = :ipAdress"),
-    @NamedQuery(name = "Module.findByStatus", query = "SELECT m FROM Module m WHERE m.status = :status"),
-    @NamedQuery(name = "Module.findByVolume", query = "SELECT m FROM Module m WHERE m.volume = :volume"),
-    @NamedQuery(name = "Module.findByCurrentMode", query = "SELECT m FROM Module m WHERE m.currentMode = :currentMode"),
-    @NamedQuery(name = "Module.findByActif", query = "SELECT m FROM Module m WHERE m.actif = :actif"),
-    @NamedQuery(name = "Module.findByLastSeen", query = "SELECT m FROM Module m WHERE m.lastSeen = :lastSeen")})
+@NamedQuery(name = "Module.findAll", query = "SELECT m FROM Module m")
+@NamedQuery(name = "Module.findByIdmodule", query = "SELECT m FROM Module m WHERE m.idmodule = :idmodule")
+@NamedQuery(name = "Module.findByNom", query = "SELECT m FROM Module m WHERE m.nom = :nom")
+@NamedQuery(name = "Module.findByIpAdress", query = "SELECT m FROM Module m WHERE m.ipAdress = :ipAdress")
+@NamedQuery(name = "Module.findByStatus", query = "SELECT m FROM Module m WHERE m.status = :status")
+@NamedQuery(name = "Module.findByVolume", query = "SELECT m FROM Module m WHERE m.volume = :volume")
+@NamedQuery(name = "Module.findByCurrentMode", query = "SELECT m FROM Module m WHERE m.currentMode = :currentMode")
+@NamedQuery(name = "Module.findByActif", query = "SELECT m FROM Module m WHERE m.actif = :actif")
+@NamedQuery(name = "Module.findByLastSeen", query = "SELECT m FROM Module m WHERE m.lastSeen = :lastSeen")
 public class Module implements Serializable {
 
     private static final long serialVersionUID = 1L;

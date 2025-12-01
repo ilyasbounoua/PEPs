@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the ModuleRepository interface, which extends JpaRepository for Module entities.
  */
 package peps.peps_back.repositories;
 
@@ -9,10 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-/**
- *
- * @author Clément
- */
 public interface ModuleRepository extends JpaRepository<Module, Integer>, ModuleRepositoryCustom {
 
 }

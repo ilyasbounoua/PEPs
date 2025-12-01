@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file contains unit tests for the AuthService.
+ */
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth';
 import { provideHttpClient } from '@angular/common/http';

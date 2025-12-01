@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the InteractionDTO class, which is a Data Transfer Object for interaction data.
+ */
 package peps.peps_back.controllers;
 
 import java.util.Date;

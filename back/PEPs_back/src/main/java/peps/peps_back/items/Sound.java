@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the Sound entity, which represents a sound file in the system.
  */
 package peps.peps_back.items;
 
@@ -19,10 +19,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/**
- *
- * @author Clément
- */
 @Entity
 @Table(name = "sound")
 @NamedQueries({

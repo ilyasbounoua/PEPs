@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the DashBoardController class, which handles requests for dashboard statistics.
  */
 package peps.peps_back.controllers;
 
@@ -19,10 +19,6 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-/**
- *
- * @author Clément
- */
 public class DashBoardController {
 
     @Autowired

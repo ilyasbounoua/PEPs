@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the SoundDTO class, which is a Data Transfer Object for sound data.
+ */
 package peps.peps_back.controllers;
 
 public class SoundDTO {

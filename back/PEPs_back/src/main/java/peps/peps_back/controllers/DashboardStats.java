@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the DashboardStats class, which is a Data Transfer Object for dashboard statistics.
+ */
 package peps.peps_back.controllers;
 
 public class DashboardStats {

@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the Interaction entity, which represents an interaction with a module.
  */
 package peps.peps_back.items;
 
@@ -14,7 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -22,17 +21,12 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/**
- *
- * @author Clément
- */
 @Entity
 @Table(name = "interaction")
-@NamedQueries({
-    @NamedQuery(name = "Interaction.findAll", query = "SELECT i FROM Interaction i"),
-    @NamedQuery(name = "Interaction.findByIdinteraction", query = "SELECT i FROM Interaction i WHERE i.idinteraction = :idinteraction"),
-    @NamedQuery(name = "Interaction.findByTypeinteraction", query = "SELECT i FROM Interaction i WHERE i.typeinteraction = :typeinteraction"),
-    @NamedQuery(name = "Interaction.findByTimeLancement", query = "SELECT i FROM Interaction i WHERE i.timeLancement = :timeLancement")})
+@NamedQuery(name = "Interaction.findAll", query = "SELECT i FROM Interaction i")
+@NamedQuery(name = "Interaction.findByIdinteraction", query = "SELECT i FROM Interaction i WHERE i.idinteraction = :idinteraction")
+@NamedQuery(name = "Interaction.findByTypeinteraction", query = "SELECT i FROM Interaction i WHERE i.typeinteraction = :typeinteraction")
+@NamedQuery(name = "Interaction.findByTimeLancement", query = "SELECT i FROM Interaction i WHERE i.timeLancement = :timeLancement")
 public class Interaction implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -120,15 +114,11 @@ public class Interaction implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Interaction)) {
             return false;
         }
         Interaction other = (Interaction) object;
-        if ((this.idinteraction == null && other.idinteraction != null) || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction))) {
-            return false;
-        }
-        return true;
+        return !((this.idinteraction == null && other.idinteraction != null) || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction)));
     }
 
     @Override

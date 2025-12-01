@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the SoundController class, which handles CRUD operations for sounds, including file uploads and streaming.
+ */
 package peps.peps_back.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;

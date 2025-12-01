@@ -1,13 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the SoundRepositoryCustom interface, which can be used to add custom repository methods.
  */
 package peps.peps_back.repositories;
 
-/**
- *
- * @author Clément
- */
 public interface SoundRepositoryCustom {
     
 }

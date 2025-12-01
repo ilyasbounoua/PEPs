@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the InteractionController class, which handles requests for retrieving all interactions.
+ */
 package peps.peps_back.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;

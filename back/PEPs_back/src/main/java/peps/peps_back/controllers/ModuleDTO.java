@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the ModuleDTO class, which is a Data Transfer Object for module data.
+ */
 package peps.peps_back.controllers;
 
 public class ModuleDTO {

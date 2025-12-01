@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file contains the TypeScript interfaces used throughout the application to define data structures.
+ */
 export interface StatCard {
   totalInteractions: number;
   activeModules: number;

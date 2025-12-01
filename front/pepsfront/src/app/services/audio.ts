@@ -1,3 +1,7 @@
+/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file contains the AudioService, which is responsible for playing and managing audio playback.
+ */
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({
