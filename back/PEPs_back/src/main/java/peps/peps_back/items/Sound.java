@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -21,11 +20,10 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "sound")
-@NamedQueries({
-    @NamedQuery(name = "Sound.findAll", query = "SELECT s FROM Sound s"),
-    @NamedQuery(name = "Sound.findByIdsound", query = "SELECT s FROM Sound s WHERE s.idsound = :idsound"),
-    @NamedQuery(name = "Sound.findByNom", query = "SELECT s FROM Sound s WHERE s.nom = :nom"),
-    @NamedQuery(name = "Sound.findByTypeSon", query = "SELECT s FROM Sound s WHERE s.typeSon = :typeSon")})
+@NamedQuery(name = "Sound.findAll", query = "SELECT s FROM Sound s")
+@NamedQuery(name = "Sound.findByIdsound", query = "SELECT s FROM Sound s WHERE s.idsound = :idsound")
+@NamedQuery(name = "Sound.findByNom", query = "SELECT s FROM Sound s WHERE s.nom = :nom")
+@NamedQuery(name = "Sound.findByTypeSon", query = "SELECT s FROM Sound s WHERE s.typeSon = :typeSon")
 public class Sound implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -126,15 +124,12 @@ public class Sound implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof Sound)) {
             return false;
         }
         Sound other = (Sound) object;
-        if ((this.idsound == null && other.idsound != null) || (this.idsound != null && !this.idsound.equals(other.idsound))) {
-            return false;
-        }
-        return true;
+        return this.idsound != null ? this.idsound.equals(other.idsound) : other.idsound == null;
     }
 
     @Override
