@@ -14,7 +14,7 @@
         <!-- SUPABASE CONFIGURATION -->
         <!-- Note: We use 'db.omaninfcfmrvrgmxqgah.supabase.co' derived from the project URL -->
         <!-- We MUST add '?sslmode=require' for cloud connections -->
-        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://db.omaninfcfmrvrgmxqgah.supabase.co:5432/postgres?sslmode=require"/>
+        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://db.omaninfcfmrvrgmxqgah.supabase.co:6543/postgres?sslmode=require"/>
         
         <!-- Default Supabase user is always 'postgres' -->
         <property name="javax.persistence.jdbc.user" value="postgres"/>
