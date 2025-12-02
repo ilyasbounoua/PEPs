@@ -13,7 +13,7 @@ import { StatCard, Interaction, Module, DailyData, Sound } from '../models/inter
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
+  private readonly BASE_URL = 'https://peps-backend.onrender.com';
 
   // Dashboard
   getDashboardStats(): Observable<StatCard> {
