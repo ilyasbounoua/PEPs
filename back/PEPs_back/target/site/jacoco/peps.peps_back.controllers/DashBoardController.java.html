@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashBoardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PEPs_back-0.1</a> &gt; <a href="index.source.html" class="el_package">peps.peps_back.controllers</a> &gt; <span class="el_source">DashBoardController.java</span></div><h1>DashBoardController.java</h1><pre class="source lang-java linenums">/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the DashBoardController class, which handles requests for dashboard statistics.
+ */
+package peps.peps_back.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import peps.peps_back.items.Interaction;
+import peps.peps_back.items.Module;
+import peps.peps_back.repositories.InteractionRepository;
+import peps.peps_back.repositories.ModuleRepository;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = &quot;http://localhost:4200&quot;)
+<span class="fc" id="L22">public class DashBoardController {</span>
+
+    @Autowired
+    private InteractionRepository interactionRepository;
+
+    @Autowired
+    private ModuleRepository moduleRepository;
+
+    @GetMapping(&quot;/dashboard&quot;)
+    public ResponseEntity&lt;DashboardStats&gt; dashboard() {
+<span class="fc" id="L32">        long totalInteractions = interactionRepository.count();</span>
+
+<span class="fc" id="L34">        List&lt;Module&gt; modules = moduleRepository.findAll();</span>
+<span class="fc" id="L35">        long activeModules = modules.stream()</span>
+<span class="fc" id="L36">                .filter(Module::getActif)</span>
+<span class="fc" id="L37">                .count();</span>
+
+<span class="fc" id="L39">        String lastInteraction = &quot;Aucune interaction&quot;;</span>
+<span class="fc" id="L40">        List&lt;Interaction&gt; interactions = interactionRepository.findAll();</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (!interactions.isEmpty()) {</span>
+<span class="nc" id="L42">            Interaction latest = interactions.stream()</span>
+<span class="nc" id="L43">                    .max((i1, i2) -&gt; i1.getTimeLancement().compareTo(i2.getTimeLancement()))</span>
+<span class="nc" id="L44">                    .orElse(null);</span>
+            
+<span class="nc bnc" id="L46" title="All 4 branches missed.">            if (latest != null &amp;&amp; latest.getTimeLancement() != null) {</span>
+<span class="nc" id="L47">                SimpleDateFormat sdf = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);</span>
+<span class="nc" id="L48">                lastInteraction = sdf.format(latest.getTimeLancement());</span>
+            }
+        }
+
+<span class="fc" id="L52">        DashboardStats stats = new DashboardStats(</span>
+                (int) totalInteractions,
+                (int) activeModules,
+                lastInteraction
+        );
+
+<span class="fc" id="L58">        return ResponseEntity.ok(stats);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

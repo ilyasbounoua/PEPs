@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SoundController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PEPs_back-0.1</a> &gt; <a href="index.source.html" class="el_package">peps.peps_back.controllers</a> &gt; <span class="el_source">SoundController.java</span></div><h1>SoundController.java</h1><pre class="source lang-java linenums">/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the SoundController class, which handles CRUD operations for sounds, including file uploads and streaming.
+ */
+package peps.peps_back.controllers;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import peps.peps_back.items.Sound;
+import peps.peps_back.repositories.SoundRepository;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/sounds&quot;)
+@CrossOrigin(origins = &quot;http://localhost:4200&quot;)
+public class SoundController {
+
+    private final SoundRepository soundRepository;
+    
+    // Files will be saved relative to Tomcat working directory (usually tomcat/bin/sons)
+    private static final String UPLOAD_DIR = &quot;sons&quot;;
+
+<span class="fc" id="L38">    public SoundController(SoundRepository soundRepository) {</span>
+<span class="fc" id="L39">        this.soundRepository = soundRepository;</span>
+<span class="fc" id="L40">    }</span>
+
+    @GetMapping
+    public ResponseEntity&lt;List&lt;SoundDTO&gt;&gt; getAllSounds() {
+<span class="fc" id="L44">        List&lt;Sound&gt; sounds = soundRepository.findAll();</span>
+        
+<span class="fc" id="L46">        List&lt;SoundDTO&gt; dtos = sounds.stream()</span>
+<span class="pc" id="L47">            .map(s -&gt; new SoundDTO(</span>
+<span class="nc" id="L48">                s.getIdsound(),</span>
+<span class="nc" id="L49">                s.getNom(),</span>
+<span class="nc" id="L50">                s.getTypeSon(),</span>
+<span class="nc" id="L51">                s.getExtension()</span>
+            ))
+<span class="fc" id="L53">            .collect(Collectors.toList());</span>
+        
+<span class="fc" id="L55">        return ResponseEntity.ok(dtos);</span>
+    }
+
+    @GetMapping(&quot;/{id}/file&quot;)
+    public ResponseEntity&lt;Resource&gt; getSoundFile(@PathVariable Integer id) {
+<span class="fc" id="L60">        Sound sound = soundRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (sound == null) {</span>
+<span class="fc" id="L62">            return ResponseEntity.notFound().build();</span>
+        }
+
+<span class="nc bnc" id="L65" title="All 4 branches missed.">        if (sound.getChemin() == null || sound.getChemin().isEmpty()) {</span>
+<span class="nc" id="L66">            return ResponseEntity.notFound().build();</span>
+        }
+
+        try {
+<span class="nc" id="L70">            Path filePath = Paths.get(sound.getChemin());</span>
+<span class="nc" id="L71">            Resource resource = new UrlResource(filePath.toUri());</span>
+            
+<span class="nc bnc" id="L73" title="All 4 branches missed.">            if (!resource.exists() || !resource.isReadable()) {</span>
+<span class="nc" id="L74">                return ResponseEntity.notFound().build();</span>
+            }
+
+<span class="nc" id="L77">            String contentType = getContentType(sound.getExtension());</span>
+<span class="nc" id="L78">            String fileName = sound.getNom().replaceAll(&quot;[^a-zA-Z0-9\\s]&quot;, &quot;_&quot;).replaceAll(&quot;\\s+&quot;, &quot;_&quot;) </span>
+<span class="nc" id="L79">                            + &quot;.&quot; + sound.getExtension();</span>
+
+<span class="nc" id="L81">            return ResponseEntity.ok()</span>
+<span class="nc" id="L82">                    .contentType(MediaType.parseMediaType(contentType))</span>
+<span class="nc" id="L83">                    .header(HttpHeaders.CONTENT_DISPOSITION, &quot;inline; filename=\&quot;&quot; + fileName + &quot;\&quot;&quot;)</span>
+<span class="nc" id="L84">                    .body(resource);</span>
+<span class="nc" id="L85">        } catch (Exception e) {</span>
+<span class="nc" id="L86">            System.err.println(&quot;Error loading file: &quot; + e.getMessage());</span>
+<span class="nc" id="L87">            e.printStackTrace();</span>
+<span class="nc" id="L88">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+
+    private String getContentType(String extension) {
+<span class="nc bnc" id="L93" title="All 5 branches missed.">        switch (extension.toLowerCase()) {</span>
+            case &quot;mp3&quot;:
+<span class="nc" id="L95">                return &quot;audio/mpeg&quot;;</span>
+            case &quot;wav&quot;:
+<span class="nc" id="L97">                return &quot;audio/wav&quot;;</span>
+            case &quot;ogg&quot;:
+<span class="nc" id="L99">                return &quot;audio/ogg&quot;;</span>
+            case &quot;m4a&quot;:
+<span class="nc" id="L101">                return &quot;audio/mp4&quot;;</span>
+            default:
+<span class="nc" id="L103">                return &quot;application/octet-stream&quot;;</span>
+        }
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity&lt;?&gt; uploadSound(
+            @RequestParam(&quot;name&quot;) String name,
+            @RequestParam(&quot;type&quot;) String type,
+            @RequestParam(&quot;file&quot;) MultipartFile file) {
+
+<span class="fc" id="L113">        System.out.println(&quot;=== Upload Sound Request ===&quot;);</span>
+<span class="fc" id="L114">        System.out.println(&quot;Name: &quot; + name);</span>
+<span class="fc" id="L115">        System.out.println(&quot;Type: &quot; + type);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        System.out.println(&quot;File: &quot; + (file != null ? file.getOriginalFilename() : &quot;null&quot;));</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        System.out.println(&quot;File size: &quot; + (file != null ? file.getSize() : 0));</span>
+
+<span class="pc bpc" id="L119" title="2 of 4 branches missed.">        if (file == null || file.isEmpty()) {</span>
+<span class="nc" id="L120">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L121">            error.put(&quot;error&quot;, &quot;Le fichier est vide ou manquant&quot;);</span>
+<span class="nc" id="L122">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L125" title="2 of 4 branches missed.">        if (name == null || name.trim().isEmpty()) {</span>
+<span class="nc" id="L126">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L127">            error.put(&quot;error&quot;, &quot;Le nom est obligatoire&quot;);</span>
+<span class="nc" id="L128">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L131" title="2 of 4 branches missed.">        if (type == null || type.trim().isEmpty()) {</span>
+<span class="nc" id="L132">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L133">            error.put(&quot;error&quot;, &quot;Le type est obligatoire&quot;);</span>
+<span class="nc" id="L134">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+        try {
+<span class="fc" id="L138">            String originalFileName = file.getOriginalFilename();</span>
+<span class="fc" id="L139">            String extension = originalFileName.substring(originalFileName.lastIndexOf(&quot;.&quot;) + 1);</span>
+            
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">            if (!extension.matches(&quot;mp3|wav|ogg|m4a&quot;)) {</span>
+<span class="nc" id="L142">                Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L143">                error.put(&quot;error&quot;, &quot;Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a&quot;);</span>
+<span class="nc" id="L144">                return ResponseEntity.badRequest().body(error);</span>
+            }
+
+            // Create directory structure: sons/type/
+<span class="fc" id="L148">            Path typeDir = Paths.get(UPLOAD_DIR, type);</span>
+<span class="fc" id="L149">            Files.createDirectories(typeDir);</span>
+            
+            // Generate unique filename
+<span class="fc" id="L152">            String sanitizedName = name.replaceAll(&quot;[^a-zA-Z0-9\\s]&quot;, &quot;_&quot;).replaceAll(&quot;\\s+&quot;, &quot;_&quot;);</span>
+<span class="fc" id="L153">            String fileName = sanitizedName + &quot;_&quot; + System.currentTimeMillis() + &quot;.&quot; + extension;</span>
+<span class="fc" id="L154">            Path filePath = typeDir.resolve(fileName);</span>
+            
+            // Save file to disk
+<span class="fc" id="L157">            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);</span>
+            
+            // Save metadata to database with file path
+<span class="fc" id="L160">            Sound sound = new Sound();</span>
+<span class="fc" id="L161">            sound.setNom(name);</span>
+<span class="fc" id="L162">            sound.setTypeSon(type);</span>
+<span class="fc" id="L163">            sound.setExtension(extension);</span>
+<span class="fc" id="L164">            sound.setChemin(filePath.toString());</span>
+<span class="fc" id="L165">            sound = soundRepository.save(sound);</span>
+            
+<span class="fc" id="L167">            System.out.println(&quot;Sound saved to file: &quot; + filePath.toString() + &quot;, ID: &quot; + sound.getIdsound());</span>
+
+<span class="fc" id="L169">            SoundDTO dto = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());</span>
+<span class="fc" id="L170">            return ResponseEntity.ok(dto);</span>
+
+<span class="nc" id="L172">        } catch (IOException e) {</span>
+<span class="nc" id="L173">            System.err.println(&quot;IOException during upload: &quot; + e.getMessage());</span>
+<span class="nc" id="L174">            e.printStackTrace();</span>
+<span class="nc" id="L175">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L176">            error.put(&quot;error&quot;, &quot;Erreur lors de la sauvegarde du fichier: &quot; + e.getMessage());</span>
+<span class="nc" id="L177">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</span>
+<span class="nc" id="L178">        } catch (Exception e) {</span>
+<span class="nc" id="L179">            System.err.println(&quot;Exception during upload: &quot; + e.getMessage());</span>
+<span class="nc" id="L180">            e.printStackTrace();</span>
+<span class="nc" id="L181">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L182">            error.put(&quot;error&quot;, &quot;Erreur inattendue: &quot; + e.getMessage());</span>
+<span class="nc" id="L183">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);</span>
+        }
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;?&gt; updateSound(@PathVariable Integer id, @RequestBody SoundDTO soundDTO) {
+<span class="fc" id="L189">        Sound sound = soundRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if (sound == null) {</span>
+<span class="fc" id="L191">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L192">            error.put(&quot;error&quot;, &quot;Son introuvable&quot;);</span>
+<span class="fc" id="L193">            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</span>
+        }
+
+<span class="nc bnc" id="L196" title="All 4 branches missed.">        if (soundDTO.getName() == null || soundDTO.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L197">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L198">            error.put(&quot;error&quot;, &quot;Le nom est obligatoire&quot;);</span>
+<span class="nc" id="L199">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="nc bnc" id="L202" title="All 4 branches missed.">        if (soundDTO.getType() == null || soundDTO.getType().trim().isEmpty()) {</span>
+<span class="nc" id="L203">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L204">            error.put(&quot;error&quot;, &quot;Le type est obligatoire&quot;);</span>
+<span class="nc" id="L205">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+        // Update only name and type, keep file path unchanged
+<span class="nc" id="L209">        sound.setNom(soundDTO.getName());</span>
+<span class="nc" id="L210">        sound.setTypeSon(soundDTO.getType());</span>
+<span class="nc" id="L211">        sound = soundRepository.save(sound);</span>
+
+<span class="nc" id="L213">        SoundDTO responseDTO = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());</span>
+<span class="nc" id="L214">        return ResponseEntity.ok(responseDTO);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;?&gt; deleteSound(@PathVariable Integer id) {
+<span class="fc" id="L219">        Sound sound = soundRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (sound == null) {</span>
+<span class="fc" id="L221">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L222">            error.put(&quot;error&quot;, &quot;Son introuvable&quot;);</span>
+<span class="fc" id="L223">            return ResponseEntity.notFound().build();</span>
+        }
+
+        // Delete file from disk
+<span class="nc bnc" id="L227" title="All 4 branches missed.">        if (sound.getChemin() != null &amp;&amp; !sound.getChemin().isEmpty()) {</span>
+            try {
+<span class="nc" id="L229">                Path filePath = Paths.get(sound.getChemin());</span>
+<span class="nc" id="L230">                Files.deleteIfExists(filePath);</span>
+<span class="nc" id="L231">                System.out.println(&quot;Deleted file: &quot; + filePath.toString());</span>
+<span class="nc" id="L232">            } catch (IOException e) {</span>
+<span class="nc" id="L233">                System.err.println(&quot;Error deleting file: &quot; + e.getMessage());</span>
+<span class="nc" id="L234">                e.printStackTrace();</span>
+<span class="nc" id="L235">            }</span>
+        }
+
+<span class="nc" id="L238">        soundRepository.delete(sound);</span>
+
+<span class="nc" id="L240">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L241">        response.put(&quot;message&quot;, &quot;Son supprimé avec succès&quot;);</span>
+<span class="nc" id="L242">        return ResponseEntity.ok(response);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModuleController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PEPs_back-0.1</a> &gt; <a href="index.source.html" class="el_package">peps.peps_back.controllers</a> &gt; <span class="el_source">ModuleController.java</span></div><h1>ModuleController.java</h1><pre class="source lang-java linenums">/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the ModuleController class, which handles CRUD operations for modules.
+ */
+package peps.peps_back.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import peps.peps_back.items.Module;
+import peps.peps_back.repositories.ModuleRepository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/modules&quot;)
+@CrossOrigin(origins = &quot;http://localhost:4200&quot;)
+<span class="fc" id="L21">public class ModuleController {</span>
+
+    @Autowired
+    private ModuleRepository moduleRepository;
+
+    @GetMapping
+    public ResponseEntity&lt;List&lt;ModuleDTO&gt;&gt; getAllModules() {
+<span class="fc" id="L28">        List&lt;Module&gt; modules = moduleRepository.findAll();</span>
+        
+<span class="fc" id="L30">        List&lt;ModuleDTO&gt; dtos = modules.stream()</span>
+<span class="pc" id="L31">            .map(m -&gt; new ModuleDTO(</span>
+<span class="nc" id="L32">                m.getIdmodule(),</span>
+<span class="nc" id="L33">                m.getNom(),</span>
+                &quot;&quot;,
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                m.getActif() ? &quot;Actif&quot; : &quot;Inactif&quot;,</span>
+<span class="nc" id="L36">                m.getIpAdress(),</span>
+                new ModuleConfigDTO(
+<span class="nc" id="L38">                    m.getVolume(),</span>
+<span class="nc" id="L39">                    m.getCurrentMode(),</span>
+<span class="nc" id="L40">                    m.getActif(),</span>
+                    false
+                )
+            ))
+<span class="fc" id="L44">            .collect(Collectors.toList());</span>
+        
+<span class="fc" id="L46">        return ResponseEntity.ok(dtos);</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ModuleDTO&gt; getModule(@PathVariable Integer id) {
+<span class="fc" id="L51">        Module m = moduleRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (m == null) {</span>
+<span class="nc" id="L53">            return ResponseEntity.notFound().build();</span>
+        }
+        
+<span class="fc" id="L56">        ModuleDTO dto = new ModuleDTO(</span>
+<span class="fc" id="L57">            m.getIdmodule(),</span>
+<span class="fc" id="L58">            m.getNom(),</span>
+            &quot;&quot;,
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">            m.getActif() ? &quot;Actif&quot; : &quot;Inactif&quot;,</span>
+<span class="fc" id="L61">            m.getIpAdress(),</span>
+            new ModuleConfigDTO(
+<span class="fc" id="L63">                m.getVolume(),</span>
+<span class="fc" id="L64">                m.getCurrentMode(),</span>
+<span class="fc" id="L65">                m.getActif(),</span>
+                false
+            )
+        );
+        
+<span class="fc" id="L70">        return ResponseEntity.ok(dto);</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;?&gt; updateModule(@PathVariable Integer id, @RequestBody ModuleDTO dto) {
+<span class="fc" id="L75">        Module module = moduleRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (module == null) {</span>
+<span class="nc" id="L77">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L78">            error.put(&quot;error&quot;, &quot;Module introuvable&quot;);</span>
+<span class="nc" id="L79">            return ResponseEntity.notFound().build();</span>
+        }
+
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">        if (dto.getName() == null || dto.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L83">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L84">            error.put(&quot;error&quot;, &quot;Le nom du module est obligatoire&quot;);</span>
+<span class="nc" id="L85">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L88" title="2 of 4 branches missed.">        if (dto.getIp() == null || dto.getIp().trim().isEmpty()) {</span>
+<span class="nc" id="L89">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L90">            error.put(&quot;error&quot;, &quot;L'adresse IP est obligatoire&quot;);</span>
+<span class="nc" id="L91">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!dto.getIp().matches(&quot;^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$&quot;)) {</span>
+<span class="nc" id="L95">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L96">            error.put(&quot;error&quot;, &quot;Format d'adresse IP invalide&quot;);</span>
+<span class="nc" id="L97">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (dto.getConfig() == null) {</span>
+<span class="nc" id="L101">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L102">            error.put(&quot;error&quot;, &quot;La configuration est obligatoire&quot;);</span>
+<span class="nc" id="L103">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L106" title="2 of 4 branches missed.">        if (dto.getConfig().getVolume() &lt; 0 || dto.getConfig().getVolume() &gt; 100) {</span>
+<span class="nc" id="L107">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L108">            error.put(&quot;error&quot;, &quot;Le volume doit être entre 0 et 100&quot;);</span>
+<span class="nc" id="L109">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L112" title="3 of 4 branches missed.">        if (!dto.getConfig().getMode().equals(&quot;Manuel&quot;) &amp;&amp; !dto.getConfig().getMode().equals(&quot;Automatique&quot;)) {</span>
+<span class="nc" id="L113">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L114">            error.put(&quot;error&quot;, &quot;Le mode doit être 'Manuel' ou 'Automatique'&quot;);</span>
+<span class="nc" id="L115">            return ResponseEntity.badRequest().body(error);</span>
+        }
+        
+<span class="fc" id="L118">        module.setNom(dto.getName());</span>
+<span class="fc" id="L119">        module.setIpAdress(dto.getIp());</span>
+<span class="fc" id="L120">        module.setVolume(dto.getConfig().getVolume());</span>
+<span class="fc" id="L121">        module.setCurrentMode(dto.getConfig().getMode());</span>
+<span class="fc" id="L122">        module.setActif(dto.getConfig().isActif());</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        module.setStatus(dto.getConfig().isActif() ? &quot;actif&quot; : &quot;inactif&quot;);</span>
+<span class="fc" id="L124">        module.setLastSeen(new java.util.Date());</span>
+        
+<span class="fc" id="L126">        moduleRepository.save(module);</span>
+        
+<span class="fc" id="L128">        ModuleDTO updatedDto = new ModuleDTO(</span>
+<span class="fc" id="L129">            module.getIdmodule(),</span>
+<span class="fc" id="L130">            module.getNom(),</span>
+<span class="fc" id="L131">            dto.getLocation(),</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            module.getActif() ? &quot;Actif&quot; : &quot;Inactif&quot;,</span>
+<span class="fc" id="L133">            module.getIpAdress(),</span>
+            new ModuleConfigDTO(
+<span class="fc" id="L135">                module.getVolume(),</span>
+<span class="fc" id="L136">                module.getCurrentMode(),</span>
+<span class="fc" id="L137">                module.getActif(),</span>
+<span class="fc" id="L138">                dto.getConfig().isSon()</span>
+            )
+        );
+        
+<span class="fc" id="L142">        return ResponseEntity.ok(updatedDto);</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;?&gt; createModule(@RequestBody ModuleDTO dto) {
+<span class="pc bpc" id="L147" title="2 of 4 branches missed.">        if (dto.getName() == null || dto.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L148">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L149">            error.put(&quot;error&quot;, &quot;Le nom du module est obligatoire&quot;);</span>
+<span class="nc" id="L150">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L153" title="2 of 4 branches missed.">        if (dto.getIp() == null || dto.getIp().trim().isEmpty()) {</span>
+<span class="nc" id="L154">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L155">            error.put(&quot;error&quot;, &quot;L'adresse IP est obligatoire&quot;);</span>
+<span class="nc" id="L156">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (!dto.getIp().matches(&quot;^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$&quot;)) {</span>
+<span class="nc" id="L160">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L161">            error.put(&quot;error&quot;, &quot;Format d'adresse IP invalide&quot;);</span>
+<span class="nc" id="L162">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (dto.getConfig() == null) {</span>
+<span class="nc" id="L166">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L167">            error.put(&quot;error&quot;, &quot;La configuration est obligatoire&quot;);</span>
+<span class="nc" id="L168">            return ResponseEntity.badRequest().body(error);</span>
+        }
+
+<span class="fc" id="L171">        Module module = new Module();</span>
+<span class="fc" id="L172">        module.setNom(dto.getName());</span>
+<span class="fc" id="L173">        module.setIpAdress(dto.getIp());</span>
+<span class="fc" id="L174">        module.setVolume(dto.getConfig().getVolume());</span>
+<span class="fc" id="L175">        module.setCurrentMode(dto.getConfig().getMode());</span>
+<span class="fc" id="L176">        module.setActif(dto.getConfig().isActif());</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        module.setStatus(dto.getConfig().isActif() ? &quot;actif&quot; : &quot;inactif&quot;);</span>
+<span class="fc" id="L178">        module.setLastSeen(new java.util.Date());</span>
+        
+<span class="fc" id="L180">        module = moduleRepository.save(module);</span>
+        
+<span class="fc" id="L182">        ModuleDTO createdDto = new ModuleDTO(</span>
+<span class="fc" id="L183">            module.getIdmodule(),</span>
+<span class="fc" id="L184">            module.getNom(),</span>
+<span class="fc" id="L185">            dto.getLocation(),</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">            module.getActif() ? &quot;Actif&quot; : &quot;Inactif&quot;,</span>
+<span class="fc" id="L187">            module.getIpAdress(),</span>
+            new ModuleConfigDTO(
+<span class="fc" id="L189">                module.getVolume(),</span>
+<span class="fc" id="L190">                module.getCurrentMode(),</span>
+<span class="fc" id="L191">                module.getActif(),</span>
+<span class="fc" id="L192">                dto.getConfig().isSon()</span>
+            )
+        );
+        
+<span class="fc" id="L196">        return ResponseEntity.ok(createdDto);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;?&gt; deleteModule(@PathVariable Integer id) {
+<span class="fc" id="L201">        Module module = moduleRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (module == null) {</span>
+<span class="nc" id="L203">            Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L204">            error.put(&quot;error&quot;, &quot;Module introuvable&quot;);</span>
+<span class="nc" id="L205">            return ResponseEntity.notFound().build();</span>
+        }
+
+<span class="fc" id="L208">        moduleRepository.delete(module);</span>
+
+<span class="fc" id="L210">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L211">        response.put(&quot;message&quot;, &quot;Module supprimé avec succès&quot;);</span>
+<span class="fc" id="L212">        return ResponseEntity.ok(response);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

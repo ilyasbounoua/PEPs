@@ -3,7 +3,7 @@
              xmlns="http://xmlns.jcp.org/xml/ns/persistence" 
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-  <!-- Define Persistence Unit -->
+  <!-- Define Persistence Unit https://omaninfcfmrvrgmxqgah.supabase.co jdbc:postgresql://localhost:5432/postgres-->
   <persistence-unit name="peps.peps_back.0PU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>peps.peps_back.items.Interaction</class>
@@ -11,18 +11,10 @@
     <class>peps.peps_back.items.Module</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-        <!-- SUPABASE CONFIGURATION -->
-        <!-- Note: We use 'db.omaninfcfmrvrgmxqgah.supabase.co' derived from the project URL -->
-        <!-- We MUST add '?sslmode=require' for cloud connections -->
-        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://db.omaninfcfmrvrgmxqgah.supabase.co:6543/postgres?sslmode=require"/>
-        
-        <!-- Default Supabase user is always 'postgres' -->
+        <property name="javax.persistence.jdbc.url" value="https://omaninfcfmrvrgmxqgah.supabase.co"/>
         <property name="javax.persistence.jdbc.user" value="postgres"/>
-        
         <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-        
-        <!-- Our DB Password -->
-        <property name="javax.persistence.jdbc.password" value="pepsAra2025projet"/>
+        <property name="javax.persistence.jdbc.password" value="CcOipla*676"/>
     </properties>
   </persistence-unit>
 </persistence>

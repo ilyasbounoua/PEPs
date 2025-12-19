@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModuleDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PEPs_back-0.1</a> &gt; <a href="index.source.html" class="el_package">peps.peps_back.controllers</a> &gt; <span class="el_source">ModuleDTO.java</span></div><h1>ModuleDTO.java</h1><pre class="source lang-java linenums">/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the ModuleDTO class, which is a Data Transfer Object for module data.
+ */
+package peps.peps_back.controllers;
+
+public class ModuleDTO {
+    private Integer id;
+    private String name;
+    private String location;
+    private String status;
+    private String ip;
+    private ModuleConfigDTO config;
+
+<span class="nc" id="L15">    public ModuleDTO() {</span>
+<span class="nc" id="L16">    }</span>
+
+<span class="fc" id="L18">    public ModuleDTO(Integer id, String name, String location, String status, String ip, ModuleConfigDTO config) {</span>
+<span class="fc" id="L19">        this.id = id;</span>
+<span class="fc" id="L20">        this.name = name;</span>
+<span class="fc" id="L21">        this.location = location;</span>
+<span class="fc" id="L22">        this.status = status;</span>
+<span class="fc" id="L23">        this.ip = ip;</span>
+<span class="fc" id="L24">        this.config = config;</span>
+<span class="fc" id="L25">    }</span>
+
+    public Integer getId() {
+<span class="fc" id="L28">        return id;</span>
+    }
+
+    public void setId(Integer id) {
+<span class="fc" id="L32">        this.id = id;</span>
+<span class="fc" id="L33">    }</span>
+
+    public String getName() {
+<span class="fc" id="L36">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L40">        this.name = name;</span>
+<span class="fc" id="L41">    }</span>
+
+    public String getLocation() {
+<span class="fc" id="L44">        return location;</span>
+    }
+
+    public void setLocation(String location) {
+<span class="fc" id="L48">        this.location = location;</span>
+<span class="fc" id="L49">    }</span>
+
+    public String getStatus() {
+<span class="fc" id="L52">        return status;</span>
+    }
+
+    public void setStatus(String status) {
+<span class="fc" id="L56">        this.status = status;</span>
+<span class="fc" id="L57">    }</span>
+
+    public String getIp() {
+<span class="fc" id="L60">        return ip;</span>
+    }
+
+    public void setIp(String ip) {
+<span class="fc" id="L64">        this.ip = ip;</span>
+<span class="fc" id="L65">    }</span>
+
+    public ModuleConfigDTO getConfig() {
+<span class="fc" id="L68">        return config;</span>
+    }
+
+    public void setConfig(ModuleConfigDTO config) {
+<span class="fc" id="L72">        this.config = config;</span>
+<span class="fc" id="L73">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

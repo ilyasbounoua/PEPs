@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Interaction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PEPs_back-0.1</a> &gt; <a href="index.source.html" class="el_package">peps.peps_back.items</a> &gt; <span class="el_source">Interaction.java</span></div><h1>Interaction.java</h1><pre class="source lang-java linenums">/**
+ * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @description This file defines the Interaction entity, which represents an interaction with a module.
+ */
+package peps.peps_back.items;
+
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+@Entity
+@Table(name = &quot;interaction&quot;)
+@NamedQuery(name = &quot;Interaction.findAll&quot;, query = &quot;SELECT i FROM Interaction i&quot;)
+@NamedQuery(name = &quot;Interaction.findByIdinteraction&quot;, query = &quot;SELECT i FROM Interaction i WHERE i.idinteraction = :idinteraction&quot;)
+@NamedQuery(name = &quot;Interaction.findByTypeinteraction&quot;, query = &quot;SELECT i FROM Interaction i WHERE i.typeinteraction = :typeinteraction&quot;)
+@NamedQuery(name = &quot;Interaction.findByTimeLancement&quot;, query = &quot;SELECT i FROM Interaction i WHERE i.timeLancement = :timeLancement&quot;)
+public class Interaction implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = &quot;idinteraction&quot;)
+    private Integer idinteraction;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 50)
+    @Column(name = &quot;typeinteraction&quot;)
+    private String typeinteraction;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = &quot;time_lancement&quot;)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timeLancement;
+    @JoinColumn(name = &quot;idmodule&quot;, referencedColumnName = &quot;idmodule&quot;)
+    @ManyToOne
+    private Module idmodule;
+    @JoinColumn(name = &quot;idsound&quot;, referencedColumnName = &quot;idsound&quot;)
+    @ManyToOne
+    private Sound idsound;
+
+<span class="nc" id="L55">    public Interaction() {</span>
+<span class="nc" id="L56">    }</span>
+
+<span class="nc" id="L58">    public Interaction(Integer idinteraction) {</span>
+<span class="nc" id="L59">        this.idinteraction = idinteraction;</span>
+<span class="nc" id="L60">    }</span>
+
+<span class="nc" id="L62">    public Interaction(Integer idinteraction, String typeinteraction, Date timeLancement) {</span>
+<span class="nc" id="L63">        this.idinteraction = idinteraction;</span>
+<span class="nc" id="L64">        this.typeinteraction = typeinteraction;</span>
+<span class="nc" id="L65">        this.timeLancement = timeLancement;</span>
+<span class="nc" id="L66">    }</span>
+
+    public Integer getIdinteraction() {
+<span class="nc" id="L69">        return idinteraction;</span>
+    }
+
+    public void setIdinteraction(Integer idinteraction) {
+<span class="nc" id="L73">        this.idinteraction = idinteraction;</span>
+<span class="nc" id="L74">    }</span>
+
+    public String getTypeinteraction() {
+<span class="nc" id="L77">        return typeinteraction;</span>
+    }
+
+    public void setTypeinteraction(String typeinteraction) {
+<span class="nc" id="L81">        this.typeinteraction = typeinteraction;</span>
+<span class="nc" id="L82">    }</span>
+
+    public Date getTimeLancement() {
+<span class="nc" id="L85">        return timeLancement;</span>
+    }
+
+    public void setTimeLancement(Date timeLancement) {
+<span class="nc" id="L89">        this.timeLancement = timeLancement;</span>
+<span class="nc" id="L90">    }</span>
+
+    public Module getIdmodule() {
+<span class="nc" id="L93">        return idmodule;</span>
+    }
+
+    public void setIdmodule(Module idmodule) {
+<span class="nc" id="L97">        this.idmodule = idmodule;</span>
+<span class="nc" id="L98">    }</span>
+
+    public Sound getIdsound() {
+<span class="nc" id="L101">        return idsound;</span>
+    }
+
+    public void setIdsound(Sound idsound) {
+<span class="nc" id="L105">        this.idsound = idsound;</span>
+<span class="nc" id="L106">    }</span>
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L110">        int hash = 0;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        hash += (idinteraction != null ? idinteraction.hashCode() : 0);</span>
+<span class="nc" id="L112">        return hash;</span>
+    }
+
+    @Override
+    public boolean equals(Object object) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (!(object instanceof Interaction)) {</span>
+<span class="nc" id="L118">            return false;</span>
+        }
+<span class="nc" id="L120">        Interaction other = (Interaction) object;</span>
+<span class="nc bnc" id="L121" title="All 8 branches missed.">        return !((this.idinteraction == null &amp;&amp; other.idinteraction != null) || (this.idinteraction != null &amp;&amp; !this.idinteraction.equals(other.idinteraction)));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L126">        return &quot;peps.peps_back.items.Interaction[ idinteraction=&quot; + idinteraction + &quot; ]&quot;;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
