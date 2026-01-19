@@ -1,13 +1,13 @@
 <div class="page-content">
   <mat-card class="config-card">
-    <mat-card-header>
+    <mat-card-header style="margin-bottom: 20px">
       <mat-card-title>Configuration: {{ module().name }}</mat-card-title>
-      <mat-card-subtitle>{{ module().location }} - {{ module().ip }}</mat-card-subtitle>
+      <mat-card-subtitle>{{ module().location }}</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <form class="config-form" #configForm="ngForm" (ngSubmit)="onSave()">
 
-        <!-- Nom -->
+        <!-- Name -->
         <mat-form-field appearance="outline">
           <mat-label>Nom du module</mat-label>
           <input matInput [(ngModel)]="module().name" name="name" required>
@@ -19,7 +19,7 @@
           <input matInput [(ngModel)]="module().ip" name="ip" required>
         </mat-form-field>
 
-        <!-- Actif -->
+        <!-- Active -->
         <mat-slide-toggle [(ngModel)]="module().config.actif" name="actif" color="primary">
           Module Actif
         </mat-slide-toggle>
@@ -39,7 +39,7 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- Son -->
+        <!-- Sound -->
         <mat-slide-toggle [(ngModel)]="module().config.son" name="son" color="primary">
           Son activé
         </mat-slide-toggle>
