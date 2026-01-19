@@ -3,8 +3,9 @@
  * @description This file contains the logic for the module detail component, which allows viewing, editing, and deleting a module's configuration.
  */
 import { Component, input, output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -33,6 +34,8 @@ import { Module } from '../../../models/interfaces';
 })
 export class ModuleDetail {
   private api = inject(ApiService);
+  private router = inject(Router);
+  private document = inject(DOCUMENT);
 
   module = input.required<Module>();
   saveSuccess = output<void>();
@@ -41,6 +44,26 @@ export class ModuleDetail {
 
   formatVolumeLabel(value: number): string {
     return `${value}%`;
+  }
+
+  private navigateToModules() {
+    // Simulate click on "Modules" link in navigation
+    console.log('Attempting navigation to Modules...');
+    const navItems = this.document.querySelectorAll('.mat-list-item, .mat-mdc-list-item');
+    let clicked = false;
+    for (let i = 0; i < navItems.length; i++) {
+      const item = navItems[i] as HTMLElement;
+      if (item.textContent?.includes('Modules')) {
+        item.click();
+        clicked = true;
+        break;
+      }
+    }
+
+    if (!clicked) {
+      console.log('Modules link not found, forced navigation to /');
+      this.router.navigate(['/'], { onSameUrlNavigation: 'reload' });
+    }
   }
 
   onSave() {
@@ -66,14 +89,21 @@ export class ModuleDetail {
       return;
     }
 
-    this.api.updateModule(moduleToSave.id, moduleToSave).subscribe({
-      next: () => this.saveSuccess.emit(),
+    const apiCall = moduleToSave.id
+      ? this.api.updateModule(moduleToSave.id, moduleToSave)
+      : this.api.createModule(moduleToSave);
+
+    apiCall.subscribe({
+      next: () => {
+        this.saveSuccess.emit();
+        this.navigateToModules();
+      },
       error: (err) => {
         console.error('Error saving module:', err);
         if (err.error && err.error.error) {
           alert('Erreur: ' + err.error.error);
         } else {
-          alert('Erreur lors de la sauvegarde de la configuration');
+          alert('Erreur lors de la sauvegarde du module');
         }
       }
     });
@@ -81,6 +111,7 @@ export class ModuleDetail {
 
   onCancel() {
     this.cancel.emit();
+    this.navigateToModules();
   }
 
   onDelete() {
@@ -91,7 +122,10 @@ export class ModuleDetail {
     }
 
     this.api.deleteModule(moduleToDelete.id).subscribe({
-      next: () => this.deleteSuccess.emit(),
+      next: () => {
+        this.deleteSuccess.emit();
+        this.navigateToModules();
+      },
       error: (err) => {
         console.error('Error deleting module:', err);
         if (err.error && err.error.error) {
