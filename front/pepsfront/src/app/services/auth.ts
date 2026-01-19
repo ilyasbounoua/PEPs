@@ -1,39 +1,46 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
- * @description This file contains the AuthService, which is responsible for handling user authentication logic, including login and logout.
+ * AuthService
+ * Authentification via backend Spring uniquement
  */
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly isLoggedIn = signal(false);
-  private readonly correctHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
 
+  private http = inject(HttpClient);
+
+  private readonly isLoggedIn = signal(false);
   isAuthenticated = this.isLoggedIn.asReadonly();
 
-  async login(password: string): Promise<{ success: boolean; error?: string }> {
-    if (!password) {
-      return { success: false, error: 'Veuillez entrer un mot de passe.' };
+  async login(
+    login: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> {
+
+    if (!login || !password) {
+      return { success: false, error: 'Login et mot de passe requis.' };
     }
 
     try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      await firstValueFrom(
+        this.http.post(
+          'http://localhost:8080/PEPs_back/auth/login',
+          { login, password }
+        )
+      );
 
-      if (hexHash === this.correctHash) {
-        this.isLoggedIn.set(true);
-        return { success: true };
-      } else {
-        return { success: false, error: 'Mot de passe incorrect.' };
-      }
+      this.isLoggedIn.set(true);
+      return { success: true };
+
     } catch (err) {
-      console.error('Erreur de hachage:', err);
-      return { success: false, error: 'Une erreur est survenue.' };
+      return {
+        success: false,
+        error: 'Login ou mot de passe incorrect'
+      };
     }
   }
 

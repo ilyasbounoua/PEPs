@@ -1,6 +1,5 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
- * @description This file contains the logic for the login component, which handles user authentication.
+ * @description Login component logic
  */
 import { Component, output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -25,25 +24,30 @@ import { AuthService } from '../../services/auth';
   styleUrl: './login.css',
 })
 export class Login {
+
   private authService = inject(AuthService);
-  
+
   loginSuccess = output<void>();
   loginError = signal('');
 
   async onSubmit(event: Event) {
     event.preventDefault();
     this.loginError.set('');
-    
+
     const form = event.target as HTMLFormElement;
+
+    const loginInput = form.elements.namedItem('login') as HTMLInputElement;
     const passwordInput = form.elements.namedItem('password') as HTMLInputElement;
+
+    const login = loginInput.value;
     const password = passwordInput.value;
 
-    const result = await this.authService.login(password);
-    
+    const result = await this.authService.login(login, password);
+
     if (result.success) {
       this.loginSuccess.emit();
     } else {
-      this.loginError.set(result.error || 'Erreur de connexion');
+      this.loginError.set(result.error ?? 'Erreur de connexion');
     }
   }
 }
