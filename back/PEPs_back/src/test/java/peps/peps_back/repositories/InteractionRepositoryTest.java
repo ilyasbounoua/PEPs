@@ -2,24 +2,27 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
  */
-package peps.peps_back.controllers;
+package peps.peps_back.repositories;
 
-import java.util.List;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.springframework.http.ResponseEntity;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import peps.peps_back.items.Interaction;
 
 /**
  *
  * @author Clément
  */
-public class DailyStatsControllerTest {
+public class InteractionRepositoryTest {
     
-    public DailyStatsControllerTest() {
+    public InteractionRepositoryTest() {
     }
     
     @BeforeAll
@@ -38,16 +41,16 @@ public class DailyStatsControllerTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of getDailyStats method, of class DailyStatsController.
-     */
     @Test
-    public void testGetDailyStats() {
-        System.out.println("getDailyStats");
-        DailyStatsController instance = new DailyStatsController();
-        ResponseEntity<List<DailyDataDTO>> expResult = null;
-        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats();
-        assertEquals(expResult, result);
+    public void testSomeMethod() {
+        InteractionRepository mockRepository = mock(InteractionRepository.class);
+        
+
+        Interaction interac = new Interaction(1, "sound", new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime());
+        when(mockRepository.findById(1)).thenReturn(interac);
+
+        User result = userService.getUserById("123");
+        assertEquals("John Doe", result.getName());
     }
     
 }

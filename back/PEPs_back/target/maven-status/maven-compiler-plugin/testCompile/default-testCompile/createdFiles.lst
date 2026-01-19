@@ -1,11 +1,1 @@
-peps\peps_back\controllers\ModuleControllerTest.class
-peps\peps_back\controllers\DailyStatsControllerTest.class
-peps\peps_back\controllers\DashBoardControllerTest.class
-peps\peps_back\controllers\SoundControllerTest.class
-peps\peps_back\controllers\SoundDTOTest.class
-peps\peps_back\controllers\InteractionControllerTest.class
-peps\peps_back\controllers\ModuleConfigDTOTest.class
-peps\peps_back\controllers\ModuleDTOTest.class
-peps\peps_back\controllers\DashboardStatsTest.class
-peps\peps_back\controllers\DailyDataDTOTest.class
-peps\peps_back\controllers\InteractionDTOTest.class
+peps\peps_back\items\InteractionTest.class

@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
  */
-package peps.peps_back.controllers;
+package peps.peps_back.items;
 
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
@@ -11,15 +12,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import peps.peps_back.repositories.InteractionRepository;
 
 /**
  *
  * @author Clément
  */
-public class InteractionControllerTest {
+public class InteractionTest {
     
-    public InteractionControllerTest() {
+    public InteractionTest() {
     }
     
     @BeforeAll
@@ -38,16 +40,26 @@ public class InteractionControllerTest {
     public void tearDown() {
     }
 
+    @Autowired
+    private InteractionRepository interactionRepository;
+        
     /**
-     * Test of getAllInteractions method, of class InteractionController.
+     * Test of getIdinteraction method, of class Interaction.
      */
     @Test
-    public void testGetAllInteractions() {
-        System.out.println("getAllInteractions");
-        InteractionController instance = new InteractionController();
-        ResponseEntity<List<InteractionDTO>> expResult = null;
-        ResponseEntity<List<InteractionDTO>> result = instance.getAllInteractions();
-        assertEquals(expResult, result);
+    public void testGetIdinteraction() {
+        System.out.println("getIdinteraction");
+        
+        List<Interaction> interactions = interactionRepository.findAll();
+        if(interactions.isEmpty())
+        {
+            System.out.println("No Interactions found");
+            assert(false);
+        }
+        Integer result = interactions.iterator().next().getIdinteraction();
+        assert(result>0);
     }
+
+    
     
 }
