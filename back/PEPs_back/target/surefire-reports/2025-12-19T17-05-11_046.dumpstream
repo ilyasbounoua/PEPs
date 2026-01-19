@@ -1,5 +1,0 @@
-# Created at 2025-12-19T17:05:11.513
-Boot Manifest-JAR contains absolute paths in classpath 'D:\Users\Ilyas\Desktop\Me\Codes\Vscode\Projects\PEPs\back\PEPs_back\target\test-classes'
-Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-'other' has different root
-
