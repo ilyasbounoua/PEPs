@@ -7,40 +7,44 @@
     </div>
 
     <mat-nav-list>
-      <mat-list-item
-        (click)="setCurrentPage('dashboard')"
-        (keydown.enter)="setCurrentPage('dashboard')"
-        [class.active]="currentPage() === 'dashboard'"
-      >
+      <mat-list-item (click)="setCurrentPage('dashboard')" (keydown.enter)="setCurrentPage('dashboard')"
+        [class.active]="currentPage() === 'dashboard'">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Tableau de Bord</span>
       </mat-list-item>
 
-      <mat-list-item
-        (click)="setCurrentPage('interactions')"
-        (keydown.enter)="setCurrentPage('interactions')"
-        [class.active]="currentPage() === 'interactions'"
-      >
+      <mat-list-item (click)="setCurrentPage('interactions')" (keydown.enter)="setCurrentPage('interactions')"
+        [class.active]="currentPage() === 'interactions'">
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>Interactions</span>
       </mat-list-item>
 
-      <mat-list-item
-        (click)="setCurrentPage('modules')"
-        (keydown.enter)="setCurrentPage('modules')"
-        [class.active]="currentPage() === 'modules'"
-      >
+      <mat-list-item (click)="setCurrentPage('modules')" (keydown.enter)="setCurrentPage('modules')"
+        [class.active]="currentPage() === 'modules'">
         <mat-icon matListItemIcon>developer_board</mat-icon>
         <span matListItemTitle>Modules</span>
       </mat-list-item>
 
-      <mat-list-item
-        (click)="setCurrentPage('sounds')"
-        (keydown.enter)="setCurrentPage('sounds')"
-        [class.active]="currentPage() === 'sounds'"
-      >
+      <mat-list-item (click)="setCurrentPage('sounds')" (keydown.enter)="setCurrentPage('sounds')"
+        [class.active]="currentPage() === 'sounds'">
         <mat-icon matListItemIcon>music_note</mat-icon>
         <span matListItemTitle>Sons</span>
+      </mat-list-item>
+
+      <!-- Rubrique Utilisateurs - visible uniquement pour les admins -->
+      @if (isAdmin()) {
+      <mat-list-item (click)="setCurrentPage('users')" (keydown.enter)="setCurrentPage('users')"
+        [class.active]="currentPage() === 'users'">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Utilisateurs</span>
+      </mat-list-item>
+      }
+
+      <!-- Mon Compte - visible pour tous les utilisateurs connectés -->
+      <mat-list-item (click)="setCurrentPage('account')" (keydown.enter)="setCurrentPage('account')"
+        [class.active]="currentPage() === 'account'">
+        <mat-icon matListItemIcon>account_circle</mat-icon>
+        <span matListItemTitle>Mon Compte</span>
       </mat-list-item>
     </mat-nav-list>
   </mat-sidenav>
@@ -51,6 +55,15 @@
         <mat-icon>menu</mat-icon>
       </button>
       <span>{{ pageTitle() }}</span>
+
+      <!-- Spacer pour pousser le bouton de déconnexion à droite -->
+      <span class="toolbar-spacer"></span>
+
+      <!-- Affichage du login et bouton de déconnexion -->
+      <span class="user-info">{{ currentLogin() }}</span>
+      <button mat-icon-button (click)="logout()" matTooltip="Déconnexion">
+        <mat-icon>logout</mat-icon>
+      </button>
     </mat-toolbar>
 
     <div class="page-area">
@@ -59,21 +72,19 @@
       } @case ('interactions') {
       <app-interactions />
       } @case ('modules') {
-      <app-modules-list
-        (selectModule)="onSelectModule($event)"
-        (addModule)="onAddModule()"
-      />
+      <app-modules-list (selectModule)="onSelectModule($event)" (addModule)="onAddModule()" />
       } @case ('module-detail') {
-        @if(selectedModule(); as module) {
-          <app-module-detail
-            [module]="module"
-            (moduleSaved)="onModuleSaved()"
-          />
-        }
+      @if(selectedModule(); as module) {
+      <app-module-detail [module]="module" (moduleSaved)="onModuleSaved()" />
+      }
       } @case ('add-module') {
       <app-module-form (moduleSaved)="onModuleSaved()" />
       } @case ('sounds') {
       <app-sounds />
+      } @case ('users') {
+      <app-users />
+      } @case ('account') {
+      <app-account />
       } }
     </div>
   </mat-sidenav-content>

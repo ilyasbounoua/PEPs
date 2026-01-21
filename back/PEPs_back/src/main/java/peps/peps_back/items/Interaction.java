@@ -52,6 +52,16 @@ public class Interaction implements Serializable {
     @ManyToOne
     private Sound idsound;
 
+    /**
+     * Propriétaire de l'interaction (système multi-profils).
+     * Permet de filtrer les interactions par utilisateur.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id_user")
+    private User owner;
+
     public Interaction() {
     }
 
@@ -105,6 +115,14 @@ public class Interaction implements Serializable {
         this.idsound = idsound;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -118,12 +136,13 @@ public class Interaction implements Serializable {
             return false;
         }
         Interaction other = (Interaction) object;
-        return !((this.idinteraction == null && other.idinteraction != null) || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction)));
+        return !((this.idinteraction == null && other.idinteraction != null)
+                || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction)));
     }
 
     @Override
     public String toString() {
         return "peps.peps_back.items.Interaction[ idinteraction=" + idinteraction + " ]";
     }
-    
+
 }

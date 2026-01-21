@@ -1,8 +1,12 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the main application component, which acts as the root of the application and manages the overall layout and navigation.
+ * 
+ * Système multi-profils :
+ * - Utilise AuthService pour vérifier le rôle de l'utilisateur
+ * - La page "Utilisateurs" n'est visible que pour les admins
  */
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -14,9 +18,12 @@ import { Dashboard } from './components/dashboard/dashboard';
 import { Interactions } from './components/interactions/interactions';
 import { ModulesList } from './components/modules/modules-list/modules-list';
 import { Sounds } from './components/sounds/sounds';
+import { Users } from './components/users/users';
 import { Module } from './models/interfaces';
 import { ModuleDetail } from './components/modules/module-detail/module-detail';
 import { ModuleForm } from './components/modules/module-form/module-form';
+import { AuthService } from './services/auth';
+import { Account } from './components/account/account';
 
 @Component({
   selector: 'app-root',
@@ -35,15 +42,25 @@ import { ModuleForm } from './components/modules/module-form/module-form';
     ModuleDetail,
     ModuleForm,
     Sounds,
+    Users,
+    Account,
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })
 export class App {
+  private authService = inject(AuthService);
+
   isLoggedIn = signal(false);
   currentPage = signal('dashboard');
   isSidenavOpen = signal(true);
   selectedModule = signal<Module | undefined>(undefined);
+
+  // Vérifie si l'utilisateur connecté est admin (pour afficher la rubrique Users)
+  isAdmin = computed(() => this.authService.isAdmin());
+
+  // Login de l'utilisateur connecté (affiché dans la toolbar)
+  currentLogin = computed(() => this.authService.currentLogin());
 
   pageTitle = computed(() => {
     switch (this.currentPage()) {
@@ -59,6 +76,10 @@ export class App {
         return 'Ajouter un Module';
       case 'sounds':
         return 'Bibliothèque de Sons';
+      case 'users':
+        return 'Gestion des Utilisateurs';
+      case 'account':
+        return 'Mon Compte';
       default:
         return "PEP'S";
     }
@@ -88,5 +109,15 @@ export class App {
 
   onModuleSaved() {
     this.currentPage.set('modules');
+  }
+
+  /**
+   * Déconnexion de l'utilisateur.
+   * Réinitialise l'état de l'application et appelle AuthService.logout()
+   */
+  logout() {
+    this.authService.logout();
+    this.isLoggedIn.set(false);
+    this.currentPage.set('dashboard');
   }
 }

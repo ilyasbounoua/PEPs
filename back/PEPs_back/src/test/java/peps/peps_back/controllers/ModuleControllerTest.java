@@ -18,22 +18,22 @@ import org.springframework.http.ResponseEntity;
  * @author Clément
  */
 public class ModuleControllerTest {
-    
+
     public ModuleControllerTest() {
     }
-    
+
     @BeforeAll
     public static void setUpClass() {
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
-    
+
     @BeforeEach
     public void setUp() {
     }
-    
+
     @AfterEach
     public void tearDown() {
     }
@@ -46,7 +46,7 @@ public class ModuleControllerTest {
         System.out.println("getAllModules");
         ModuleController instance = new ModuleController();
         ResponseEntity<List<ModuleDTO>> expResult = null;
-        ResponseEntity<List<ModuleDTO>> result = instance.getAllModules();
+        ResponseEntity<List<ModuleDTO>> result = instance.getAllModules(null);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -112,5 +112,5 @@ public class ModuleControllerTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-    
+
 }

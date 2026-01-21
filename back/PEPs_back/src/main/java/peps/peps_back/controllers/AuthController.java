@@ -35,16 +35,22 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // 🔐 Plus tard : JWT
+        // Réponse d'authentification pour le système multi-profils
+        // - userId : identifiant unique pour filtrer les données propres à
+        // l'utilisateur
+        // - role : "admin", "dauphin" ou "aras" pour contrôler l'accès aux
+        // fonctionnalités
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Authentification réussie");
+        response.put("userId", user.getIdUser());
         response.put("login", user.getLogin());
+        response.put("role", user.getRole());
 
         return ResponseEntity.ok(response);
     }
 
     /* ===================== */
-    /* DTO interne           */
+    /* DTO interne */
     /* ===================== */
     public static class LoginRequest {
         private String login;

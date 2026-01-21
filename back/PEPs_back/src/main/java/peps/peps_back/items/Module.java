@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -73,6 +75,17 @@ public class Module implements Serializable {
     @Column(name = "last_seen")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastSeen;
+
+    /**
+     * Propriétaire du module (système multi-profils).
+     * Permet de filtrer les modules par utilisateur.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id_user")
+    private User owner;
+
     @OneToMany(mappedBy = "idmodule")
     private Collection<Interaction> interactionCollection;
 
@@ -85,6 +98,7 @@ public class Module implements Serializable {
 
     /**
      * Constructs a new Module with the given configuration.
+     * 
      * @param config The module configuration.
      */
     public Module(ModuleConfig config) {
@@ -224,6 +238,14 @@ public class Module implements Serializable {
         this.interactionCollection = interactionCollection;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -238,12 +260,13 @@ public class Module implements Serializable {
         }
         Module other = (Module) object;
         // This method was changed to handle null idmodule values.
-        return (this.idmodule != null && this.idmodule.equals(other.idmodule)) || (this.idmodule == null && other.idmodule == null);
+        return (this.idmodule != null && this.idmodule.equals(other.idmodule))
+                || (this.idmodule == null && other.idmodule == null);
     }
 
     @Override
     public String toString() {
         return "peps.peps_back.items.Module[ idmodule=" + idmodule + " ]";
     }
-    
+
 }
