@@ -3,6 +3,15 @@ package peps.peps_back.items;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Entité représentant un utilisateur du système PEP'S.
+ * Prend en charge le système multi-profils avec 3 rôles possibles :
+ * - "admin" : accès complet + gestion des utilisateurs
+ * - "dauphin" : accès limité à ses propres données
+ * - "aras" : accès limité à ses propres données
+ * 
+ * @author Équipe PEP'S, Anas EL HOUDI
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -21,6 +30,16 @@ public class User {
     @Column(nullable = false)
     private Boolean enabled = true;
 
+    /**
+     * Rôle de l'utilisateur : "admin", "dauphin" ou "aras".
+     * Utilisé pour :
+     * - Contrôler l'accès aux fonctionnalités (ex: gestion users pour admin)
+     * - Filtrer les données visibles (chaque user ne voit que ses propres
+     * modules/sons/interactions)
+     */
+    @Column(nullable = false, length = 20)
+    private String role = "dauphin";
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -28,7 +47,7 @@ public class User {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     /* ===================== */
-    /* Getters & Setters     */
+    /* Getters & Setters */
     /* ===================== */
 
     public Integer getIdUser() {
@@ -61,5 +80,13 @@ public class User {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

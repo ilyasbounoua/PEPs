@@ -1,0 +1,84 @@
+/**
+ * Styles pour le composant Users
+ * Gestion des utilisateurs pour admin
+ * @author Anas EL HOUDI
+ */
+
+.users-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.users-card {
+  max-width: 100%;
+}
+
+.actions-header {
+  margin-bottom: 16px;
+}
+
+/* Tableau des utilisateurs */
+.users-table {
+  width: 100%;
+}
+
+.users-table th,
+.users-table td {
+  padding: 12px 16px;
+}
+
+/* Badges de rôle */
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-admin {
+  background-color: #e91e63;
+  color: white;
+}
+
+.role-dauphin {
+  background-color: #2196f3;
+  color: white;
+}
+
+.role-aras {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Icône de statut actif */
+mat-icon.active {
+  color: #4caf50;
+}
+
+mat-icon:not(.active) {
+  color: #f44336;
+}
+
+/* Formulaire */
+.form-card {
+  max-width: 500px;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-form mat-form-field {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}

@@ -1,0 +1,206 @@
+/**
+ * Composant Users
+ * Gestion des utilisateurs pour les administrateurs.
+ * 
+ * Fonctionnalités :
+ * - Liste des utilisateurs avec tableau
+ * - Création d'un nouvel utilisateur
+ * - Modification login/password/role
+ * - Suppression d'un utilisateur
+ * 
+ * Accessible uniquement aux utilisateurs avec role "admin"
+ * 
+ * @author Anas EL HOUDI
+ */
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ApiService } from '../../services/api';
+import { UserDTO, CreateUserDTO } from '../../models/interfaces';
+
+@Component({
+    selector: 'app-users',
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatCardModule,
+        MatTableModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatSnackBarModule
+    ],
+    templateUrl: './users.html',
+    styleUrl: './users.css'
+})
+export class Users implements OnInit {
+
+    private api = inject(ApiService);
+    private snackBar = inject(MatSnackBar);
+
+    // Liste des utilisateurs
+    users = signal<UserDTO[]>([]);
+    displayedColumns = ['id', 'login', 'role', 'enabled', 'actions'];
+
+    // État du formulaire de création/édition
+    showForm = signal(false);
+    isEditing = signal(false);
+    editingUserId = signal<number | null>(null);
+
+    // Formulaire
+    formLogin = signal('');
+    formPassword = signal('');
+    formRole = signal<'admin' | 'dauphin' | 'aras'>('dauphin');
+
+    // Rôles disponibles
+    roles: ('admin' | 'dauphin' | 'aras')[] = ['admin', 'dauphin', 'aras'];
+
+    ngOnInit(): void {
+        this.loadUsers();
+    }
+
+    /**
+     * Charge la liste des utilisateurs depuis le backend
+     */
+    loadUsers(): void {
+        this.api.getUsers().subscribe({
+            next: (users) => this.users.set(users),
+            error: (err) => {
+                console.error('Erreur chargement utilisateurs:', err);
+                this.snackBar.open('Erreur lors du chargement des utilisateurs', 'Fermer', { duration: 3000 });
+            }
+        });
+    }
+
+    /**
+     * Affiche le formulaire de création
+     */
+    openCreateForm(): void {
+        this.resetForm();
+        this.isEditing.set(false);
+        this.showForm.set(true);
+    }
+
+    /**
+     * Affiche le formulaire d'édition pour un utilisateur
+     */
+    openEditForm(user: UserDTO): void {
+        this.formLogin.set(user.login);
+        this.formPassword.set(''); // Vide pour ne pas changer
+        this.formRole.set(user.role);
+        this.editingUserId.set(user.id);
+        this.isEditing.set(true);
+        this.showForm.set(true);
+    }
+
+    /**
+     * Ferme le formulaire
+     */
+    closeForm(): void {
+        this.showForm.set(false);
+        this.resetForm();
+    }
+
+    /**
+     * Réinitialise le formulaire
+     */
+    private resetForm(): void {
+        this.formLogin.set('');
+        this.formPassword.set('');
+        this.formRole.set('dauphin');
+        this.editingUserId.set(null);
+    }
+
+    /**
+     * Soumet le formulaire (création ou modification)
+     */
+    submitForm(): void {
+        if (this.isEditing()) {
+            this.updateUser();
+        } else {
+            this.createUser();
+        }
+    }
+
+    /**
+     * Crée un nouvel utilisateur
+     */
+    private createUser(): void {
+        const data: CreateUserDTO = {
+            login: this.formLogin(),
+            password: this.formPassword(),
+            role: this.formRole()
+        };
+
+        this.api.createUser(data).subscribe({
+            next: () => {
+                this.snackBar.open('Utilisateur créé avec succès', 'Fermer', { duration: 3000 });
+                this.closeForm();
+                this.loadUsers();
+            },
+            error: (err) => {
+                console.error('Erreur création utilisateur:', err);
+                const message = err.status === 409 ? 'Ce login existe déjà' : 'Erreur lors de la création';
+                this.snackBar.open(message, 'Fermer', { duration: 3000 });
+            }
+        });
+    }
+
+    /**
+     * Modifie un utilisateur existant
+     */
+    private updateUser(): void {
+        const id = this.editingUserId();
+        if (!id) return;
+
+        const data: any = {};
+        if (this.formLogin()) data.login = this.formLogin();
+        if (this.formPassword()) data.password = this.formPassword();
+        if (this.formRole()) data.role = this.formRole();
+
+        this.api.updateUser(id, data).subscribe({
+            next: () => {
+                this.snackBar.open('Utilisateur modifié avec succès', 'Fermer', { duration: 3000 });
+                this.closeForm();
+                this.loadUsers();
+            },
+            error: (err) => {
+                console.error('Erreur modification utilisateur:', err);
+                this.snackBar.open('Erreur lors de la modification', 'Fermer', { duration: 3000 });
+            }
+        });
+    }
+
+    /**
+     * Supprime un utilisateur après confirmation
+     */
+    deleteUser(user: UserDTO): void {
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.login}" ?`)) {
+            return;
+        }
+
+        this.api.deleteUser(user.id).subscribe({
+            next: () => {
+                this.snackBar.open('Utilisateur supprimé', 'Fermer', { duration: 3000 });
+                this.loadUsers();
+            },
+            error: (err) => {
+                console.error('Erreur suppression utilisateur:', err);
+                this.snackBar.open('Erreur lors de la suppression', 'Fermer', { duration: 3000 });
+            }
+        });
+    }
+}

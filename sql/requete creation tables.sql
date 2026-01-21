@@ -35,3 +35,21 @@ CREATE TABLE public.Interaction (
 		REFERENCES Sound(idsound)
 		ON DELETE SET NULL
 );
+
+-- Table: public.users
+
+-- DROP TABLE IF EXISTS public.users;
+
+CREATE TABLE public.users
+(
+    id_user integer NOT NULL DEFAULT nextval('users_id_user_seq'::regclass),
+    login character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    password_hash character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    enabled boolean NOT NULL DEFAULT true,
+    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT users_pkey PRIMARY KEY (id_user),
+    CONSTRAINT users_login_key UNIQUE (login)
+)
+
+
