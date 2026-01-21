@@ -1,5 +1,18 @@
 <div class="page-content">
   <div class="modules-header">
+
+    <!-- Admin Profile Filter -->
+    @if (isAdmin()) {
+    <mat-form-field appearance="outline" class="profile-select">
+      <mat-label>Filtrer par profil</mat-label>
+      <mat-select [(ngModel)]="selectedProfile" (selectionChange)="onProfileChange()">
+        @for (profile of profiles; track profile.id) {
+        <mat-option [value]="profile.id">{{profile.name}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    }
+
     <button mat-raised-button color="primary" (click)="onAddClick()">
       <mat-icon>add</mat-icon>
       Ajouter un module

@@ -11,16 +11,34 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 import { Interaction } from '../../models/interfaces';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-interactions',
-  imports: [CommonModule, FormsModule, MatCardModule, MatRadioModule, MatButtonModule, MatIconModule, MatTableModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatRadioModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatFormFieldModule],
   templateUrl: './interactions.html',
   styleUrl: './interactions.css',
 })
 export class Interactions implements OnInit {
   private api = inject(ApiService);
+  private authService = inject(AuthService);
+
+  readonly isAdmin = this.authService.isAdmin;
+
+  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
+  // If admin selects 'all' (1), we pass undefined to API to get everything
+  // If admin selects specific ID, we pass that ID
+  selectedProfile = signal<number>(1);
+
+  // Profiles for dropdown
+  profiles = [
+    { id: 1, name: 'Tous les profils' },
+    { id: 2, name: 'Aras' },
+    { id: 3, name: 'Dauphin' }
+  ];
 
   filter = signal('all');
   interactions = signal<Interaction[]>([]);
@@ -57,10 +75,25 @@ export class Interactions implements OnInit {
   }
 
   loadData() {
-    this.api.getInteractions().subscribe({
+    let profileId: number | undefined = undefined;
+
+    if (this.isAdmin()) {
+      const selected = this.selectedProfile();
+      // ID 1 means "All" for admin in our UI logic, so we pass undefined to API
+      // User IDs are: 2=Aras, 3=Dauphin
+      if (selected !== 1) {
+        profileId = selected;
+      }
+    }
+
+    this.api.getInteractions(profileId).subscribe({
       next: (data) => this.interactions.set(data),
       error: (err) => console.error('Error loading interactions:', err)
     });
+  }
+
+  onProfileChange() {
+    this.loadData();
   }
 
   setFilter(newFilter: string) {
@@ -73,10 +106,10 @@ export class Interactions implements OnInit {
 
     const headers = ['ID', 'Date', 'Module', 'Type'];
     const rows = data.map(i => [i.id, `"${i.date}"`, i.module, i.type].join(','));
-    
+
     const csvContent = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    
+
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
