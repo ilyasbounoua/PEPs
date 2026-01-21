@@ -24,32 +24,65 @@ export class ApiService {
   private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
 
   // Dashboard
-  getDashboardStats(): Observable<StatCard> {
-    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard`);
+  /**
+   * Gets dashboard stats.
+   * - Regular users: stats for their own data (pass ownerId)
+   * - Admin: stats for ALL data (no ownerId)
+   * @author Anas EL HOUDI
+   */
+  getDashboardStats(filterOwnerId?: number): Observable<StatCard> {
+    const userId = this.authService.currentUserId();
+    const isAdmin = this.authService.isAdmin();
+
+    let targetId = isAdmin ? filterOwnerId : userId;
+    const params = targetId ? `?ownerId=${targetId}` : '';
+
+    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${params}`);
   }
 
-  getDailyStats(): Observable<DailyData[]> {
-    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats`);
+  getDailyStats(filterOwnerId?: number): Observable<DailyData[]> {
+    const userId = this.authService.currentUserId();
+    const isAdmin = this.authService.isAdmin();
+
+    let targetId = isAdmin ? filterOwnerId : userId;
+    const params = targetId ? `?ownerId=${targetId}` : '';
+
+    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${params}`);
   }
 
   // Interactions
-  getInteractions(): Observable<Interaction[]> {
-    const ownerId = this.authService.currentUserId();
-    const params = ownerId ? `?ownerId=${ownerId}` : '';
+  // Interactions
+  getInteractions(filterOwnerId?: number): Observable<Interaction[]> {
+    const userId = this.authService.currentUserId();
+    const isAdmin = this.authService.isAdmin();
+
+    // If admin provides a filter ID, use it. 
+    // If admin provides no filter, use no param (get all).
+    // If regular user, ALWAYS enforce their own ID.
+    let targetId = isAdmin ? filterOwnerId : userId;
+
+    // If admin and explicit null passed (meaning "All"), ensure param is empty
+    const params = targetId ? `?ownerId=${targetId}` : '';
+
     return this.http.get<any[]>(`${this.BASE_URL}/interactions${params}`).pipe(
       map(data => data.map(i => ({
-        id: i.id,
-        date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19),
-        module: i.module,
-        type: i.type
+        id: i.id, // Backend DTO uses 'id'
+        date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19), // Backend DTO uses 'date'
+        module: i.module, // Backend DTO uses 'module'
+        type: i.type // Backend DTO uses 'type'
       })))
     );
   }
 
   // Modules
-  getModules(): Observable<Module[]> {
-    const ownerId = this.authService.currentUserId();
-    const params = ownerId ? `?ownerId=${ownerId}` : '';
+  // Modules
+  getModules(filterOwnerId?: number): Observable<Module[]> {
+    const userId = this.authService.currentUserId();
+    const isAdmin = this.authService.isAdmin();
+
+    let targetId = isAdmin ? filterOwnerId : userId;
+    const params = targetId ? `?ownerId=${targetId}` : '';
+
     return this.http.get<Module[]>(`${this.BASE_URL}/modules${params}`);
   }
 
@@ -66,9 +99,14 @@ export class ApiService {
   }
 
   // Sounds
-  getSounds(): Observable<Sound[]> {
-    const ownerId = this.authService.currentUserId();
-    const params = ownerId ? `?ownerId=${ownerId}` : '';
+  // Sounds
+  getSounds(filterOwnerId?: number): Observable<Sound[]> {
+    const userId = this.authService.currentUserId();
+    const isAdmin = this.authService.isAdmin();
+
+    let targetId = isAdmin ? filterOwnerId : userId;
+    const params = targetId ? `?ownerId=${targetId}` : '';
+
     return this.http.get<Sound[]>(`${this.BASE_URL}/sounds${params}`);
   }
 

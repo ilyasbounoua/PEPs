@@ -1,0 +1,36 @@
+mat-card {
+    margin: 16px;
+}
+
+mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.filters-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.profile-select {
+    width: 200px;
+    margin-bottom: -1.25em;
+    /* Fix height alignment with radio group */
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}

@@ -6,7 +6,8 @@ CREATE TABLE public.Module (
 	volume integer NOT NULL,
 	current_mode character varying(50) NOT NULL,
 	actif boolean NOT NULL,
-	last_seen timestamp NOT NULL
+	last_seen timestamp NOT NULL,
+    owner_id integer
 );
 
 CREATE TABLE public.Sound (
@@ -14,7 +15,8 @@ CREATE TABLE public.Sound (
     nom character varying(255) NOT NULL,
     type_son character varying(50) NOT NULL,
     extension character varying(10) NOT NULL,
-    chemin character varying(500)
+    chemin character varying(500),
+    owner_id integer
 );
 
 CREATE TABLE public.Interaction (
@@ -23,6 +25,7 @@ CREATE TABLE public.Interaction (
 	idmodule integer ,
     typeInteraction character varying(50) NOT NULL,
 	time_lancement timestamp NOT NULL DEFAULT NOW(),
+    owner_id integer,
 
 
 	CONSTRAINT fk_idmodule
@@ -48,6 +51,7 @@ CREATE TABLE public.users
     enabled boolean NOT NULL DEFAULT true,
     created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    role character varying(50),
     CONSTRAINT users_pkey PRIMARY KEY (id_user),
     CONSTRAINT users_login_key UNIQUE (login)
 )

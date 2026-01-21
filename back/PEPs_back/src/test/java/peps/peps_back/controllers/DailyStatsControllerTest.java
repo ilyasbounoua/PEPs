@@ -18,22 +18,22 @@ import org.springframework.http.ResponseEntity;
  * @author Clément
  */
 public class DailyStatsControllerTest {
-    
+
     public DailyStatsControllerTest() {
     }
-    
+
     @BeforeAll
     public static void setUpClass() {
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
-    
+
     @BeforeEach
     public void setUp() {
     }
-    
+
     @AfterEach
     public void tearDown() {
     }
@@ -46,8 +46,8 @@ public class DailyStatsControllerTest {
         System.out.println("getDailyStats");
         DailyStatsController instance = new DailyStatsController();
         ResponseEntity<List<DailyDataDTO>> expResult = null;
-        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats();
+        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats(null);
         assertEquals(expResult, result);
     }
-    
+
 }

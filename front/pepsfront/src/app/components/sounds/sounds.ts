@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 import { AudioService } from '../../services/audio';
 import { Sound, SoundFilter } from '../../models/interfaces';
 
@@ -34,16 +35,29 @@ import { Sound, SoundFilter } from '../../models/interfaces';
 })
 export class Sounds implements OnInit {
   private api = inject(ApiService);
+  private authService = inject(AuthService);
   private audioService = inject(AudioService);
+
+  readonly isAdmin = this.authService.isAdmin;
+
+  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
+  selectedProfile = signal<number>(1);
+
+  // Profiles for dropdown
+  profiles = [
+    { id: 1, name: 'Tous les profils' },
+    { id: 2, name: 'Aras' },
+    { id: 3, name: 'Dauphin' }
+  ];
 
   sounds = signal<Sound[]>([]);
   soundFilter = signal<SoundFilter>('all');
   showAddSoundForm = signal(false);
   isUploading = signal(false);
   uploadError = signal('');
-  
+
   newSound = signal({ name: '', type: '', file: null as File | null });
-  
+
   editingSoundId = signal<number | null>(null);
   editSoundData = signal<{ name: string, type: string }>({ name: '', type: '' });
   editSoundError = signal('');
@@ -53,11 +67,11 @@ export class Sounds implements OnInit {
   filteredSounds = computed(() => {
     const filter = this.soundFilter();
     const allSounds = this.sounds();
-    
+
     if (filter === 'all') {
       return allSounds;
     }
-    
+
     return allSounds.filter(s => s.type === filter);
   });
 
@@ -66,10 +80,23 @@ export class Sounds implements OnInit {
   }
 
   loadData() {
-    this.api.getSounds().subscribe({
+    let profileId: number | undefined = undefined;
+
+    if (this.isAdmin()) {
+      const selected = this.selectedProfile();
+      if (selected !== 1) {
+        profileId = selected;
+      }
+    }
+
+    this.api.getSounds(profileId).subscribe({
       next: (data) => this.sounds.set(data),
       error: (err) => console.error('Error loading sounds:', err)
     });
+  }
+
+  onProfileChange() {
+    this.loadData();
   }
 
   toggleAddForm() {
@@ -92,11 +119,11 @@ export class Sounds implements OnInit {
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    
+
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const extension = file.name.split('.').pop()?.toLowerCase();
-      
+
       if (!['mp3', 'wav', 'ogg', 'm4a'].includes(extension || '')) {
         this.uploadError.set('Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a');
         input.value = '';
@@ -110,7 +137,7 @@ export class Sounds implements OnInit {
 
   uploadSound() {
     const sound = this.newSound();
-    
+
     if (!sound.name || sound.name.trim() === '') {
       this.uploadError.set('Le nom est obligatoire');
       return;
@@ -181,7 +208,7 @@ export class Sounds implements OnInit {
 
   saveEditSound(soundId: number) {
     const data = this.editSoundData();
-    
+
     if (!data.name || data.name.trim() === '') {
       this.editSoundError.set('Le nom est obligatoire');
       return;
@@ -194,7 +221,7 @@ export class Sounds implements OnInit {
 
     this.api.updateSound(soundId, data).subscribe({
       next: (updatedSound) => {
-        this.sounds.update(sounds => 
+        this.sounds.update(sounds =>
           sounds.map(s => s.id === updatedSound.id ? updatedSound : s)
         );
         this.cancelEditSound();
