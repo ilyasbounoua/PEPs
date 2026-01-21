@@ -17,22 +17,22 @@ import org.springframework.http.ResponseEntity;
  * @author Clément
  */
 public class DashBoardControllerTest {
-    
+
     public DashBoardControllerTest() {
     }
-    
+
     @BeforeAll
     public static void setUpClass() {
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
-    
+
     @BeforeEach
     public void setUp() {
     }
-    
+
     @AfterEach
     public void tearDown() {
     }
@@ -45,8 +45,8 @@ public class DashBoardControllerTest {
         System.out.println("dashboard");
         DashBoardController instance = new DashBoardController();
         ResponseEntity<DashboardStats> expResult = null;
-        ResponseEntity<DashboardStats> result = instance.dashboard();
+        ResponseEntity<DashboardStats> result = instance.dashboard(null);
         assertEquals(expResult, result);
     }
-    
+
 }

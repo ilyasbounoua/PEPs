@@ -1,5 +1,5 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the DailyStatsController class, which handles requests for daily interaction statistics.
  */
 package peps.peps_back.controllers;
@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Interaction;
+import peps.peps_back.items.User;
 import peps.peps_back.repositories.InteractionRepository;
+import peps.peps_back.repositories.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,26 +25,46 @@ public class DailyStatsController {
     @Autowired
     private InteractionRepository interactionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    /**
+     * Returns daily stats.
+     * 
+     * @param ownerId Optional owner ID for filtering.
+     * @author Anas EL HOUDI
+     */
     @GetMapping
-    public ResponseEntity<List<DailyDataDTO>> getDailyStats() {
-        List<Interaction> interactions = interactionRepository.findAll();
-        
+    public ResponseEntity<List<DailyDataDTO>> getDailyStats(@RequestParam(required = false) Integer ownerId) {
+        List<Interaction> interactions;
+
+        if (ownerId != null) {
+            User owner = userRepository.findById(ownerId).orElse(null);
+            if (owner != null && !"admin".equals(owner.getRole())) {
+                interactions = interactionRepository.findByOwner(owner);
+            } else {
+                interactions = interactionRepository.findAll();
+            }
+        } else {
+            interactions = interactionRepository.findAll();
+        }
+
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date startOfDay = cal.getTime();
-        
+
         List<Interaction> todayInteractions = interactions.stream()
-            .filter(i -> i.getTimeLancement().compareTo(startOfDay) >= 0)
-            .collect(Collectors.toList());
-        
+                .filter(i -> i.getTimeLancement().compareTo(startOfDay) >= 0)
+                .collect(Collectors.toList());
+
         Map<String, Integer> hourCounts = new HashMap<>();
         for (int hour = 8; hour <= 18; hour += 2) {
             hourCounts.put(hour + "h", 0);
         }
-        
+
         SimpleDateFormat hourFormat = new SimpleDateFormat("H");
         for (Interaction interaction : todayInteractions) {
             int hour = Integer.parseInt(hourFormat.format(interaction.getTimeLancement()));
@@ -54,13 +76,13 @@ public class DailyStatsController {
                 }
             }
         }
-        
+
         List<DailyDataDTO> result = new ArrayList<>();
         for (int hour = 8; hour <= 18; hour += 2) {
             String key = hour + "h";
             result.add(new DailyDataDTO(key, hourCounts.get(key)));
         }
-        
+
         return ResponseEntity.ok(result);
     }
 }

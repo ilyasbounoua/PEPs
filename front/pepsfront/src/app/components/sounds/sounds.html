@@ -8,6 +8,21 @@
       </button>
     </mat-card-header>
     <mat-card-content>
+
+      <!-- Admin Profile Filter -->
+      @if (isAdmin()) {
+      <div class="profile-filter-container">
+        <mat-form-field appearance="outline" class="profile-select">
+          <mat-label>Filtrer par profil</mat-label>
+          <mat-select [(ngModel)]="selectedProfile" (selectionChange)="onProfileChange()">
+            @for (profile of profiles; track profile.id) {
+            <mat-option [value]="profile.id">{{profile.name}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+
       <!-- Filter buttons -->
       <div class="filter-buttons">
         <button mat-button [class.active-filter]="soundFilter() === 'all'" (click)="setSoundFilter('all')">
@@ -40,8 +55,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Type</mat-label>
-              <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)"
-                name="soundType">
+              <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)" name="soundType">
                 <mat-option value="Vocal">Vocal</mat-option>
                 <mat-option value="Ambiance">Ambiance</mat-option>
                 <mat-option value="Naturel">Naturel</mat-option>
@@ -97,14 +111,12 @@
             <div class="sound-edit-form">
               <mat-form-field appearance="outline">
                 <mat-label>Nom du son</mat-label>
-                <input matInput [value]="editSoundData().name" 
-                  (input)="updateEditSoundName($any($event.target).value)">
+                <input matInput [value]="editSoundData().name" (input)="updateEditSoundName($any($event.target).value)">
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Type</mat-label>
-                <mat-select [value]="editSoundData().type" 
-                  (selectionChange)="updateEditSoundType($event.value)">
+                <mat-select [value]="editSoundData().type" (selectionChange)="updateEditSoundType($event.value)">
                   <mat-option value="Vocal">Vocal</mat-option>
                   <mat-option value="Ambiance">Ambiance</mat-option>
                   <mat-option value="Naturel">Naturel</mat-option>

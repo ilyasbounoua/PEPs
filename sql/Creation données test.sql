@@ -1,25 +1,86 @@
--- 1. INSERER DES SONS
-INSERT INTO public.Sound (nom, type_son, extension) VALUES
-('Chant Mali', 'Ambiance', 'mp3'),
-('Cri et Communication Perroquet', 'Vocal', 'mp3'),
-('Son Eau Qui Coule', 'Naturel', 'wav');
+-- ============================================================
+-- SCRIPT DE NETTOYAGE ET CONFIGURATION ADMIN SUPERVISION
+-- ============================================================
 
--- 2. INSERER DES MODULES
-INSERT INTO public.Module (nom, ip_adress, status, volume, current_mode, actif, last_seen) VALUES
-('Module Perchoir 1', '192.168.1.10', 'actif', 80, 'Automatique', true, NOW() - INTERVAL '10 minutes'),
-('Module Nid 2', '192.168.1.11', 'inactif', 65, 'Manuel', false, NOW() - INTERVAL '2 hours'),
-('Module Abreuvoir', '192.168.1.12', 'actif', 100, 'Automatique', true, NOW() - INTERVAL '1 minute');
+-- 1. SUPPRESSION DES DONNEES ADMIN (owner_id = 1)
+DELETE FROM peps.Interaction WHERE owner_id = 1;
+DELETE FROM peps.Sound WHERE owner_id = 1;
+DELETE FROM peps.Module WHERE owner_id = 1;
 
--- 3. INSERER DES INTERACTIONS
-INSERT INTO public.Interaction (idsound, idmodule, typeInteraction, time_lancement) VALUES
--- Interaction : Son 1 (Cri Ara) sur Module 1 (Perchoir)
-(1, 1, 'Bec', NOW() - INTERVAL '5 minutes'),
+-- ============================================================
+-- DONNEES TEST POUR DAUPHIN (id_user = 3)
+-- ============================================================
 
--- Interaction : Son 3 (Eau) sur Module 3 (Abreuvoir)
-(3, 3, 'Patte', NOW() - INTERVAL '3 minutes'),
+-- Sons pour Dauphin
+INSERT INTO peps.Sound (nom, type_son, extension, owner_id) VALUES
+('Chant des Baleines', 'Naturel', 'mp3', 3),
+('Clics de Dauphin', 'Vocal', 'wav', 3),
+('Vagues Océan', 'Ambiance', 'mp3', 3),
+('Sonar Marin', 'Vocal', 'mp3', 3),
+('Musique Aquatique', 'Ambiance', 'wav', 3)
+ON CONFLICT DO NOTHING;
 
--- Interaction : Son 1 (Cri Ara) à nouveau sur Module 1 (Perchoir)
-(1, 1, 'Bec', NOW() - INTERVAL '1 minute'),
+-- Modules pour Dauphin
+INSERT INTO peps.Module (nom, ip_adress, status, volume, current_mode, actif, last_seen, owner_id) VALUES
+('Module Bassin Principal', '192.168.2.10', 'actif', 90, 'Automatique', true, NOW() - INTERVAL '5 minutes', 3),
+('Module Zone Repos', '192.168.2.11', 'actif', 50, 'Manuel', true, NOW() - INTERVAL '15 minutes', 3),
+('Module Piscine Entrainement', '192.168.2.12', 'actif', 70, 'Automatique', true, NOW() - INTERVAL '1 minute', 3)
+ON CONFLICT DO NOTHING;
 
--- Interaction : Son 2 (Foret) sur Module 1 (Perchoir)
-(2, 1, 'Patte', NOW() - INTERVAL '30 seconds');
+-- Interactions Dauphin
+INSERT INTO peps.Interaction (idsound, idmodule, typeInteraction, time_lancement, owner_id)
+SELECT s.idsound, m.idmodule, 'Head', NOW() - INTERVAL '10 minutes', 3
+FROM peps.Sound s
+JOIN peps.Module m ON m.owner_id = 3
+WHERE s.nom = 'Chant des Baleines' AND s.owner_id = 3
+  AND m.nom = 'Module Bassin Principal';
+
+INSERT INTO peps.Interaction (idsound, idmodule, typeInteraction, time_lancement, owner_id)
+SELECT s.idsound, m.idmodule, 'Tail', NOW() - INTERVAL '8 minutes', 3
+FROM peps.Sound s
+JOIN peps.Module m ON m.owner_id = 3
+WHERE s.nom = 'Clics de Dauphin'
+  AND m.nom = 'Module Bassin Principal';
+
+-- ============================================================
+-- DONNEES TEST POUR ARAS (id_user = 2)
+-- ============================================================
+
+-- Sons pour Aras
+INSERT INTO peps.Sound (nom, type_son, extension, owner_id) VALUES
+('Cri Ara Bleu', 'Vocal', 'mp3', 2),
+('Musique Tropicale', 'Ambiance', 'mp3', 2),
+('Pluie Amazonienne', 'Naturel', 'wav', 2),
+('Chant Perroquet', 'Vocal', 'mp3', 2),
+('Foret Tropicale', 'Ambiance', 'wav', 2)
+ON CONFLICT DO NOTHING;
+
+-- Modules pour Aras
+INSERT INTO peps.Module (nom, ip_adress, status, volume, current_mode, actif, last_seen, owner_id) VALUES
+('Module Volière Ara', '192.168.3.10', 'actif', 75, 'Automatique', true, NOW() - INTERVAL '2 minutes', 2),
+('Module Perchoir Ara', '192.168.3.11', 'inactif', 60, 'Manuel', false, NOW() - INTERVAL '1 hour', 2),
+('Module Cage Principale', '192.168.3.12', 'actif', 85, 'Automatique', true, NOW() - INTERVAL '5 minutes', 2)
+ON CONFLICT DO NOTHING;
+
+-- Interactions Aras
+INSERT INTO peps.Interaction (idsound, idmodule, typeInteraction, time_lancement, owner_id)
+SELECT s.idsound, m.idmodule, 'Bec', NOW() - INTERVAL '20 minutes', 2
+FROM peps.Sound s
+JOIN peps.Module m ON m.owner_id = 2
+WHERE s.nom = 'Cri Ara Bleu'
+  AND m.nom = 'Module Volière Ara';
+
+INSERT INTO peps.Interaction (idsound, idmodule, typeInteraction, time_lancement, owner_id)
+SELECT s.idsound, m.idmodule, 'Patte', NOW() - INTERVAL '15 minutes', 2
+FROM peps.Sound s
+JOIN peps.Module m ON m.owner_id = 2
+WHERE s.nom = 'Musique Tropicale'
+  AND m.nom = 'Module Perchoir Ara';
+
+-- ============================================================
+-- VERIFICATIONS
+-- ============================================================
+
+SELECT owner_id, COUNT(*) FROM peps.Interaction GROUP BY owner_id;
+SELECT owner_id, COUNT(*) FROM peps.Module GROUP BY owner_id;
+SELECT owner_id, COUNT(*) FROM peps.Sound GROUP BY owner_id;

@@ -18,22 +18,22 @@ import org.springframework.http.ResponseEntity;
  * @author Clément
  */
 public class InteractionControllerTest {
-    
+
     public InteractionControllerTest() {
     }
-    
+
     @BeforeAll
     public static void setUpClass() {
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
-    
+
     @BeforeEach
     public void setUp() {
     }
-    
+
     @AfterEach
     public void tearDown() {
     }
@@ -46,8 +46,8 @@ public class InteractionControllerTest {
         System.out.println("getAllInteractions");
         InteractionController instance = new InteractionController();
         ResponseEntity<List<InteractionDTO>> expResult = null;
-        ResponseEntity<List<InteractionDTO>> result = instance.getAllInteractions();
+        ResponseEntity<List<InteractionDTO>> result = instance.getAllInteractions(null);
         assertEquals(expResult, result);
     }
-    
+
 }

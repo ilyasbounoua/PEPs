@@ -1,5 +1,4 @@
 *.log
-**/persistence.xml
 
 # Uploaded audio files (exclude from version control)
 back/PEPs_back/sons/**/*
@@ -8,4 +7,5 @@ back/PEPs_back/sons/**/*
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
 
-back/PEPs_back/target/*
+back/PEPs_back/target/* 
+
