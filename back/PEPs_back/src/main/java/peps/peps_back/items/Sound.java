@@ -56,8 +56,8 @@ public class Sound implements Serializable {
     private Collection<Interaction> interactionCollection;
 
     /**
-     * Propriétaire du son (système multi-profils).
-     * Permet de filtrer les sons par utilisateur.
+     * Sound owner (multi-profile system).
+     * Used to filter sounds by user.
      * 
      * @author Anas EL HOUDI
      */

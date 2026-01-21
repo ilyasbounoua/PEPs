@@ -2,9 +2,9 @@
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the SoundController class, which handles CRUD operations for sounds, including file uploads and streaming.
  * 
- * Système multi-profils :
- * - Utilise ownerId pour filtrer les sons par utilisateur
- * - Chaque utilisateur ne voit que ses propres sons
+ * Multi-profile system:
+ * - Uses ownerId to filter sounds by user
+ * - Each user only sees their own sounds
  */
 package peps.peps_back.controllers;
 
@@ -49,15 +49,15 @@ public class SoundController {
     }
 
     /**
-     * Liste les sons d'un utilisateur.
+     * Lists a user's sounds.
      * 
-     * @param ownerId ID de l'utilisateur connecté (filtrage multi-profils)
+     * @param ownerId ID of the logged-in user (multi-profile filtering)
      */
     @GetMapping
     public ResponseEntity<List<SoundDTO>> getAllSounds(@RequestParam(required = false) Integer ownerId) {
         List<Sound> sounds;
 
-        // Si ownerId est fourni, filtrer par propriétaire
+        // If ownerId is provided, filter by owner
         if (ownerId != null) {
             User owner = userRepository.findById(ownerId).orElse(null);
             if (owner != null) {

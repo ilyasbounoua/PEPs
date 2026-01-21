@@ -53,8 +53,8 @@ public class Interaction implements Serializable {
     private Sound idsound;
 
     /**
-     * Propriétaire de l'interaction (système multi-profils).
-     * Permet de filtrer les interactions par utilisateur.
+     * Interaction owner (multi-profile system).
+     * Used to filter interactions by user.
      * 
      * @author Anas EL HOUDI
      */

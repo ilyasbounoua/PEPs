@@ -2,9 +2,9 @@
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the ApiService, which handles all HTTP requests to the backend.
  * 
- * Système multi-profils :
- * - Utilise AuthService pour récupérer l'ID de l'utilisateur connecté
- * - Passe ownerId aux endpoints pour filtrer les données par utilisateur
+ * Multi-profile system:
+ * - Uses AuthService to get the logged-in user's ID
+ * - Passes ownerId to endpoints to filter data by user
  */
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -20,7 +20,7 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   // private readonly BASE_URL = 'https://peps-backend.onrender.com';
-  // Correction pour le développement local (NetBeans/Tomcat)
+  // Fix for local development (NetBeans/Tomcat)
   private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
 
   // Dashboard
@@ -132,12 +132,12 @@ export class ApiService {
   }
 
   /* ===================== */
-  /* Changement de mot de passe (compte utilisateur) */
+  /* User Password Change */
   /* ===================== */
 
   /**
-   * Permet à l'utilisateur de changer son propre mot de passe.
-   * Nécessite le mot de passe actuel pour validation.
+   * Allows the user to change their own password.
+   * Requires current password for validation.
    * @author Anas EL HOUDI
    */
   changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {

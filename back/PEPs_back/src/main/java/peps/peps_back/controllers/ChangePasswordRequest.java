@@ -1,8 +1,8 @@
 package peps.peps_back.controllers;
 
 /**
- * DTO pour la requête de changement de mot de passe par l'utilisateur.
- * L'utilisateur doit fournir son ancien et son nouveau mot de passe.
+ * DTO for user password change request.
+ * User must provide their current password and new password.
  * 
  * @author Anas EL HOUDI
  */

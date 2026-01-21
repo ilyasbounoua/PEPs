@@ -15,8 +15,8 @@ import java.util.List;
 public interface InteractionRepository extends JpaRepository<Interaction, Integer>, InteractionRepositoryCustom {
 
     /**
-     * Récupère toutes les interactions appartenant à un utilisateur.
-     * Pour le système multi-profils (isolation des données).
+     * Retrieves all interactions belonging to a user.
+     * For multi-profile system (data isolation).
      * 
      * @author Anas EL HOUDI
      */

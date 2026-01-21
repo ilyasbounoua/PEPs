@@ -15,8 +15,8 @@ import java.util.List;
 public interface ModuleRepository extends JpaRepository<Module, Integer>, ModuleRepositoryCustom {
 
     /**
-     * Récupère tous les modules appartenant à un utilisateur.
-     * Pour le système multi-profils (isolation des données).
+     * Retrieves all modules belonging to a user.
+     * For multi-profile system (data isolation).
      * 
      * @author Anas EL HOUDI
      */

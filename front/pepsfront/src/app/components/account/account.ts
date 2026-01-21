@@ -1,6 +1,6 @@
 /**
- * Composant Account - Gestion du compte utilisateur
- * Permet à l'utilisateur de modifier son mot de passe.
+ * Account Component - User account management
+ * Allows the user to change their password.
  * 
  * @author Anas EL HOUDI
  */
@@ -37,47 +37,47 @@ export class Account {
     private authService = inject(AuthService);
     private snackBar = inject(MatSnackBar);
 
-    // Formulaire de changement de mot de passe
+    // Password change form
     currentPassword = signal('');
     newPassword = signal('');
     confirmPassword = signal('');
 
-    // États
+    // States
     isLoading = signal(false);
     showCurrentPassword = signal(false);
     showNewPassword = signal(false);
     showConfirmPassword = signal(false);
     error = signal('');
 
-    // Informations utilisateur
+    // User information
     userLogin = this.authService.currentLogin;
     userRole = this.authService.currentRole;
 
     /**
-     * Soumet le formulaire de changement de mot de passe.
+     * Submits the password change form.
      */
     submitPasswordChange() {
         this.error.set('');
 
         // Validation
         if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {
-            this.error.set('Tous les champs sont obligatoires');
+            this.error.set('All fields are required');
             return;
         }
 
         if (this.newPassword().length < 4) {
-            this.error.set('Le nouveau mot de passe doit contenir au moins 4 caractères');
+            this.error.set('New password must be at least 4 characters');
             return;
         }
 
         if (this.newPassword() !== this.confirmPassword()) {
-            this.error.set('Les nouveaux mots de passe ne correspondent pas');
+            this.error.set('New passwords do not match');
             return;
         }
 
         const userId = this.authService.currentUserId();
         if (!userId) {
-            this.error.set('Utilisateur non connecté');
+            this.error.set('User not logged in');
             return;
         }
 
@@ -86,8 +86,8 @@ export class Account {
         this.api.changePassword(userId, this.currentPassword(), this.newPassword()).subscribe({
             next: () => {
                 this.isLoading.set(false);
-                this.snackBar.open('Mot de passe modifié avec succès !', 'OK', { duration: 3000 });
-                // Réinitialiser le formulaire
+                this.snackBar.open('Password changed successfully!', 'OK', { duration: 3000 });
+                // Reset form
                 this.currentPassword.set('');
                 this.newPassword.set('');
                 this.confirmPassword.set('');
@@ -95,11 +95,11 @@ export class Account {
             error: (err) => {
                 this.isLoading.set(false);
                 if (err.status === 401) {
-                    this.error.set('Mot de passe actuel incorrect');
+                    this.error.set('Current password is incorrect');
                 } else if (err.error?.error) {
                     this.error.set(err.error.error);
                 } else {
-                    this.error.set('Erreur lors du changement de mot de passe');
+                    this.error.set('Error changing password');
                 }
             }
         });

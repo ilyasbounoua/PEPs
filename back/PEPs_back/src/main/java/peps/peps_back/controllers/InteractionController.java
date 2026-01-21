@@ -2,9 +2,9 @@
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the InteractionController class, which handles requests for retrieving all interactions.
  * 
- * Système multi-profils :
- * - Utilise ownerId pour filtrer les interactions par utilisateur
- * - Chaque utilisateur ne voit que ses propres interactions
+ * Multi-profile system:
+ * - Uses ownerId to filter interactions by user
+ * - Each user only sees their own interactions
  */
 package peps.peps_back.controllers;
 
@@ -35,15 +35,15 @@ public class InteractionController {
     private UserRepository userRepository;
 
     /**
-     * Liste les interactions d'un utilisateur.
+     * Lists a user's interactions.
      * 
-     * @param ownerId ID de l'utilisateur connecté (filtrage multi-profils)
+     * @param ownerId ID of the logged-in user (multi-profile filtering)
      */
     @GetMapping
     public ResponseEntity<List<InteractionDTO>> getAllInteractions(@RequestParam(required = false) Integer ownerId) {
         List<Interaction> interactions;
 
-        // Si ownerId est fourni, filtrer par propriétaire
+        // If ownerId is provided, filter by owner
         if (ownerId != null) {
             User owner = userRepository.findById(ownerId).orElse(null);
             if (owner != null) {

@@ -15,8 +15,8 @@ import java.util.List;
 public interface SoundRepository extends JpaRepository<Sound, Integer>, SoundRepositoryCustom {
 
     /**
-     * Récupère tous les sons appartenant à un utilisateur.
-     * Pour le système multi-profils (isolation des données).
+     * Retrieves all sounds belonging to a user.
+     * For multi-profile system (data isolation).
      * 
      * @author Anas EL HOUDI
      */

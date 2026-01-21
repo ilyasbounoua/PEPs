@@ -77,8 +77,8 @@ public class Module implements Serializable {
     private Date lastSeen;
 
     /**
-     * Propriétaire du module (système multi-profils).
-     * Permet de filtrer les modules par utilisateur.
+     * Module owner (multi-profile system).
+     * Used to filter modules by user.
      * 
      * @author Anas EL HOUDI
      */

@@ -11,20 +11,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Contrôleur REST pour la gestion des utilisateurs (CRUD).
- * Accessible uniquement par les administrateurs.
+ * REST Controller for user management (CRUD).
+ * Accessible only by administrators.
  * 
- * Endpoints :
- * - GET /users : Liste tous les utilisateurs
- * - GET /users/{id} : Récupère un utilisateur par son ID
- * - POST /users : Crée un nouvel utilisateur
- * - PUT /users/{id} : Modifie un utilisateur existant
- * - DELETE /users/{id} : Supprime un utilisateur
+ * Endpoints:
+ * - GET /users : List all users
+ * - GET /users/{id} : Get user by ID
+ * - POST /users : Create a new user
+ * - PUT /users/{id} : Update an existing user
+ * - DELETE /users/{id} : Delete a user
+ * - PUT /users/{id}/password : Change user password
  * 
- * Note : Le filtrage par rôle admin devra être ajouté via Spring Security
- * une fois l'authentification JWT mise en place.
+ * Note: Role-based filtering should be added via Spring Security
+ * once JWT authentication is implemented.
  * 
- * @author Équipe PEP'S, Anas EL HOUDI
+ * @author Equipe PEP'S, Anas EL HOUDI
  */
 @RestController
 @RequestMapping("/users")
@@ -39,8 +40,8 @@ public class UserController {
     }
 
     /**
-     * Liste tous les utilisateurs.
-     * Retourne une liste de UserDTO (sans les mots de passe).
+     * Lists all users.
+     * Returns a list of UserDTO (without passwords).
      */
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
@@ -51,7 +52,7 @@ public class UserController {
     }
 
     /**
-     * Récupère un utilisateur par son ID.
+     * Gets a user by their ID.
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id) {
@@ -61,8 +62,8 @@ public class UserController {
     }
 
     /**
-     * Crée un nouvel utilisateur.
-     * Le mot de passe est hashé avec BCrypt avant stockage.
+     * Creates a new user.
+     * Password is hashed with BCrypt before storage.
      */
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserRequest request) {
@@ -82,8 +83,8 @@ public class UserController {
     }
 
     /**
-     * Modifie un utilisateur existant.
-     * Seuls les champs non-null sont mis à jour.
+     * Updates an existing user.
+     * Only non-null fields are updated.
      */
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Integer id, @RequestBody UpdateUserRequest request) {
@@ -107,7 +108,7 @@ public class UserController {
     }
 
     /**
-     * Supprime un utilisateur par son ID.
+     * Deletes a user by their ID.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
@@ -119,51 +120,51 @@ public class UserController {
     }
 
     /* ===================== */
-    /* Changement de mot de passe (utilisateur) */
+    /* User Password Change */
     /* ===================== */
 
     /**
-     * Permet à un utilisateur de changer son propre mot de passe.
-     * Vérifie que l'ancien mot de passe est correct avant de le remplacer.
+     * Allows a user to change their own password.
+     * Verifies that the current password is correct before replacing it.
      * 
-     * @param id      ID de l'utilisateur
-     * @param request Contient currentPassword et newPassword
+     * @param id      User ID
+     * @param request Contains currentPassword and newPassword
      * @author Anas EL HOUDI
      */
     @PutMapping("/{id}/password")
     public ResponseEntity<?> changePassword(@PathVariable Integer id, @RequestBody ChangePasswordRequest request) {
         return userRepository.findById(id)
                 .map(user -> {
-                    // Vérifier que l'ancien mot de passe est correct
+                    // Verify current password is correct
                     if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(java.util.Collections.singletonMap("error", "Mot de passe actuel incorrect"));
+                                .body(java.util.Collections.singletonMap("error", "Current password is incorrect"));
                     }
 
-                    // Vérifier que le nouveau mot de passe est valide
+                    // Verify new password is valid
                     if (request.getNewPassword() == null || request.getNewPassword().length() < 4) {
                         return ResponseEntity.badRequest()
                                 .body(java.util.Collections.singletonMap("error",
-                                        "Le nouveau mot de passe doit contenir au moins 4 caractères"));
+                                        "New password must be at least 4 characters"));
                     }
 
-                    // Mettre à jour le mot de passe
+                    // Update password
                     user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
                     userRepository.save(user);
 
                     return ResponseEntity
-                            .ok(java.util.Collections.singletonMap("message", "Mot de passe modifié avec succès"));
+                            .ok(java.util.Collections.singletonMap("message", "Password changed successfully"));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /* ===================== */
-    /* Méthode utilitaire */
+    /* Utility Method */
     /* ===================== */
 
     /**
-     * Convertit une entité User en UserDTO.
-     * Masque le password_hash pour des raisons de sécurité.
+     * Converts a User entity to UserDTO.
+     * Hides password_hash for security reasons.
      */
     private UserDTO toDTO(User user) {
         return new UserDTO(

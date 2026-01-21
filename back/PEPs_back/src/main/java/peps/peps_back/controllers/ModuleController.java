@@ -2,9 +2,9 @@
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the ModuleController class, which handles CRUD operations for modules.
  * 
- * Système multi-profils :
- * - Utilise ownerId pour filtrer les modules par utilisateur
- * - Chaque utilisateur ne voit que ses propres modules
+ * Multi-profile system:
+ * - Uses ownerId to filter modules by user
+ * - Each user only sees their own modules
  */
 package peps.peps_back.controllers;
 
@@ -33,15 +33,15 @@ public class ModuleController {
     private UserRepository userRepository;
 
     /**
-     * Liste les modules d'un utilisateur.
+     * Lists a user's modules.
      * 
-     * @param ownerId ID de l'utilisateur connecté (filtrage multi-profils)
+     * @param ownerId ID of the logged-in user (multi-profile filtering)
      */
     @GetMapping
     public ResponseEntity<List<ModuleDTO>> getAllModules(@RequestParam(required = false) Integer ownerId) {
         List<Module> modules;
 
-        // Si ownerId est fourni, filtrer par propriétaire
+        // If ownerId is provided, filter by owner
         if (ownerId != null) {
             User owner = userRepository.findById(ownerId).orElse(null);
             if (owner != null) {
