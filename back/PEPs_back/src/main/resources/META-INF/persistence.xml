@@ -18,10 +18,10 @@
         -->
 
         <!-- Configuration Locale (PostgreSQL) -->
-        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/peps_db"/>
+        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>
         <property name="javax.persistence.jdbc.user" value="postgres"/>
         <!-- ATTENTION : Remplacez 'postgres' ci-dessous par votre vrai mot de passe local si différent -->
-        <property name="javax.persistence.jdbc.password" value="0828"/>
+        <property name="javax.persistence.jdbc.password" value="postgres"/>
         <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
     </properties>
   </persistence-unit>
