@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the ModuleController class, which handles CRUD operations for modules.
+ * 
+ * Multi-profile system:
+ * - Uses ownerId to filter modules by user
+ * - Each user only sees their own modules
  */
 package peps.peps_back.controllers;
 
@@ -8,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Module;
+import peps.peps_back.items.User;
 import peps.peps_back.repositories.ModuleRepository;
+import peps.peps_back.repositories.UserRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,26 +29,44 @@ public class ModuleController {
     @Autowired
     private ModuleRepository moduleRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    /**
+     * Lists a user's modules.
+     * 
+     * @param ownerId ID of the logged-in user (multi-profile filtering)
+     */
     @GetMapping
-    public ResponseEntity<List<ModuleDTO>> getAllModules() {
-        List<Module> modules = moduleRepository.findAll();
-        
+    public ResponseEntity<List<ModuleDTO>> getAllModules(@RequestParam(required = false) Integer ownerId) {
+        List<Module> modules;
+
+        // If ownerId is provided, filter by owner
+        if (ownerId != null) {
+            User owner = userRepository.findById(ownerId).orElse(null);
+            if (owner != null) {
+                modules = moduleRepository.findByOwner(owner);
+            } else {
+                modules = moduleRepository.findAll();
+            }
+        } else {
+            modules = moduleRepository.findAll();
+        }
+
         List<ModuleDTO> dtos = modules.stream()
-            .map(m -> new ModuleDTO(
-                m.getIdmodule(),
-                m.getNom(),
-                "",
-                m.getActif() ? "Actif" : "Inactif",
-                m.getIpAdress(),
-                new ModuleConfigDTO(
-                    m.getVolume(),
-                    m.getCurrentMode(),
-                    m.getActif(),
-                    false
-                )
-            ))
-            .collect(Collectors.toList());
-        
+                .map(m -> new ModuleDTO(
+                        m.getIdmodule(),
+                        m.getNom(),
+                        "",
+                        m.getActif() ? "Actif" : "Inactif",
+                        m.getIpAdress(),
+                        new ModuleConfigDTO(
+                                m.getVolume(),
+                                m.getCurrentMode(),
+                                m.getActif(),
+                                false)))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(dtos);
     }
 
@@ -52,21 +76,19 @@ public class ModuleController {
         if (m == null) {
             return ResponseEntity.notFound().build();
         }
-        
+
         ModuleDTO dto = new ModuleDTO(
-            m.getIdmodule(),
-            m.getNom(),
-            "",
-            m.getActif() ? "Actif" : "Inactif",
-            m.getIpAdress(),
-            new ModuleConfigDTO(
-                m.getVolume(),
-                m.getCurrentMode(),
-                m.getActif(),
-                false
-            )
-        );
-        
+                m.getIdmodule(),
+                m.getNom(),
+                "",
+                m.getActif() ? "Actif" : "Inactif",
+                m.getIpAdress(),
+                new ModuleConfigDTO(
+                        m.getVolume(),
+                        m.getCurrentMode(),
+                        m.getActif(),
+                        false));
+
         return ResponseEntity.ok(dto);
     }
 
@@ -114,7 +136,7 @@ public class ModuleController {
             error.put("error", "Le mode doit être 'Manuel' ou 'Automatique'");
             return ResponseEntity.badRequest().body(error);
         }
-        
+
         module.setNom(dto.getName());
         module.setIpAdress(dto.getIp());
         module.setVolume(dto.getConfig().getVolume());
@@ -122,23 +144,21 @@ public class ModuleController {
         module.setActif(dto.getConfig().isActif());
         module.setStatus(dto.getConfig().isActif() ? "actif" : "inactif");
         module.setLastSeen(new java.util.Date());
-        
+
         moduleRepository.save(module);
-        
+
         ModuleDTO updatedDto = new ModuleDTO(
-            module.getIdmodule(),
-            module.getNom(),
-            dto.getLocation(),
-            module.getActif() ? "Actif" : "Inactif",
-            module.getIpAdress(),
-            new ModuleConfigDTO(
-                module.getVolume(),
-                module.getCurrentMode(),
-                module.getActif(),
-                dto.getConfig().isSon()
-            )
-        );
-        
+                module.getIdmodule(),
+                module.getNom(),
+                dto.getLocation(),
+                module.getActif() ? "Actif" : "Inactif",
+                module.getIpAdress(),
+                new ModuleConfigDTO(
+                        module.getVolume(),
+                        module.getCurrentMode(),
+                        module.getActif(),
+                        dto.getConfig().isSon()));
+
         return ResponseEntity.ok(updatedDto);
     }
 
@@ -176,23 +196,21 @@ public class ModuleController {
         module.setActif(dto.getConfig().isActif());
         module.setStatus(dto.getConfig().isActif() ? "actif" : "inactif");
         module.setLastSeen(new java.util.Date());
-        
+
         module = moduleRepository.save(module);
-        
+
         ModuleDTO createdDto = new ModuleDTO(
-            module.getIdmodule(),
-            module.getNom(),
-            dto.getLocation(),
-            module.getActif() ? "Actif" : "Inactif",
-            module.getIpAdress(),
-            new ModuleConfigDTO(
-                module.getVolume(),
-                module.getCurrentMode(),
-                module.getActif(),
-                dto.getConfig().isSon()
-            )
-        );
-        
+                module.getIdmodule(),
+                module.getNom(),
+                dto.getLocation(),
+                module.getActif() ? "Actif" : "Inactif",
+                module.getIpAdress(),
+                new ModuleConfigDTO(
+                        module.getVolume(),
+                        module.getCurrentMode(),
+                        module.getActif(),
+                        dto.getConfig().isSon()));
+
         return ResponseEntity.ok(createdDto);
     }
 

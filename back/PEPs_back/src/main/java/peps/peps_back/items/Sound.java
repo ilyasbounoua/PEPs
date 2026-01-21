@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -52,6 +54,16 @@ public class Sound implements Serializable {
     private String chemin;
     @OneToMany(mappedBy = "idsound")
     private Collection<Interaction> interactionCollection;
+
+    /**
+     * Sound owner (multi-profile system).
+     * Used to filter sounds by user.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id_user")
+    private User owner;
 
     public Sound() {
     }
@@ -115,6 +127,14 @@ public class Sound implements Serializable {
         this.interactionCollection = interactionCollection;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -136,5 +156,5 @@ public class Sound implements Serializable {
     public String toString() {
         return "peps.peps_back.items.Sound[ idsound=" + idsound + " ]";
     }
-    
+
 }
