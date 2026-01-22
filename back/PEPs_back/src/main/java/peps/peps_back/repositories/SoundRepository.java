@@ -5,7 +5,6 @@
 package peps.peps_back.repositories;
 
 import peps.peps_back.items.Sound;
-import peps.peps_back.items.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +14,10 @@ import java.util.List;
 public interface SoundRepository extends JpaRepository<Sound, Integer>, SoundRepositoryCustom {
 
     /**
-     * Retrieves all sounds belonging to a user.
-     * For multi-profile system (data isolation).
+     * Retrieves all sounds belonging to a specific role.
+     * For multi-profile system (data isolation by role).
      * 
      * @author Anas EL HOUDI
      */
-    List<Sound> findByOwner(User owner);
+    List<Sound> findByOwnerRole(String ownerRole);
 }

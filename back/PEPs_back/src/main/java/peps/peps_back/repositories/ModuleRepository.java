@@ -5,7 +5,6 @@
 package peps.peps_back.repositories;
 
 import peps.peps_back.items.Module;
-import peps.peps_back.items.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +14,10 @@ import java.util.List;
 public interface ModuleRepository extends JpaRepository<Module, Integer>, ModuleRepositoryCustom {
 
     /**
-     * Retrieves all modules belonging to a user.
-     * For multi-profile system (data isolation).
+     * Retrieves all modules belonging to a specific role.
+     * For multi-profile system (data isolation by role).
      * 
      * @author Anas EL HOUDI
      */
-    List<Module> findByOwner(User owner);
+    List<Module> findByOwnerRole(String ownerRole);
 }

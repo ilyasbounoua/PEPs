@@ -1,6 +1,9 @@
 /**
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the DailyStatsController class, which handles requests for daily interaction statistics.
+ * 
+ * Multi-profile system:
+ * - Uses role to filter daily stats by profile
  */
 package peps.peps_back.controllers;
 
@@ -8,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Interaction;
-import peps.peps_back.items.User;
 import peps.peps_back.repositories.InteractionRepository;
-import peps.peps_back.repositories.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,26 +26,20 @@ public class DailyStatsController {
     @Autowired
     private InteractionRepository interactionRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     /**
      * Returns daily stats.
      * 
-     * @param ownerId Optional owner ID for filtering.
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
      * @author Anas EL HOUDI
      */
     @GetMapping
-    public ResponseEntity<List<DailyDataDTO>> getDailyStats(@RequestParam(required = false) Integer ownerId) {
+    public ResponseEntity<List<DailyDataDTO>> getDailyStats(@RequestParam(required = false) String role) {
         List<Interaction> interactions;
 
-        if (ownerId != null) {
-            User owner = userRepository.findById(ownerId).orElse(null);
-            if (owner != null && !"admin".equals(owner.getRole())) {
-                interactions = interactionRepository.findByOwner(owner);
-            } else {
-                interactions = interactionRepository.findAll();
-            }
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
         } else {
             interactions = interactionRepository.findAll();
         }

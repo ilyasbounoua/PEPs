@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the logic for the dashboard component, which displays statistics and daily data.
+ * 
+ * Multi-profile system:
+ * - Admin can filter by role using dropdown
+ * - Regular users see only their own data
  */
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -22,18 +26,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 })
 export class Dashboard implements OnInit {
   private readonly api = inject(ApiService);
-  private readonly authService = inject(AuthService); // Inject AuthService
+  private readonly authService = inject(AuthService);
 
   readonly isAdmin = this.authService.isAdmin;
 
-  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
-  selectedProfile = signal<number>(1);
+  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  selectedRole = '';
 
-  // Profiles for dropdown
-  profiles = [
-    { id: 1, name: 'Tous les profils' },
-    { id: 2, name: 'Aras' },
-    { id: 3, name: 'Dauphin' }
+  // Profiles for dropdown - loaded from DB
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
   ];
 
   stats = signal<StatCard>({
@@ -45,20 +47,24 @@ export class Dashboard implements OnInit {
   dailyChartData = signal<DailyData[]>([]);
 
   ngOnInit() {
+    // Load available roles for admin filter
+    if (this.isAdmin()) {
+      this.api.getRoles().subscribe({
+        next: (roles) => {
+          this.profiles = [{ role: '', name: 'Tous les profils' }];
+          roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
+        },
+        error: (err) => console.error('Error loading roles:', err)
+      });
+    }
     this.loadData();
   }
 
   loadData() {
-    let profileId: number | undefined = undefined;
+    // Admin uses selectedRole, regular users use their own role via api.ts
+    const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
 
-    if (this.isAdmin()) {
-      const selected = this.selectedProfile();
-      if (selected !== 1) {
-        profileId = selected;
-      }
-    }
-
-    this.api.getDashboardStats(profileId).subscribe({
+    this.api.getDashboardStats(filterRole).subscribe({
       next: (data) => this.stats.set(data),
       error: (err) => {
         console.error('Error loading dashboard:', err);
@@ -70,13 +76,14 @@ export class Dashboard implements OnInit {
       }
     });
 
-    this.api.getDailyStats(profileId).subscribe({ // Assuming getDailyStats will update next
+    this.api.getDailyStats(filterRole).subscribe({
       next: (data) => this.dailyChartData.set(data),
       error: (err) => console.error('Error loading daily stats:', err)
     });
   }
 
-  onProfileChange() {
+  onProfileChange(role: string) {
+    this.selectedRole = role;
     this.loadData();
   }
 }

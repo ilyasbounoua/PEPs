@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the logic for the modules list component, which displays a list of modules and allows selecting or adding a module.
+ * 
+ * Multi-profile system:
+ * - Admin can filter by role using dropdown
+ * - Regular users see only their own data
  */
 import { Component, OnInit, output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -26,14 +30,12 @@ export class ModulesList implements OnInit {
 
   readonly isAdmin = this.authService.isAdmin;
 
-  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
-  selectedProfile = signal<number>(1);
+  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  selectedRole = '';
 
-  // Profiles for dropdown
-  profiles = [
-    { id: 1, name: 'Tous les profils' },
-    { id: 2, name: 'Aras' },
-    { id: 3, name: 'Dauphin' }
+  // Profiles for dropdown - loaded from DB (regular array for template iteration)
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
   ];
 
   modules = signal<Module[]>([]);
@@ -41,26 +43,30 @@ export class ModulesList implements OnInit {
   addModule = output<void>();
 
   ngOnInit() {
+    // Load available roles for admin filter
+    if (this.isAdmin()) {
+      this.api.getRoles().subscribe({
+        next: (roles) => {
+          this.profiles = [{ role: '', name: 'Tous les profils' }];
+          roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
+        },
+        error: (err) => console.error('Error loading roles:', err)
+      });
+    }
     this.loadData();
   }
 
   loadData() {
-    let profileId: number | undefined = undefined;
+    const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
 
-    if (this.isAdmin()) {
-      const selected = this.selectedProfile();
-      if (selected !== 1) {
-        profileId = selected;
-      }
-    }
-
-    this.api.getModules(profileId).subscribe({
+    this.api.getModules(filterRole).subscribe({
       next: (data) => this.modules.set(data),
       error: (err) => console.error('Error loading modules:', err)
     });
   }
 
-  onProfileChange() {
+  onProfileChange(role: string) {
+    this.selectedRole = role;
     this.loadData();
   }
 

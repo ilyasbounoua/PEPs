@@ -1,12 +1,7 @@
 package peps.peps_back.controllers;
 
 import peps.peps_back.repositories.SoundRepository;
-import peps.peps_back.repositories.UserRepository;
-// If you deleted them, you might need:
-// import peps.peps_back.dto.SoundDTO;
-// import peps.peps_back.models.Sound;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.ArrayList;
 
@@ -23,17 +18,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class SoundControllerTest {
 
     private SoundRepository soundRepository;
-    private UserRepository userRepository;
     private SoundController instance;
 
     @BeforeEach
     public void setUp() {
         // 1. Create the Mocks
         soundRepository = mock(SoundRepository.class);
-        userRepository = mock(UserRepository.class);
 
-        // 2. Inject Mocks into Controller
-        instance = new SoundController(soundRepository, userRepository);
+        // 2. Inject Mocks into Controller (UserRepository no longer needed)
+        instance = new SoundController(soundRepository);
     }
 
     @Test

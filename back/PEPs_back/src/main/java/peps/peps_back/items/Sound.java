@@ -12,8 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -56,14 +54,13 @@ public class Sound implements Serializable {
     private Collection<Interaction> interactionCollection;
 
     /**
-     * Sound owner (multi-profile system).
-     * Used to filter sounds by user.
+     * Owner role for filtering (multi-profile system).
+     * Stores the role name (e.g., 'dauphin', 'aras') for data isolation.
      * 
      * @author Anas EL HOUDI
      */
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id_user")
-    private User owner;
+    @Column(name = "owner_role")
+    private String ownerRole;
 
     public Sound() {
     }
@@ -127,12 +124,12 @@ public class Sound implements Serializable {
         this.interactionCollection = interactionCollection;
     }
 
-    public User getOwner() {
-        return owner;
+    public String getOwnerRole() {
+        return ownerRole;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setOwnerRole(String ownerRole) {
+        this.ownerRole = ownerRole;
     }
 
     @Override

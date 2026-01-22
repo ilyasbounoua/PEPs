@@ -3,8 +3,8 @@
  * @description This file contains the ApiService, which handles all HTTP requests to the backend.
  * 
  * Multi-profile system:
- * - Uses AuthService to get the logged-in user's ID
- * - Passes ownerId to endpoints to filter data by user
+ * - Uses AuthService to get the logged-in user's role
+ * - Passes role to endpoints to filter data by profile
  */
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -26,62 +26,56 @@ export class ApiService {
   // Dashboard
   /**
    * Gets dashboard stats.
-   * - Regular users: stats for their own data (pass ownerId)
-   * - Admin: stats for ALL data (no ownerId)
+   * - Regular users: stats for their own role
+   * - Admin: stats for ALL data (no role) or filtered by selected role
    * @author Anas EL HOUDI
    */
-  getDashboardStats(filterOwnerId?: number): Observable<StatCard> {
-    const userId = this.authService.currentUserId();
+  getDashboardStats(filterRole?: string): Observable<StatCard> {
+    const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
-    let targetId = isAdmin ? filterOwnerId : userId;
-    const params = targetId ? `?ownerId=${targetId}` : '';
+    // Admin can filter by role, regular users always use their own role
+    let targetRole = isAdmin ? filterRole : userRole;
+    const params = targetRole ? `?role=${targetRole}` : '';
 
     return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${params}`);
   }
 
-  getDailyStats(filterOwnerId?: number): Observable<DailyData[]> {
-    const userId = this.authService.currentUserId();
+  getDailyStats(filterRole?: string): Observable<DailyData[]> {
+    const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
-    let targetId = isAdmin ? filterOwnerId : userId;
-    const params = targetId ? `?ownerId=${targetId}` : '';
+    let targetRole = isAdmin ? filterRole : userRole;
+    const params = targetRole ? `?role=${targetRole}` : '';
 
     return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${params}`);
   }
 
   // Interactions
-  // Interactions
-  getInteractions(filterOwnerId?: number): Observable<Interaction[]> {
-    const userId = this.authService.currentUserId();
+  getInteractions(filterRole?: string): Observable<Interaction[]> {
+    const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
-    // If admin provides a filter ID, use it. 
-    // If admin provides no filter, use no param (get all).
-    // If regular user, ALWAYS enforce their own ID.
-    let targetId = isAdmin ? filterOwnerId : userId;
-
-    // If admin and explicit null passed (meaning "All"), ensure param is empty
-    const params = targetId ? `?ownerId=${targetId}` : '';
+    let targetRole = isAdmin ? filterRole : userRole;
+    const params = targetRole ? `?role=${targetRole}` : '';
 
     return this.http.get<any[]>(`${this.BASE_URL}/interactions${params}`).pipe(
       map(data => data.map(i => ({
-        id: i.id, // Backend DTO uses 'id'
-        date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19), // Backend DTO uses 'date'
-        module: i.module, // Backend DTO uses 'module'
-        type: i.type // Backend DTO uses 'type'
+        id: i.id,
+        date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19),
+        module: i.module,
+        type: i.type
       })))
     );
   }
 
   // Modules
-  // Modules
-  getModules(filterOwnerId?: number): Observable<Module[]> {
-    const userId = this.authService.currentUserId();
+  getModules(filterRole?: string): Observable<Module[]> {
+    const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
-    let targetId = isAdmin ? filterOwnerId : userId;
-    const params = targetId ? `?ownerId=${targetId}` : '';
+    let targetRole = isAdmin ? filterRole : userRole;
+    const params = targetRole ? `?role=${targetRole}` : '';
 
     return this.http.get<Module[]>(`${this.BASE_URL}/modules${params}`);
   }
@@ -99,15 +93,16 @@ export class ApiService {
   }
 
   // Sounds
-  // Sounds
-  getSounds(filterOwnerId?: number): Observable<Sound[]> {
-    const userId = this.authService.currentUserId();
+  getSounds(filterRole?: string): Observable<Sound[]> {
+    const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
-    let targetId = isAdmin ? filterOwnerId : userId;
-    const params = targetId ? `?ownerId=${targetId}` : '';
+    let targetRole = isAdmin ? filterRole : userRole;
+    const params = targetRole ? `?role=${targetRole}` : '';
+    const url = `${this.BASE_URL}/sounds${params}`;
+    console.log('[API] getSounds - filterRole:', filterRole, 'targetRole:', targetRole, 'URL:', url);
 
-    return this.http.get<Sound[]>(`${this.BASE_URL}/sounds${params}`);
+    return this.http.get<Sound[]>(url);
   }
 
   uploadSound(formData: FormData): Observable<Sound> {
@@ -136,6 +131,21 @@ export class ApiService {
    */
   getUsers(): Observable<UserDTO[]> {
     return this.http.get<UserDTO[]>(`${this.BASE_URL}/users`);
+  }
+
+  /**
+   * Récupère les rôles distincts depuis la base de données.
+   * Pour le filtre par profil.
+   */
+  getRoles(): Observable<string[]> {
+    return this.getUsers().pipe(
+      map(users => {
+        const roles = users
+          .map(u => u.role)
+          .filter(r => r !== 'admin');
+        return [...new Set(roles)];
+      })
+    );
   }
 
   /**
@@ -185,4 +195,3 @@ export class ApiService {
     });
   }
 }
-
