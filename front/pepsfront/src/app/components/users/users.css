@@ -82,3 +82,12 @@ mat-icon:not(.active) {
   gap: 12px;
   margin-top: 8px;
 }
+
+/* Role validation error */
+.role-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: -12px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}

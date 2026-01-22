@@ -6,9 +6,9 @@
         @if (isAdmin()) {
         <mat-form-field appearance="outline" class="profile-select">
           <mat-label>Filtrer par profil</mat-label>
-          <mat-select [(ngModel)]="selectedProfile" (selectionChange)="onProfileChange()">
-            @for (profile of profiles; track profile.id) {
-            <mat-option [value]="profile.id">{{profile.name}}</mat-option>
+          <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+            @for (profile of profiles; track $index) {
+            <mat-option [value]="profile.role">{{profile.name}}</mat-option>
             }
           </mat-select>
         </mat-form-field>

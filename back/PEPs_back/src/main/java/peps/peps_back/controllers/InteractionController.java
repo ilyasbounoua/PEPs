@@ -3,8 +3,8 @@
  * @description This file defines the InteractionController class, which handles requests for retrieving all interactions.
  * 
  * Multi-profile system:
- * - Uses ownerId to filter interactions by user
- * - Each user only sees their own interactions
+ * - Uses role to filter interactions by profile
+ * - Each profile only sees its own interactions
  */
 package peps.peps_back.controllers;
 
@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import peps.peps_back.items.Interaction;
-import peps.peps_back.items.User;
 import peps.peps_back.repositories.InteractionRepository;
-import peps.peps_back.repositories.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,26 +29,19 @@ public class InteractionController {
     @Autowired
     private InteractionRepository interactionRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     /**
-     * Lists a user's interactions.
+     * Lists interactions filtered by role.
      * 
-     * @param ownerId ID of the logged-in user (multi-profile filtering)
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
      */
     @GetMapping
-    public ResponseEntity<List<InteractionDTO>> getAllInteractions(@RequestParam(required = false) Integer ownerId) {
+    public ResponseEntity<List<InteractionDTO>> getAllInteractions(@RequestParam(required = false) String role) {
         List<Interaction> interactions;
 
-        // If ownerId is provided, filter by owner
-        if (ownerId != null) {
-            User owner = userRepository.findById(ownerId).orElse(null);
-            if (owner != null) {
-                interactions = interactionRepository.findByOwner(owner);
-            } else {
-                interactions = interactionRepository.findAll();
-            }
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
         } else {
             interactions = interactionRepository.findAll();
         }

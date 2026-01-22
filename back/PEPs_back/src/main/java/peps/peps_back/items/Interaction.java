@@ -53,14 +53,13 @@ public class Interaction implements Serializable {
     private Sound idsound;
 
     /**
-     * Interaction owner (multi-profile system).
-     * Used to filter interactions by user.
+     * Owner role for filtering (multi-profile system).
+     * Stores the role name (e.g., 'dauphin', 'aras') for data isolation.
      * 
      * @author Anas EL HOUDI
      */
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id_user")
-    private User owner;
+    @Column(name = "owner_role")
+    private String ownerRole;
 
     public Interaction() {
     }
@@ -115,12 +114,12 @@ public class Interaction implements Serializable {
         this.idsound = idsound;
     }
 
-    public User getOwner() {
-        return owner;
+    public String getOwnerRole() {
+        return ownerRole;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setOwnerRole(String ownerRole) {
+        this.ownerRole = ownerRole;
     }
 
     @Override

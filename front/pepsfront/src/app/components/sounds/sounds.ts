@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the logic for the sounds component, which handles listing, filtering, playing, uploading, editing, and deleting sounds.
+ * 
+ * Multi-profile system:
+ * - Admin can filter by role using dropdown
+ * - Regular users see only their own data
  */
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -40,14 +44,12 @@ export class Sounds implements OnInit {
 
   readonly isAdmin = this.authService.isAdmin;
 
-  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
-  selectedProfile = signal<number>(1);
+  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  selectedRole = '';
 
-  // Profiles for dropdown
-  profiles = [
-    { id: 1, name: 'Tous les profils' },
-    { id: 2, name: 'Aras' },
-    { id: 3, name: 'Dauphin' }
+  // Profiles for dropdown - loaded from DB (regular array for template iteration)
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
   ];
 
   sounds = signal<Sound[]>([]);
@@ -76,26 +78,41 @@ export class Sounds implements OnInit {
   });
 
   ngOnInit() {
+    console.log('[Sounds] ngOnInit - isAdmin:', this.isAdmin());
+    // Load available roles for admin filter
+    if (this.isAdmin()) {
+      this.api.getRoles().subscribe({
+        next: (roles) => {
+          console.log('[Sounds] Loaded roles:', roles);
+          // Use array reassignment (not mutation) for proper change detection
+          this.profiles = [
+            { role: '', name: 'Tous les profils' },
+            ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))
+          ];
+          console.log('[Sounds] profiles set to:', this.profiles);
+        },
+        error: (err) => console.error('Error loading roles:', err)
+      });
+    }
     this.loadData();
   }
 
   loadData() {
-    let profileId: number | undefined = undefined;
+    const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
+    console.log('[Sounds] loadData - isAdmin:', this.isAdmin(), 'selectedRole:', this.selectedRole, 'filterRole:', filterRole);
 
-    if (this.isAdmin()) {
-      const selected = this.selectedProfile();
-      if (selected !== 1) {
-        profileId = selected;
-      }
-    }
-
-    this.api.getSounds(profileId).subscribe({
-      next: (data) => this.sounds.set(data),
+    this.api.getSounds(filterRole).subscribe({
+      next: (data) => {
+        console.log('[Sounds] Received', data.length, 'sounds');
+        this.sounds.set(data);
+      },
       error: (err) => console.error('Error loading sounds:', err)
     });
   }
 
-  onProfileChange() {
+  onProfileChange(role: string) {
+    console.log('[Sounds] onProfileChange - role:', role);
+    this.selectedRole = role;
     this.loadData();
   }
 

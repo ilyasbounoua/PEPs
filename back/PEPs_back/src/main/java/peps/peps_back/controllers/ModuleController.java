@@ -3,8 +3,8 @@
  * @description This file defines the ModuleController class, which handles CRUD operations for modules.
  * 
  * Multi-profile system:
- * - Uses ownerId to filter modules by user
- * - Each user only sees their own modules
+ * - Uses role to filter modules by profile
+ * - Each profile only sees its own modules
  */
 package peps.peps_back.controllers;
 
@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Module;
-import peps.peps_back.items.User;
 import peps.peps_back.repositories.ModuleRepository;
-import peps.peps_back.repositories.UserRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,26 +27,19 @@ public class ModuleController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     /**
-     * Lists a user's modules.
+     * Lists modules filtered by role.
      * 
-     * @param ownerId ID of the logged-in user (multi-profile filtering)
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
      */
     @GetMapping
-    public ResponseEntity<List<ModuleDTO>> getAllModules(@RequestParam(required = false) Integer ownerId) {
+    public ResponseEntity<List<ModuleDTO>> getAllModules(@RequestParam(required = false) String role) {
         List<Module> modules;
 
-        // If ownerId is provided, filter by owner
-        if (ownerId != null) {
-            User owner = userRepository.findById(ownerId).orElse(null);
-            if (owner != null) {
-                modules = moduleRepository.findByOwner(owner);
-            } else {
-                modules = moduleRepository.findAll();
-            }
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            modules = moduleRepository.findByOwnerRole(role.toLowerCase());
         } else {
             modules = moduleRepository.findAll();
         }

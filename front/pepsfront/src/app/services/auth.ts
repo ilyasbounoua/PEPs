@@ -39,6 +39,7 @@ export class AuthService {
   currentUserId = this.userId.asReadonly();
   currentLogin = this.userLogin.asReadonly();
   currentRole = this.userRole.asReadonly();
+  currentUserRole = this.userRole.asReadonly(); // Alias for api.ts
 
   // Computed pour vérifier si l'utilisateur est admin
   isAdmin = computed(() => this.userRole() === 'admin');
