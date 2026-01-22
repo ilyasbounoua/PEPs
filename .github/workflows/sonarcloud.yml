@@ -2,7 +2,7 @@ name: SonarCloud Monorepo Analysis with Coverage
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main" ]
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: BACKEND (Java/Spring) with JaCoCo Coverage
+  # JOB 1: BACKEND (Java/Spring) - Unchanged
   # ------------------------------------------------------------------
   backend-analysis:
     name: Backend (Spring)
@@ -42,7 +42,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Runs Maven Verify (Tests) + Sonar Scan + JaCoCo Report
         run: |
           mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=ilyasFR_PEPs_BACK \
@@ -51,7 +50,7 @@ jobs:
           -Dmaven.test.failure.ignore=true
 
   # ------------------------------------------------------------------
-  # JOB 2: FRONTEND (Angular) with LCOV Coverage
+  # JOB 2: FRONTEND (Angular)
   # ------------------------------------------------------------------
   frontend-analysis:
     name: Frontend (Angular)
@@ -67,17 +66,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # <--- UPDATED FROM 18 TO 20
+          node-version: '20'
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Run Angular Tests and Generate LCOV
-        # Generating coverage report before scanning
         run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: Analyze Frontend
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
