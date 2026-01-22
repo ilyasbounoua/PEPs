@@ -71,6 +71,9 @@ export class Users implements OnInit {
     // Role validation error
     roleError = '';
 
+    // Original role when editing (to exclude from validation)
+    private originalRole = '';
+
     ngOnInit(): void {
         this.loadUsers();
         this.loadExistingRoles();
@@ -119,6 +122,7 @@ export class Users implements OnInit {
         this.formLogin = user.login;
         this.formPassword = '';
         this.formRole = user.role;
+        this.originalRole = user.role; // Store original role for validation
         this.roleError = '';
         this.editingUserId.set(user.id);
         this.isEditing.set(true);
@@ -141,6 +145,7 @@ export class Users implements OnInit {
         this.formPassword = '';
         this.formRole = '';
         this.roleError = '';
+        this.originalRole = '';
         this.editingUserId.set(null);
     }
 
@@ -163,7 +168,12 @@ export class Users implements OnInit {
         }
 
         // Check if role is already used by another user (case-insensitive)
-        const isRoleUsed = this.existingRoles.some(r => r.toLowerCase() === roleLower);
+        // Exclude the original role when editing (user can keep their own role)
+        const isRoleUsed = this.existingRoles.some(r => {
+            const isMatch = r.toLowerCase() === roleLower;
+            const isOwnRole = this.isEditing() && this.originalRole.toLowerCase() === roleLower;
+            return isMatch && !isOwnRole;
+        });
 
         if (isRoleUsed) {
             this.roleError = `Le rôle "${this.formRole}" est déjà utilisé par un autre utilisateur`;
@@ -246,6 +256,7 @@ export class Users implements OnInit {
                 this.snackBar.open('Utilisateur modifié avec succès', 'Fermer', { duration: 3000 });
                 this.closeForm();
                 this.loadUsers();
+                this.loadExistingRoles(); // Refresh roles list after update
             },
             error: (err) => {
                 console.error('Erreur modification utilisateur:', err);
@@ -266,6 +277,7 @@ export class Users implements OnInit {
             next: () => {
                 this.snackBar.open('Utilisateur supprimé', 'Fermer', { duration: 3000 });
                 this.loadUsers();
+                this.loadExistingRoles(); // Refresh roles list after deletion
             },
             error: (err) => {
                 console.error('Erreur suppression utilisateur:', err);
