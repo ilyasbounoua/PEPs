@@ -4,36 +4,50 @@
  */
 package peps.peps_back.controllers;
 
-import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import peps.peps_back.repositories.InteractionRepository;
 
-@ExtendWith(MockitoExtension.class)
+/**
+ *
+ * @author Clément
+ */
 public class InteractionControllerTest {
 
-    @Mock
-    private InteractionRepository interactionRepository;
+    public InteractionControllerTest() {
+    }
 
-    @InjectMocks
-    private InteractionController interactionController;
+    @BeforeAll
+    public static void setUpClass() {
+    }
 
+    @AfterAll
+    public static void tearDownClass() {
+    }
+
+    @BeforeEach
+    public void setUp() {
+    }
+
+    @AfterEach
+    public void tearDown() {
+    }
+
+    /**
+     * Test of getAllInteractions method, of class InteractionController.
+     */
     @Test
     public void testGetAllInteractions() {
         System.out.println("getAllInteractions");
-        when(interactionRepository.findAll()).thenReturn(Collections.emptyList());
-
-        ResponseEntity<List<InteractionDTO>> result = interactionController.getAllInteractions();
-
-        assertNotNull(result);
-        assertEquals(200, result.getStatusCodeValue());
-        assertNotNull(result.getBody());
+        InteractionController instance = new InteractionController();
+        ResponseEntity<List<InteractionDTO>> expResult = null;
+        ResponseEntity<List<InteractionDTO>> result = instance.getAllInteractions(null);
+        assertEquals(expResult, result);
     }
+
 }

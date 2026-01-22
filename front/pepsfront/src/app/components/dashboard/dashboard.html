@@ -1,4 +1,19 @@
 <div class="page-content dashboard-page">
+
+  <!-- Admin Profile Filter -->
+  @if (isAdmin()) {
+  <div class="dashboard-filter">
+    <mat-form-field appearance="outline" class="profile-select">
+      <mat-label>Filtrer par profil</mat-label>
+      <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+        @for (profile of profiles; track $index) {
+        <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  }
+
   <div class="stats-grid">
     <mat-card class="stat-card">
       <mat-card-header>
@@ -33,8 +48,7 @@
       <div class="chart-placeholder">
         <div class="chart-mock">
           @for(item of dailyChartData(); track item.time) {
-          <div class="bar" [style.height.%]="(item.count / 30) * 100"
-            [matTooltip]="item.time + ': ' + item.count">
+          <div class="bar" [style.height.%]="(item.count / 30) * 100" [matTooltip]="item.time + ': ' + item.count">
           </div>
           }
         </div>

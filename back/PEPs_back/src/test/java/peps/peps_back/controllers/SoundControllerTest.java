@@ -1,12 +1,7 @@
 package peps.peps_back.controllers;
 
 import peps.peps_back.repositories.SoundRepository;
-// ⚠️ KEEP YOUR EXISTING IMPORTS for SoundDTO, Sound, etc.
-// If you deleted them, you might need:
-// import peps.peps_back.dto.SoundDTO;
-// import peps.peps_back.models.Sound;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.ArrayList;
 
@@ -21,27 +16,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public class SoundControllerTest {
-    
+
     private SoundRepository soundRepository;
     private SoundController instance;
 
     @BeforeEach
     public void setUp() {
-        // 1. Create the Mock
+        // 1. Create the Mocks
         soundRepository = mock(SoundRepository.class);
-        
-        // 2. Inject Mock into Controller
+
+        // 2. Inject Mocks into Controller (UserRepository no longer needed)
         instance = new SoundController(soundRepository);
     }
 
     @Test
     public void testGetAllSounds() {
         System.out.println("getAllSounds");
-        
+
         // STUB: When controller asks for all sounds, give empty list (not null)
         when(soundRepository.findAll()).thenReturn(new ArrayList<>());
-        
-        ResponseEntity result = instance.getAllSounds();
+
+        ResponseEntity result = instance.getAllSounds(null);
         assertNotNull(result);
     }
 
@@ -49,9 +44,10 @@ public class SoundControllerTest {
     public void testGetSoundFile() {
         System.out.println("getSoundFile");
         Integer id = 1;
-        
-        // STUB: When asking for ID 1, return an empty Optional (simulating 'not found' safely)
-        // If your controller throws error on 'Not Found', this might still fail, 
+
+        // STUB: When asking for ID 1, return an empty Optional (simulating 'not found'
+        // safely)
+        // If your controller throws error on 'Not Found', this might still fail,
         // but it won't be a NullPointerException.
         when(soundRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -80,10 +76,10 @@ public class SoundControllerTest {
 
 
         try {
-             ResponseEntity result = instance.uploadSound(name, type, file);
-             assertNotNull(result);
+            ResponseEntity result = instance.uploadSound(name, type, file);
+            assertNotNull(result);
         } catch (Exception e) {
-             // Catch potential IOExceptions from file handling
+            // Catch potential IOExceptions from file handling
         }
     }
 
@@ -99,10 +95,10 @@ public class SoundControllerTest {
         when(soundRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         try {
-             // Pass null or new DTO just to check execution flow
-             ResponseEntity result = instance.updateSound(id, null);
+            // Pass null or new DTO just to check execution flow
+            ResponseEntity result = instance.updateSound(id, null);
         } catch (Exception e) {
-             System.out.println("Ignored update error: " + e.getMessage());
+            System.out.println("Ignored update error: " + e.getMessage());
         }
     }
 
@@ -110,7 +106,7 @@ public class SoundControllerTest {
     public void testDeleteSound() {
         System.out.println("deleteSound");
         Integer id = 1;
-        
+
         // Delete usually returns void, so strictly speaking no stub needed,
         // but let's prevent 'exists' checks from failing
         when(soundRepository.existsById(id)).thenReturn(true);

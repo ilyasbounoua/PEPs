@@ -52,6 +52,15 @@ public class Interaction implements Serializable {
     @ManyToOne
     private Sound idsound;
 
+    /**
+     * Owner role for filtering (multi-profile system).
+     * Stores the role name (e.g., 'dauphin', 'aras') for data isolation.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @Column(name = "owner_role")
+    private String ownerRole;
+
     public Interaction() {
     }
 
@@ -105,6 +114,14 @@ public class Interaction implements Serializable {
         this.idsound = idsound;
     }
 
+    public String getOwnerRole() {
+        return ownerRole;
+    }
+
+    public void setOwnerRole(String ownerRole) {
+        this.ownerRole = ownerRole;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -118,12 +135,13 @@ public class Interaction implements Serializable {
             return false;
         }
         Interaction other = (Interaction) object;
-        return !((this.idinteraction == null && other.idinteraction != null) || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction)));
+        return !((this.idinteraction == null && other.idinteraction != null)
+                || (this.idinteraction != null && !this.idinteraction.equals(other.idinteraction)));
     }
 
     @Override
     public String toString() {
         return "peps.peps_back.items.Interaction[ idinteraction=" + idinteraction + " ]";
     }
-    
+
 }

@@ -4,41 +4,49 @@
  */
 package peps.peps_back.controllers;
 
-import java.util.Collections;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import peps.peps_back.repositories.InteractionRepository;
-import peps.peps_back.repositories.ModuleRepository;
 
-@ExtendWith(MockitoExtension.class)
+/**
+ *
+ * @author Clément
+ */
 public class DashBoardControllerTest {
 
-    @Mock
-    private InteractionRepository interactionRepository;
+    public DashBoardControllerTest() {
+    }
 
-    @Mock
-    private ModuleRepository moduleRepository;
+    @BeforeAll
+    public static void setUpClass() {
+    }
 
-    @InjectMocks
-    private DashBoardController dashBoardController;
+    @AfterAll
+    public static void tearDownClass() {
+    }
 
+    @BeforeEach
+    public void setUp() {
+    }
+
+    @AfterEach
+    public void tearDown() {
+    }
+
+    /**
+     * Test of dashboard method, of class DashBoardController.
+     */
     @Test
     public void testDashboard() {
         System.out.println("dashboard");
-        when(interactionRepository.count()).thenReturn(0L);
-        when(moduleRepository.findAll()).thenReturn(Collections.emptyList());
-        when(interactionRepository.findAll()).thenReturn(Collections.emptyList());
-
-        ResponseEntity<DashboardStats> result = dashBoardController.dashboard();
-
-        assertNotNull(result);
-        assertEquals(200, result.getStatusCodeValue());
-        assertNotNull(result.getBody());
+        DashBoardController instance = new DashBoardController();
+        ResponseEntity<DashboardStats> expResult = null;
+        ResponseEntity<DashboardStats> result = instance.dashboard(null);
+        assertEquals(expResult, result);
     }
+
 }

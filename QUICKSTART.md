@@ -5,7 +5,7 @@
 PEPs is a web-based monitoring system for intelligent modules, featuring real-time statistics, historical data analysis, and audio management.
 
 ## 🛠 Technology Stack
-* **Backend:** Java 8+, Spring Boot/Framework, Apache Tomcat 9+
+* **Backend:** Java 8+, Spring MVC /Framework, Apache Tomcat 9+
 * **Frontend:** Angular 17+, Angular Material
 * **Database:** PostgreSQL 12+
 

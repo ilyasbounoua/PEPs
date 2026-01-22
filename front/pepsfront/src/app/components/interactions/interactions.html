@@ -1,15 +1,29 @@
 <div class="page-content">
   <mat-card>
     <mat-card-header>
-      <mat-radio-group [(ngModel)]="filter" (ngModelChange)="setFilter($event)">
-        <mat-radio-button value="all" checked>Toutes</mat-radio-button>
-        <mat-radio-button value="today">Aujourd'hui</mat-radio-button>
-        <mat-radio-button value="yesterday">Hier</mat-radio-button>
-        <mat-radio-button value="week">Semaine</mat-radio-button>
-      </mat-radio-group>
+      <div class="filters-container">
+        <!-- Admin Profile Filter -->
+        @if (isAdmin()) {
+        <mat-form-field appearance="outline" class="profile-select">
+          <mat-label>Filtrer par profil</mat-label>
+          <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+            @for (profile of profiles; track $index) {
+            <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        }
+
+        <mat-radio-group [(ngModel)]="filter" (ngModelChange)="setFilter($event)">
+          <mat-radio-button value="all" checked>Toutes</mat-radio-button>
+          <mat-radio-button value="today">Aujourd'hui</mat-radio-button>
+          <mat-radio-button value="yesterday">Hier</mat-radio-button>
+          <mat-radio-button value="week">Semaine</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
       <span class="spacer"></span>
-      <button mat-flat-button color="primary" (click)="exportAsCsv()"
-        [disabled]="filteredInteractions().length === 0">
+      <button mat-flat-button color="primary" (click)="exportAsCsv()" [disabled]="filteredInteractions().length === 0">
         <mat-icon>download</mat-icon>
         Exporter CSV
       </button>

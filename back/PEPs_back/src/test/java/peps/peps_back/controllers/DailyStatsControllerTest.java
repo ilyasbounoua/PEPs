@@ -4,36 +4,50 @@
  */
 package peps.peps_back.controllers;
 
-import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import peps.peps_back.repositories.InteractionRepository;
 
-@ExtendWith(MockitoExtension.class)
+/**
+ *
+ * @author Clément
+ */
 public class DailyStatsControllerTest {
 
-    @Mock
-    private InteractionRepository interactionRepository;
+    public DailyStatsControllerTest() {
+    }
 
-    @InjectMocks
-    private DailyStatsController dailyStatsController;
+    @BeforeAll
+    public static void setUpClass() {
+    }
 
+    @AfterAll
+    public static void tearDownClass() {
+    }
+
+    @BeforeEach
+    public void setUp() {
+    }
+
+    @AfterEach
+    public void tearDown() {
+    }
+
+    /**
+     * Test of getDailyStats method, of class DailyStatsController.
+     */
     @Test
     public void testGetDailyStats() {
         System.out.println("getDailyStats");
-        when(interactionRepository.findAll()).thenReturn(Collections.emptyList());
-
-        ResponseEntity<List<DailyDataDTO>> result = dailyStatsController.getDailyStats();
-
-        assertNotNull(result);
-        assertEquals(200, result.getStatusCodeValue());
-        assertNotNull(result.getBody());
+        DailyStatsController instance = new DailyStatsController();
+        ResponseEntity<List<DailyDataDTO>> expResult = null;
+        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats(null);
+        assertEquals(expResult, result);
     }
+
 }

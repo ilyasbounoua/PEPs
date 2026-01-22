@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file defines the SoundController class, which handles CRUD operations for sounds, including file uploads and streaming.
+ * 
+ * Multi-profile system:
+ * - Uses role to filter sounds by profile
+ * - Each profile only sees its own sounds
  */
 package peps.peps_back.controllers;
 
@@ -31,27 +35,40 @@ import java.util.stream.Collectors;
 public class SoundController {
 
     private final SoundRepository soundRepository;
-    
-    // Files will be saved relative to Tomcat working directory (usually tomcat/bin/sons)
+
+    // Files will be saved relative to Tomcat working directory (usually
+    // tomcat/bin/sons)
     private static final String UPLOAD_DIR = "sons";
 
     public SoundController(SoundRepository soundRepository) {
         this.soundRepository = soundRepository;
     }
 
+    /**
+     * Lists sounds filtered by role.
+     * 
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
+     */
     @GetMapping
-    public ResponseEntity<List<SoundDTO>> getAllSounds() {
-        List<Sound> sounds = soundRepository.findAll();
-        
+    public ResponseEntity<List<SoundDTO>> getAllSounds(@RequestParam(required = false) String role) {
+        List<Sound> sounds;
+
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            sounds = soundRepository.findByOwnerRole(role.toLowerCase());
+        } else {
+            sounds = soundRepository.findAll();
+        }
+
         List<SoundDTO> dtos = sounds.stream()
-            .map(s -> new SoundDTO(
-                s.getIdsound(),
-                s.getNom(),
-                s.getTypeSon(),
-                s.getExtension()
-            ))
-            .collect(Collectors.toList());
-        
+                .map(s -> new SoundDTO(
+                        s.getIdsound(),
+                        s.getNom(),
+                        s.getTypeSon(),
+                        s.getExtension()))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(dtos);
     }
 
@@ -69,14 +86,14 @@ public class SoundController {
         try {
             Path filePath = Paths.get(sound.getChemin());
             Resource resource = new UrlResource(filePath.toUri());
-            
+
             if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.notFound().build();
             }
 
             String contentType = getContentType(sound.getExtension());
-            String fileName = sound.getNom().replaceAll("[^a-zA-Z0-9\\s]", "_").replaceAll("\\s+", "_") 
-                            + "." + sound.getExtension();
+            String fileName = sound.getNom().replaceAll("[^a-zA-Z0-9\\s]", "_").replaceAll("\\s+", "_")
+                    + "." + sound.getExtension();
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
@@ -137,7 +154,7 @@ public class SoundController {
         try {
             String originalFileName = file.getOriginalFilename();
             String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
-            
+
             if (!extension.matches("mp3|wav|ogg|m4a")) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a");
@@ -147,15 +164,15 @@ public class SoundController {
             // Create directory structure: sons/type/
             Path typeDir = Paths.get(UPLOAD_DIR, type);
             Files.createDirectories(typeDir);
-            
+
             // Generate unique filename
             String sanitizedName = name.replaceAll("[^a-zA-Z0-9\\s]", "_").replaceAll("\\s+", "_");
             String fileName = sanitizedName + "_" + System.currentTimeMillis() + "." + extension;
             Path filePath = typeDir.resolve(fileName);
-            
+
             // Save file to disk
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            
+
             // Save metadata to database with file path
             Sound sound = new Sound();
             sound.setNom(name);
@@ -163,7 +180,7 @@ public class SoundController {
             sound.setExtension(extension);
             sound.setChemin(filePath.toString());
             sound = soundRepository.save(sound);
-            
+
             System.out.println("Sound saved to file: " + filePath.toString() + ", ID: " + sound.getIdsound());
 
             SoundDTO dto = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());
@@ -210,7 +227,8 @@ public class SoundController {
         sound.setTypeSon(soundDTO.getType());
         sound = soundRepository.save(sound);
 
-        SoundDTO responseDTO = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());
+        SoundDTO responseDTO = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(),
+                sound.getExtension());
         return ResponseEntity.ok(responseDTO);
     }
 

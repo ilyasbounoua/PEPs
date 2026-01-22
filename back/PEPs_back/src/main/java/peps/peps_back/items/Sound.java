@@ -53,6 +53,15 @@ public class Sound implements Serializable {
     @OneToMany(mappedBy = "idsound")
     private Collection<Interaction> interactionCollection;
 
+    /**
+     * Owner role for filtering (multi-profile system).
+     * Stores the role name (e.g., 'dauphin', 'aras') for data isolation.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @Column(name = "owner_role")
+    private String ownerRole;
+
     public Sound() {
     }
 
@@ -115,6 +124,14 @@ public class Sound implements Serializable {
         this.interactionCollection = interactionCollection;
     }
 
+    public String getOwnerRole() {
+        return ownerRole;
+    }
+
+    public void setOwnerRole(String ownerRole) {
+        this.ownerRole = ownerRole;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -136,5 +153,5 @@ public class Sound implements Serializable {
     public String toString() {
         return "peps.peps_back.items.Sound[ idsound=" + idsound + " ]";
     }
-    
+
 }

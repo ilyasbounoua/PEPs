@@ -1,9 +1,13 @@
 /* --- VARIABLES DE COULEUR (inspirées du logo PEP'S) --- */
 :host {
-  --primary-color: #2c3e50; /* Bleu/Vert foncé */
-  --secondary-color: #0089c4; /* Bleu Dauphin */
-  --accent-color: #4CAF50; /* Vert Logo */
-  --warn-color: #e74c3c; /* Rouge (Inactif / Erreur) */
+  --primary-color: #2c3e50;
+  /* Bleu/Vert foncé */
+  --secondary-color: #0089c4;
+  /* Bleu Dauphin */
+  --accent-color: #4CAF50;
+  /* Vert Logo */
+  --warn-color: #e74c3c;
+  /* Rouge (Inactif / Erreur) */
   --text-light: #ffffff;
   --text-dark: #333;
   --background-color: #ecf0f1;
@@ -37,16 +41,19 @@
 .login-form mat-card-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 0 8px 8px; /* Ajustement pour aligner */
+  padding: 0 8px 8px;
+  /* Ajustement pour aligner */
 }
 
 /* AJOUT: Style pour l'erreur de connexion générale */
 .login-general-error {
   font-size: 14px;
-  margin-top: -16px; /* Remonte l'erreur sous le champ */
+  margin-top: -16px;
+  /* Remonte l'erreur sous le champ */
   margin-bottom: 16px;
   text-align: center;
-  display: block; /* S'assurer que mat-error est visible */
+  display: block;
+  /* S'assurer que mat-error est visible */
 }
 
 /* --- STRUCTURE GLOBALE DE L'APP --- */
@@ -64,6 +71,18 @@
   margin-left: 16px;
 }
 
+/* Spacer pour pousser les éléments à droite dans la toolbar */
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* Affichage du login utilisateur dans la toolbar */
+.user-info {
+  font-size: 14px;
+  margin-right: 8px;
+  opacity: 0.9;
+}
+
 .main-content {
   background-color: var(--background-color);
 }
@@ -77,8 +96,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- MENU LATÉRAL (SIDENAV) --- */
@@ -141,16 +167,28 @@
 }
 
 /* Application du délai en cascade (comme la boucle @for en SCSS) */
-.mat-sidenav-opened .mat-list-item:nth-child(1) { animation-delay: 0.05s; }
-.mat-sidenav-opened .mat-list-item:nth-child(2) { animation-delay: 0.1s; }
-.mat-sidenav-opened .mat-list-item:nth-child(3) { animation-delay: 0.15s; }
-.mat-sidenav-opened .mat-list-item:nth-child(4) { animation-delay: 0.2s; }
+.mat-sidenav-opened .mat-list-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.mat-sidenav-opened .mat-list-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.mat-sidenav-opened .mat-list-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.mat-sidenav-opened .mat-list-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
 
 @keyframes slideInItem {
   from {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -199,19 +237,22 @@
   height: 36px;
   padding: 8px;
   border-radius: 50%;
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .stat-card .mat-card-avatar {
   color: var(--primary-color);
 }
+
 .stat-card .icon-active {
   color: var(--accent-color);
 }
+
 .stat-card .mat-card-title {
   font-size: 2rem;
   font-weight: bold;
 }
+
 .stat-card .mat-card-subtitle {
   font-size: 1rem;
 }
@@ -249,6 +290,7 @@
   transition: opacity 0.2s;
   border-radius: 4px 4px 0 0;
 }
+
 .bar:hover {
   opacity: 1;
 }
@@ -260,17 +302,23 @@
   align-items: center;
   width: 100%;
 }
-.spacer { flex: 1 1 auto; }
+
+.spacer {
+  flex: 1 1 auto;
+}
+
 .mat-radio-group {
   display: flex;
   gap: 20px;
 }
+
 .table-container {
   width: 100%;
   overflow-x: auto;
   margin: 0 !important;
   padding: 0 !important;
 }
+
 .mat-table {
   width: 100%;
   max-width: 100%;
@@ -297,42 +345,56 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
 }
+
 .module-card {
   cursor: pointer;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
+
 .module-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
+
 .status-active {
   color: var(--accent-color);
   font-weight: bold;
 }
+
 .status-inactive {
   color: var(--warn-color);
   font-weight: bold;
 }
-.icon-active { color: var(--accent-color); }
-.icon-inactive { color: var(--warn-color); }
+
+.icon-active {
+  color: var(--accent-color);
+}
+
+.icon-inactive {
+  color: var(--warn-color);
+}
 
 /* --- PAGE: DÉTAIL/CONFIG MODULE (F5) --- */
 .config-card {
   max-width: 600px;
   margin: 0 auto;
 }
+
 .config-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
 .mat-slider {
   width: 100%;
 }
+
 .mat-slide-toggle {
   display: block;
   margin: 8px 0;
 }
+
 .mat-card-actions {
   display: flex;
   gap: 8px;
@@ -410,7 +472,7 @@
 }
 
 .sound-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .sound-info {
@@ -506,5 +568,5 @@
 
 .sound-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

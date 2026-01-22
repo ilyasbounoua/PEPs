@@ -73,6 +73,16 @@ public class Module implements Serializable {
     @Column(name = "last_seen")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastSeen;
+
+    /**
+     * Owner role for filtering (multi-profile system).
+     * Stores the role name (e.g., 'dauphin', 'aras') for data isolation.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @Column(name = "owner_role")
+    private String ownerRole;
+
     @OneToMany(mappedBy = "idmodule")
     private Collection<Interaction> interactionCollection;
 
@@ -85,6 +95,7 @@ public class Module implements Serializable {
 
     /**
      * Constructs a new Module with the given configuration.
+     * 
      * @param config The module configuration.
      */
     public Module(ModuleConfig config) {
@@ -224,6 +235,14 @@ public class Module implements Serializable {
         this.interactionCollection = interactionCollection;
     }
 
+    public String getOwnerRole() {
+        return ownerRole;
+    }
+
+    public void setOwnerRole(String ownerRole) {
+        this.ownerRole = ownerRole;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -238,12 +257,13 @@ public class Module implements Serializable {
         }
         Module other = (Module) object;
         // This method was changed to handle null idmodule values.
-        return (this.idmodule != null && this.idmodule.equals(other.idmodule)) || (this.idmodule == null && other.idmodule == null);
+        return (this.idmodule != null && this.idmodule.equals(other.idmodule))
+                || (this.idmodule == null && other.idmodule == null);
     }
 
     @Override
     public String toString() {
         return "peps.peps_back.items.Module[ idmodule=" + idmodule + " ]";
     }
-    
+
 }
