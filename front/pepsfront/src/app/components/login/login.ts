@@ -1,5 +1,5 @@
-import { Component, output, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, output, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,12 +25,12 @@ import { AuthService } from '../../services/auth';
 })
 export class Login implements OnInit {
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
   
   hidePassword = true; 
   loginSuccess = output<void>();
   loginError = signal('');
   
-  // Signal pour masquer l'interface pendant le chargement
   isReady = signal(false);
 
   ngOnInit() {
@@ -38,12 +38,17 @@ export class Login implements OnInit {
   }
 
   preloadBackground(url: string) {
-    const img = new Image();
-    img.src = url;
-    // Dès que l'image est chargée en cache par le navigateur
-    img.onload = () => this.isReady.set(true);
-    // En cas d'erreur de chemin, on affiche quand même pour ne pas bloquer
-    img.onerror = () => this.isReady.set(true);
+    // Check if running in the browser
+    if (isPlatformBrowser(this.platformId)) {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => this.isReady.set(true);
+      img.onerror = () => this.isReady.set(true);
+    } else {
+      // On the server (SSR), 'Image' doesn't exist.
+      // We set ready to true so the server renders the form immediately.
+      this.isReady.set(true);
+    }
   }
 
   async onSubmit(event: Event) {
