@@ -3,8 +3,8 @@
  * @description This file defines the DashBoardController class, which handles requests for dashboard statistics.
  * 
  * Multi-profile system:
- * - Admin (ownerId=null) sees stats for ALL users
- * - Regular users see only their own stats
+ * - Admin (role=null) sees stats for ALL profiles
+ * - Regular users: pass role to filter by profile
  */
 package peps.peps_back.controllers;
 
@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import peps.peps_back.items.Interaction;
 import peps.peps_back.items.Module;
-import peps.peps_back.items.User;
 import peps.peps_back.repositories.InteractionRepository;
 import peps.peps_back.repositories.ModuleRepository;
-import peps.peps_back.repositories.UserRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -34,35 +32,24 @@ public class DashBoardController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     /**
      * Returns dashboard statistics.
      * 
-     * @param ownerId If provided, filters stats by owner (for regular users).
-     *                If null or admin, returns stats for ALL users.
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             stats for ALL.
      * @author Anas EL HOUDI
      */
     @GetMapping("/dashboard")
-    public ResponseEntity<DashboardStats> dashboard(@RequestParam(required = false) Integer ownerId) {
+    public ResponseEntity<DashboardStats> dashboard(@RequestParam(required = false) String role) {
         List<Interaction> interactions;
         List<Module> modules;
 
-        // If ownerId is provided, filter by owner (for regular users)
-        if (ownerId != null) {
-            User owner = userRepository.findById(ownerId).orElse(null);
-            if (owner != null && !"admin".equals(owner.getRole())) {
-                // Regular user: filter by owner
-                interactions = interactionRepository.findByOwner(owner);
-                modules = moduleRepository.findByOwner(owner);
-            } else {
-                // Admin or unknown: get all
-                interactions = interactionRepository.findAll();
-                modules = moduleRepository.findAll();
-            }
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
+            modules = moduleRepository.findByOwnerRole(role.toLowerCase());
         } else {
-            // No ownerId (admin view): get all
+            // No role (admin view): get all
             interactions = interactionRepository.findAll();
             modules = moduleRepository.findAll();
         }

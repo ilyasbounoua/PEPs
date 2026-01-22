@@ -3,8 +3,8 @@
  * @description This file defines the SoundController class, which handles CRUD operations for sounds, including file uploads and streaming.
  * 
  * Multi-profile system:
- * - Uses ownerId to filter sounds by user
- * - Each user only sees their own sounds
+ * - Uses role to filter sounds by profile
+ * - Each profile only sees its own sounds
  */
 package peps.peps_back.controllers;
 
@@ -17,9 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import peps.peps_back.items.Sound;
-import peps.peps_back.items.User;
 import peps.peps_back.repositories.SoundRepository;
-import peps.peps_back.repositories.UserRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,34 +35,28 @@ import java.util.stream.Collectors;
 public class SoundController {
 
     private final SoundRepository soundRepository;
-    private final UserRepository userRepository;
 
     // Files will be saved relative to Tomcat working directory (usually
     // tomcat/bin/sons)
     private static final String UPLOAD_DIR = "sons";
 
-    public SoundController(SoundRepository soundRepository, UserRepository userRepository) {
+    public SoundController(SoundRepository soundRepository) {
         this.soundRepository = soundRepository;
-        this.userRepository = userRepository;
     }
 
     /**
-     * Lists a user's sounds.
+     * Lists sounds filtered by role.
      * 
-     * @param ownerId ID of the logged-in user (multi-profile filtering)
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
      */
     @GetMapping
-    public ResponseEntity<List<SoundDTO>> getAllSounds(@RequestParam(required = false) Integer ownerId) {
+    public ResponseEntity<List<SoundDTO>> getAllSounds(@RequestParam(required = false) String role) {
         List<Sound> sounds;
 
-        // If ownerId is provided, filter by owner
-        if (ownerId != null) {
-            User owner = userRepository.findById(ownerId).orElse(null);
-            if (owner != null) {
-                sounds = soundRepository.findByOwner(owner);
-            } else {
-                sounds = soundRepository.findAll();
-            }
+        // If role is provided, filter by owner_role
+        if (role != null && !role.isEmpty()) {
+            sounds = soundRepository.findByOwnerRole(role.toLowerCase());
         } else {
             sounds = soundRepository.findAll();
         }

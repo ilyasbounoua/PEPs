@@ -5,7 +5,6 @@
 package peps.peps_back.repositories;
 
 import peps.peps_back.items.Interaction;
-import peps.peps_back.items.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +14,10 @@ import java.util.List;
 public interface InteractionRepository extends JpaRepository<Interaction, Integer>, InteractionRepositoryCustom {
 
     /**
-     * Retrieves all interactions belonging to a user.
-     * For multi-profile system (data isolation).
+     * Retrieves all interactions belonging to a specific role.
+     * For multi-profile system (data isolation by role).
      * 
      * @author Anas EL HOUDI
      */
-    List<Interaction> findByOwner(User owner);
+    List<Interaction> findByOwnerRole(String ownerRole);
 }

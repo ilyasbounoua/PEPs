@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the logic for the interactions component, which displays and filters interactions, and allows exporting them as a CSV file.
+ * 
+ * Multi-profile system:
+ * - Admin can filter by role using dropdown
+ * - Regular users see only their own data
  */
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -28,16 +32,12 @@ export class Interactions implements OnInit {
 
   readonly isAdmin = this.authService.isAdmin;
 
-  // Admin Filter: 1=Admin(All), 2=Aras, 3=Dauphin
-  // If admin selects 'all' (1), we pass undefined to API to get everything
-  // If admin selects specific ID, we pass that ID
-  selectedProfile = signal<number>(1);
+  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  selectedRole = '';
 
-  // Profiles for dropdown
-  profiles = [
-    { id: 1, name: 'Tous les profils' },
-    { id: 2, name: 'Aras' },
-    { id: 3, name: 'Dauphin' }
+  // Profiles for dropdown - loaded from DB (regular array for template iteration)
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
   ];
 
   filter = signal('all');
@@ -71,28 +71,31 @@ export class Interactions implements OnInit {
   });
 
   ngOnInit() {
+    // Load available roles for admin filter
+    if (this.isAdmin()) {
+      this.api.getRoles().subscribe({
+        next: (roles) => {
+          this.profiles = [{ role: '', name: 'Tous les profils' }];
+          roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
+        },
+        error: (err) => console.error('Error loading roles:', err)
+      });
+    }
     this.loadData();
   }
 
   loadData() {
-    let profileId: number | undefined = undefined;
+    // Admin uses selectedRole, regular users use their own role via api.ts
+    const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
 
-    if (this.isAdmin()) {
-      const selected = this.selectedProfile();
-      // ID 1 means "All" for admin in our UI logic, so we pass undefined to API
-      // User IDs are: 2=Aras, 3=Dauphin
-      if (selected !== 1) {
-        profileId = selected;
-      }
-    }
-
-    this.api.getInteractions(profileId).subscribe({
+    this.api.getInteractions(filterRole).subscribe({
       next: (data) => this.interactions.set(data),
       error: (err) => console.error('Error loading interactions:', err)
     });
   }
 
-  onProfileChange() {
+  onProfileChange(role: string) {
+    this.selectedRole = role;
     this.loadData();
   }
 
@@ -113,7 +116,7 @@ export class Interactions implements OnInit {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'interactions-aras.csv');
+    link.setAttribute('download', 'interactions.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

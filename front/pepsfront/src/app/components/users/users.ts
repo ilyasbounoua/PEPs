@@ -60,16 +60,34 @@ export class Users implements OnInit {
     isEditing = signal(false);
     editingUserId = signal<number | null>(null);
 
-    // Formulaire
-    formLogin = signal('');
-    formPassword = signal('');
-    formRole = signal<'admin' | 'dauphin' | 'aras'>('dauphin');
+    // Formulaire - using regular properties for ngModel binding
+    formLogin = '';
+    formPassword = '';
+    formRole = '';
 
-    // Rôles disponibles
-    roles: ('admin' | 'dauphin' | 'aras')[] = ['admin', 'dauphin', 'aras'];
+    // Available roles loaded from DB
+    existingRoles: string[] = [];
+
+    // Role validation error
+    roleError = '';
 
     ngOnInit(): void {
         this.loadUsers();
+        this.loadExistingRoles();
+    }
+
+    /**
+     * Charge la liste des rôles existants depuis le backend
+     */
+    loadExistingRoles(): void {
+        this.api.getRoles().subscribe({
+            next: (roles) => {
+                this.existingRoles = roles;
+            },
+            error: (err) => {
+                console.error('Erreur chargement rôles:', err);
+            }
+        });
     }
 
     /**
@@ -98,9 +116,10 @@ export class Users implements OnInit {
      * Affiche le formulaire d'édition pour un utilisateur
      */
     openEditForm(user: UserDTO): void {
-        this.formLogin.set(user.login);
-        this.formPassword.set(''); // Vide pour ne pas changer
-        this.formRole.set(user.role);
+        this.formLogin = user.login;
+        this.formPassword = '';
+        this.formRole = user.role;
+        this.roleError = '';
         this.editingUserId.set(user.id);
         this.isEditing.set(true);
         this.showForm.set(true);
@@ -118,16 +137,61 @@ export class Users implements OnInit {
      * Réinitialise le formulaire
      */
     private resetForm(): void {
-        this.formLogin.set('');
-        this.formPassword.set('');
-        this.formRole.set('dauphin');
+        this.formLogin = '';
+        this.formPassword = '';
+        this.formRole = '';
+        this.roleError = '';
         this.editingUserId.set(null);
+    }
+
+    /**
+     * Valide le rôle entré - BLOQUE les rôles déjà utilisés
+     * Chaque rôle ne peut être associé qu'à un seul utilisateur
+     */
+    validateRole(): boolean {
+        if (!this.formRole || this.formRole.trim() === '') {
+            this.roleError = 'Le rôle est obligatoire';
+            return false;
+        }
+
+        const roleLower = this.formRole.toLowerCase().trim();
+
+        // Block 'admin' as it's reserved
+        if (roleLower === 'admin') {
+            this.roleError = 'Le rôle "admin" est réservé';
+            return false;
+        }
+
+        // Check if role is already used by another user (case-insensitive)
+        const isRoleUsed = this.existingRoles.some(r => r.toLowerCase() === roleLower);
+
+        if (isRoleUsed) {
+            this.roleError = `Le rôle "${this.formRole}" est déjà utilisé par un autre utilisateur`;
+            return false;
+        }
+
+        this.roleError = '';
+        return true;
+    }
+
+    /**
+     * Called when role input changes
+     */
+    onRoleInputChange(): void {
+        // Clear error on input change
+        if (this.roleError) {
+            this.roleError = '';
+        }
     }
 
     /**
      * Soumet le formulaire (création ou modification)
      */
     submitForm(): void {
+        if (!this.validateRole()) {
+            return;
+        }
+
         if (this.isEditing()) {
             this.updateUser();
         } else {
@@ -139,10 +203,13 @@ export class Users implements OnInit {
      * Crée un nouvel utilisateur
      */
     private createUser(): void {
+        // Normalize role to lowercase
+        const role = this.formRole.toLowerCase().trim() as 'admin' | 'dauphin' | 'aras';
+
         const data: CreateUserDTO = {
-            login: this.formLogin(),
-            password: this.formPassword(),
-            role: this.formRole()
+            login: this.formLogin,
+            password: this.formPassword,
+            role: role
         };
 
         this.api.createUser(data).subscribe({
@@ -166,10 +233,13 @@ export class Users implements OnInit {
         const id = this.editingUserId();
         if (!id) return;
 
+        // Normalize role to lowercase
+        const role = this.formRole.toLowerCase().trim();
+
         const data: any = {};
-        if (this.formLogin()) data.login = this.formLogin();
-        if (this.formPassword()) data.password = this.formPassword();
-        if (this.formRole()) data.role = this.formRole();
+        if (this.formLogin) data.login = this.formLogin;
+        if (this.formPassword) data.password = this.formPassword;
+        if (role) data.role = role;
 
         this.api.updateUser(id, data).subscribe({
             next: () => {
