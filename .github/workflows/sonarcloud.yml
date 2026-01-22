@@ -2,7 +2,7 @@ name: SonarCloud Monorepo Analysis with Coverage
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
