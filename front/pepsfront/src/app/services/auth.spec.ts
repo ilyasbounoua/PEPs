@@ -37,7 +37,7 @@ describe('AuthService', () => {
 
     spyOn(crypto.subtle, 'digest').and.resolveTo(buffer);
 
-    const result = await service.login('PEPS');
+    const result = await service.login('PEPS', 'dummyPassword');
 
     expect(result.success).toBe(true);
     expect(service.isAuthenticated()).toBe(true);
@@ -45,7 +45,7 @@ describe('AuthService', () => {
 
   it('should not set isAuthenticated to true on failed login', async () => {
     spyOn(crypto.subtle, 'digest').and.resolveTo(new ArrayBuffer(32)); // return a wrong hash
-    const result = await service.login('wrongpassword');
+    const result = await service.login('wrongpassword', 'wrongPassword');
     expect(result.success).toBe(false);
     expect(service.isAuthenticated()).toBe(false);
   });
