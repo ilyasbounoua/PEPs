@@ -1,5 +1,7 @@
-<div class="login-container">
-  <mat-card class="login-card">
+@if (isReady()) {
+<div class="login-container fade-in">
+  <img src="web-app-manifest-512x512.png" alt="Logo" class="top-left-logo">
+  <mat-card class="login-card glass-effect">
     <mat-card-header>
       <mat-card-title>PEP'S Login</mat-card-title>
       <mat-card-subtitle>Accès au panneau de supervision</mat-card-subtitle>
@@ -8,34 +10,37 @@
     <mat-card-content>
       <form class="login-form" (submit)="onSubmit($event)">
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="glass-input">
           <mat-label>Login</mat-label>
-          <input
-            matInput
-            type="text"
-            name="login"
-            required
-            autocomplete="username">
+          <input matInput type="text" name="login" required autocomplete="username">
+          <mat-icon matSuffix>person</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="glass-input">
           <mat-label>Mot de passe</mat-label>
-          <input
-            matInput
-            type="password"
-            name="password"
-            required
+          <input 
+            matInput 
+            [type]="hidePassword ? 'password' : 'text'" 
+            name="password" 
+            required 
             autocomplete="current-password">
+          <button 
+            type="button"
+            mat-icon-button 
+            matSuffix 
+            (click)="hidePassword = !hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
         </mat-form-field>
 
         @if (loginError()) {
-          <mat-error class="login-general-error">
+          <div class="login-general-error">
             {{ loginError() }}
-          </mat-error>
+          </div>
         }
 
         <mat-card-actions>
-          <button mat-flat-button color="primary" type="submit">
+          <button mat-flat-button class="submit-btn" type="submit">
             Entrer
           </button>
         </mat-card-actions>
@@ -44,3 +49,6 @@
     </mat-card-content>
   </mat-card>
 </div>
+} @else {
+  <div style="background: #000; height: 100vh; width: 100vw;"></div>
+}
