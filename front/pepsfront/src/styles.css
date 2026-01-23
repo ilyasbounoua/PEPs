@@ -85,8 +85,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* --- TOOLBAR --- */
 .toolbar {
-  background-color: var(--primary-color) !important;
-  color: var(--text-light) !important;
+  background-color: #ffffff !important;
+  color: var(--text-dark) !important;
 }
 
 .toolbar span {
