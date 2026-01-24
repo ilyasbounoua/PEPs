@@ -25,7 +25,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api';
-import { UserDTO, CreateUserDTO } from '../../models/interfaces';
+import { UserDTO, CreateUserDTO, PermissionType } from '../../models/interfaces';
 
 @Component({
     selector: 'app-users',
@@ -53,7 +53,7 @@ export class Users implements OnInit {
 
     // Liste des utilisateurs
     users = signal<UserDTO[]>([]);
-    displayedColumns = ['id', 'login', 'role', 'enabled', 'actions'];
+    displayedColumns = ['id', 'login', 'role', 'permission', 'enabled', 'actions'];
 
     // État du formulaire de création/édition
     showForm = signal(false);
@@ -64,6 +64,7 @@ export class Users implements OnInit {
     formLogin = '';
     formPassword = '';
     formRole = '';
+    formPermission: PermissionType = 'viewer';
 
     // Available roles loaded from DB
     existingRoles: string[] = [];
@@ -122,6 +123,7 @@ export class Users implements OnInit {
         this.formLogin = user.login;
         this.formPassword = '';
         this.formRole = user.role;
+        this.formPermission = user.permission || 'viewer';
         this.originalRole = user.role; // Store original role for validation
         this.roleError = '';
         this.editingUserId.set(user.id);
@@ -144,6 +146,7 @@ export class Users implements OnInit {
         this.formLogin = '';
         this.formPassword = '';
         this.formRole = '';
+        this.formPermission = 'viewer';
         this.roleError = '';
         this.originalRole = '';
         this.editingUserId.set(null);
@@ -214,12 +217,13 @@ export class Users implements OnInit {
      */
     private createUser(): void {
         // Normalize role to lowercase
-        const role = this.formRole.toLowerCase().trim() as 'admin' | 'dauphin' | 'aras';
+        const role = this.formRole.toLowerCase().trim();
 
         const data: CreateUserDTO = {
             login: this.formLogin,
             password: this.formPassword,
-            role: role
+            role: role,
+            permission: this.formPermission
         };
 
         this.api.createUser(data).subscribe({
@@ -250,6 +254,7 @@ export class Users implements OnInit {
         if (this.formLogin) data.login = this.formLogin;
         if (this.formPassword) data.password = this.formPassword;
         if (role) data.role = role;
+        if (this.formPermission) data.permission = this.formPermission;
 
         this.api.updateUser(id, data).subscribe({
             next: () => {

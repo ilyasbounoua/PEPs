@@ -7,10 +7,10 @@
  * - Passes role to endpoints to filter data by profile
  */
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO } from '../models/interfaces';
+import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog } from '../models/interfaces';
 import { AuthService } from './auth';
 
 @Injectable({
@@ -21,7 +21,20 @@ export class ApiService {
   private readonly authService = inject(AuthService);
   // private readonly BASE_URL = 'https://peps-backend.onrender.com';
   // Fix for local development (NetBeans/Tomcat)
+  // Fix for local development (NetBeans/Tomcat)
   private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
+
+  /**
+   * Helper to get headers with user login for audit logging.
+   */
+  private getHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
+    const login = this.authService.currentLogin();
+    if (login) {
+      headers = headers.set('X-User-Login', login);
+    }
+    return headers;
+  }
 
   // Dashboard
   /**
@@ -80,16 +93,22 @@ export class ApiService {
     return this.http.get<Module[]>(`${this.BASE_URL}/modules${params}`);
   }
 
-  createModule(module: Omit<Module, 'id'>): Observable<Module> {
-    return this.http.post<Module>(`${this.BASE_URL}/modules`, module);
+  createModule(module: Omit<Module, 'id'>, overrideRole?: string): Observable<Module> {
+    const userRole = this.authService.currentUserRole();
+    const isAdmin = this.authService.isAdmin();
+    // overrideRole takes precedence (admin assigning to specific role)
+    // Otherwise: non-admin users use their own role, admin without override gets undefined
+    const ownerRole = overrideRole !== undefined ? overrideRole : (isAdmin ? undefined : userRole);
+    const params = ownerRole ? `?role=${ownerRole}` : '';
+    return this.http.post<Module>(`${this.BASE_URL}/modules${params}`, module, { headers: this.getHeaders() });
   }
 
   updateModule(id: number, module: Module): Observable<Module> {
-    return this.http.put<Module>(`${this.BASE_URL}/modules/${id}`, module);
+    return this.http.put<Module>(`${this.BASE_URL}/modules/${id}`, module, { headers: this.getHeaders() });
   }
 
   deleteModule(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/modules/${id}`);
+    return this.http.delete<void>(`${this.BASE_URL}/modules/${id}`, { headers: this.getHeaders() });
   }
 
   // Sounds
@@ -105,16 +124,22 @@ export class ApiService {
     return this.http.get<Sound[]>(url);
   }
 
-  uploadSound(formData: FormData): Observable<Sound> {
-    return this.http.post<Sound>(`${this.BASE_URL}/sounds`, formData);
+  uploadSound(formData: FormData, overrideRole?: string): Observable<Sound> {
+    const userRole = this.authService.currentUserRole();
+    const isAdmin = this.authService.isAdmin();
+    // overrideRole takes precedence (admin assigning to specific role)
+    // Otherwise: non-admin users use their own role, admin without override gets undefined
+    const ownerRole = overrideRole !== undefined ? overrideRole : (isAdmin ? undefined : userRole);
+    const params = ownerRole ? `?role=${ownerRole}` : '';
+    return this.http.post<Sound>(`${this.BASE_URL}/sounds${params}`, formData, { headers: this.getHeaders() });
   }
 
   updateSound(id: number, data: { name: string, type: string }): Observable<Sound> {
-    return this.http.put<Sound>(`${this.BASE_URL}/sounds/${id}`, data);
+    return this.http.put<Sound>(`${this.BASE_URL}/sounds/${id}`, data, { headers: this.getHeaders() });
   }
 
   deleteSound(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/sounds/${id}`);
+    return this.http.delete<void>(`${this.BASE_URL}/sounds/${id}`, { headers: this.getHeaders() });
   }
 
   getSoundFileUrl(id: number): string {
@@ -160,7 +185,7 @@ export class ApiService {
    * @param data Login, password et role du nouvel utilisateur
    */
   createUser(data: CreateUserDTO): Observable<UserDTO> {
-    return this.http.post<UserDTO>(`${this.BASE_URL}/users`, data);
+    return this.http.post<UserDTO>(`${this.BASE_URL}/users`, data, { headers: this.getHeaders() });
   }
 
   /**
@@ -169,14 +194,14 @@ export class ApiService {
    * @param data Champs à modifier (tous optionnels)
    */
   updateUser(id: number, data: UpdateUserDTO): Observable<UserDTO> {
-    return this.http.put<UserDTO>(`${this.BASE_URL}/users/${id}`, data);
+    return this.http.put<UserDTO>(`${this.BASE_URL}/users/${id}`, data, { headers: this.getHeaders() });
   }
 
   /**
    * Supprime un utilisateur.
    */
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/users/${id}`);
+    return this.http.delete<void>(`${this.BASE_URL}/users/${id}`, { headers: this.getHeaders() });
   }
 
   /* ===================== */
@@ -192,6 +217,33 @@ export class ApiService {
     return this.http.put<any>(`${this.BASE_URL}/users/${userId}/password`, {
       currentPassword,
       newPassword
-    });
+    }, { headers: this.getHeaders() });
+  }
+
+  /* ===================== */
+  /* Audit Logs */
+  /* ===================== */
+
+  /**
+   * Gets all audit logs (admin only).
+   * Returns logs sorted by timestamp descending (most recent first).
+   * @author Anas EL HOUDI
+   */
+  getAuditLogs(): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs`);
+  }
+
+  /**
+   * Gets audit logs filtered by entity type.
+   */
+  getAuditLogsByEntity(entityType: string): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-entity/${entityType}`);
+  }
+
+  /**
+   * Gets audit logs for a specific user.
+   */
+  getAuditLogsByUser(userLogin: string): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-user/${userLogin}`);
   }
 }

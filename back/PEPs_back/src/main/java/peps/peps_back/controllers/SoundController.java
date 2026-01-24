@@ -8,6 +8,7 @@
  */
 package peps.peps_back.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import peps.peps_back.items.Sound;
 import peps.peps_back.repositories.SoundRepository;
+import peps.peps_back.repositories.UserRepository;
+import peps.peps_back.items.User;
+import peps.peps_back.services.AuditService;
+import javax.persistence.OptimisticLockException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +44,12 @@ public class SoundController {
     // Files will be saved relative to Tomcat working directory (usually
     // tomcat/bin/sons)
     private static final String UPLOAD_DIR = "sons";
+
+    @Autowired
+    private AuditService auditService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public SoundController(SoundRepository soundRepository) {
         this.soundRepository = soundRepository;
@@ -125,11 +136,24 @@ public class SoundController {
     public ResponseEntity<?> uploadSound(
             @RequestParam("name") String name,
             @RequestParam("type") String type,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "role", required = false) String role,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
 
         System.out.println("=== Upload Sound Request ===");
         System.out.println("Name: " + name);
         System.out.println("Type: " + type);
+        System.out.println("Role: " + role);
         System.out.println("File: " + (file != null ? file.getOriginalFilename() : "null"));
         System.out.println("File size: " + (file != null ? file.getSize() : 0));
 
@@ -179,9 +203,23 @@ public class SoundController {
             sound.setTypeSon(type);
             sound.setExtension(extension);
             sound.setChemin(filePath.toString());
+
+            // Set owner role for multi-profile filtering
+            if (role != null && !role.isEmpty()) {
+                sound.setOwnerRole(role.toLowerCase());
+            }
+
             sound = soundRepository.save(sound);
 
             System.out.println("Sound saved to file: " + filePath.toString() + ", ID: " + sound.getIdsound());
+
+            // Log upload in audit
+            String newValue = String.format(
+                    "{\"name\":\"%s\",\"type\":\"%s\",\"extension\":\"%s\",\"path\":\"%s\"}",
+                    sound.getNom(), sound.getTypeSon(), sound.getExtension(), sound.getChemin());
+            String userLogin = (login != null) ? login : "unknown";
+            auditService.log("CREATE", "sound", sound.getIdsound(), sound.getNom(),
+                    sound.getOwnerRole(), userLogin, null, newValue, "Upload de fichier son");
 
             SoundDTO dto = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());
             return ResponseEntity.ok(dto);
@@ -202,7 +240,19 @@ public class SoundController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateSound(@PathVariable Integer id, @RequestBody SoundDTO soundDTO) {
+    public ResponseEntity<?> updateSound(@PathVariable Integer id, @RequestBody SoundDTO soundDTO,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
         Sound sound = soundRepository.findById(id).orElse(null);
         if (sound == null) {
             Map<String, String> error = new HashMap<>();
@@ -222,24 +272,65 @@ public class SoundController {
             return ResponseEntity.badRequest().body(error);
         }
 
+        // Capture old values
+        String oldValue = String.format(
+                "{\"name\":\"%s\",\"type\":\"%s\"}",
+                sound.getNom(), sound.getTypeSon());
+
         // Update only name and type, keep file path unchanged
         sound.setNom(soundDTO.getName());
         sound.setTypeSon(soundDTO.getType());
-        sound = soundRepository.save(sound);
 
-        SoundDTO responseDTO = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(),
-                sound.getExtension());
-        return ResponseEntity.ok(responseDTO);
+        try {
+            sound = soundRepository.save(sound);
+
+            // Log update
+            String newValue = String.format(
+                    "{\"name\":\"%s\",\"type\":\"%s\"}",
+                    sound.getNom(), sound.getTypeSon());
+            String userLogin = (login != null) ? login : "unknown";
+            auditService.log("UPDATE", "sound", sound.getIdsound(), sound.getNom(),
+                    sound.getOwnerRole(), userLogin, oldValue, newValue, "Modification du son");
+
+            SoundDTO responseDTO = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(),
+                    sound.getExtension());
+            return ResponseEntity.ok(responseDTO);
+
+        } catch (javax.persistence.OptimisticLockException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Conflit de modification : le son a été modifié par un autre utilisateur.");
+            return ResponseEntity.status(409).body(error);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteSound(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteSound(@PathVariable Integer id,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
         Sound sound = soundRepository.findById(id).orElse(null);
         if (sound == null) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Son introuvable");
             return ResponseEntity.notFound().build();
         }
+
+        // Log deletion (before file delete just in case)
+        String oldValue = String.format(
+                "{\"name\":\"%s\",\"type\":\"%s\",\"path\":\"%s\"}",
+                sound.getNom(), sound.getTypeSon(), sound.getChemin());
+        String userLogin = (login != null) ? login : "unknown";
+        auditService.log("DELETE", "sound", id, sound.getNom(),
+                sound.getOwnerRole(), userLogin, oldValue, null, "Suppression du son");
 
         // Delete file from disk
         if (sound.getChemin() != null && !sound.getChemin().isEmpty()) {

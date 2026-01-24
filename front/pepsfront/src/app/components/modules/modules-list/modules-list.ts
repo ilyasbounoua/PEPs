@@ -29,6 +29,7 @@ export class ModulesList implements OnInit {
   private authService = inject(AuthService);
 
   readonly isAdmin = this.authService.isAdmin;
+  readonly canEdit = this.authService.canEdit;
 
   // Admin Filter: role name or empty for all (regular property for ngModel binding)
   selectedRole = '';
@@ -40,7 +41,7 @@ export class ModulesList implements OnInit {
 
   modules = signal<Module[]>([]);
   selectModule = output<Module>();
-  addModule = output<void>();
+  addModule = output<string | undefined>();
 
   ngOnInit() {
     // Load available roles for admin filter
@@ -75,7 +76,8 @@ export class ModulesList implements OnInit {
   }
 
   onAddClick() {
-    this.addModule.emit();
+    // Emit the currently selected role filter (or undefined if "Tous les profils")
+    this.addModule.emit(this.selectedRole || undefined);
   }
 
   refreshData() {

@@ -8,6 +8,7 @@ package peps.peps_back.controllers;
  * - login : identifiant unique de l'utilisateur
  * - password : mot de passe en clair (sera hashé côté serveur avec BCrypt)
  * - role : "admin", "dauphin" ou "aras"
+ * - permission : "viewer", "editor" ou "admin"
  * 
  * @author Anas EL HOUDI
  */
@@ -16,6 +17,7 @@ public class CreateUserRequest {
     private String login;
     private String password;
     private String role;
+    private String permission;
 
     /* ===================== */
     /* Getters & Setters */
@@ -43,5 +45,13 @@ public class CreateUserRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 }

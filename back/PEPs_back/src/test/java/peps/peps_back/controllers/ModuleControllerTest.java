@@ -77,7 +77,7 @@ public class ModuleControllerTest {
         ModuleDTO dto = null;
         ModuleController instance = new ModuleController();
         ResponseEntity expResult = null;
-        ResponseEntity result = instance.updateModule(id, dto);
+        ResponseEntity result = instance.updateModule(id, dto, null);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -92,7 +92,7 @@ public class ModuleControllerTest {
         ModuleDTO dto = null;
         ModuleController instance = new ModuleController();
         ResponseEntity expResult = null;
-        ResponseEntity result = instance.createModule(dto);
+        ResponseEntity result = instance.createModule(dto, null, null);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -107,7 +107,7 @@ public class ModuleControllerTest {
         Integer id = null;
         ModuleController instance = new ModuleController();
         ResponseEntity expResult = null;
-        ResponseEntity result = instance.deleteModule(id);
+        ResponseEntity result = instance.deleteModule(id, null);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
