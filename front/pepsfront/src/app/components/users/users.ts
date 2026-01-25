@@ -233,6 +233,17 @@ export class Users implements OnInit {
     }
 
     /**
+     * Helper to get French label for permission
+     */
+    getPermissionLabel(permission: string): string {
+        if (!permission) return '';
+        const p = permission.toLowerCase();
+        if (p === 'viewer') return 'Lecteur';
+        if (p === 'editor') return 'Éditeur';
+        return permission;
+    }
+
+    /**
      * Crée un nouvel utilisateur
      */
     private createUser(): void {

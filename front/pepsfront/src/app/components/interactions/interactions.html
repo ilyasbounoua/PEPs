@@ -23,10 +23,16 @@
       </div>
 
       <span class="spacer"></span>
-      <button mat-flat-button color="primary" (click)="exportAsCsv()" [disabled]="filteredInteractions().length === 0">
-        <mat-icon>download</mat-icon>
-        Exporter CSV
-      </button>
+      <div style="display: flex; flex-direction: column; align-items: flex-end;">
+        <button mat-flat-button color="primary" (click)="exportAsCsv()"
+          [disabled]="filteredInteractions().length === 0">
+          <mat-icon>download</mat-icon>
+          Exporter CSV
+        </button>
+        @if (filteredInteractions().length === 0) {
+        <span style="font-size: 11px; color: gray; margin-top: 4px;">Aucune donnée à exporter</span>
+        }
+      </div>
     </mat-card-header>
     <mat-card-content class="table-container">
       <table mat-table [dataSource]="filteredInteractions()">
