@@ -27,7 +27,7 @@
         <!-- Volume -->
         <mat-label>Volume</mat-label>
         <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel" [disabled]="!canEdit()">
-          <input matSliderThumb [(ngModel)]="module().config.volume" name="volume">
+          <input matSliderThumb [(ngModel)]="module().config.volume" name="volume" [disabled]="!canEdit()">
         </mat-slider>
 
         <!-- Mode -->
