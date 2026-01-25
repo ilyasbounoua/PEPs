@@ -43,6 +43,7 @@ export class Sounds implements OnInit {
   private audioService = inject(AudioService);
 
   readonly isAdmin = this.authService.isAdmin;
+  readonly canEdit = this.authService.canEdit;
 
   // Admin Filter: role name or empty for all (regular property for ngModel binding)
   selectedRole = '';
@@ -117,6 +118,11 @@ export class Sounds implements OnInit {
   }
 
   toggleAddForm() {
+    // Admin must select a specific role before adding a sound
+    if (this.isAdmin() && !this.selectedRole) {
+      alert('Veuillez sélectionner un profil spécifique avant de créer un son.');
+      return;
+    }
     this.showAddSoundForm.update(show => !show);
     this.newSound.set({ name: '', type: '', file: null });
     this.uploadError.set('');
@@ -170,6 +176,12 @@ export class Sounds implements OnInit {
       return;
     }
 
+    // Admin must select a specific role before uploading a sound
+    if (this.isAdmin() && !this.selectedRole) {
+      this.uploadError.set('Veuillez sélectionner un profil spécifique avant de créer un son.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', sound.name);
     formData.append('type', sound.type);
@@ -178,7 +190,9 @@ export class Sounds implements OnInit {
     this.isUploading.set(true);
     this.uploadError.set('');
 
-    this.api.uploadSound(formData).subscribe({
+    // Pass selectedRole for admin, undefined for non-admin (api will use their role)
+    const overrideRole = this.isAdmin() ? this.selectedRole : undefined;
+    this.api.uploadSound(formData, overrideRole).subscribe({
       next: (newSound) => {
         this.sounds.update(sounds => [...sounds, newSound]);
         this.showAddSoundForm.set(false);

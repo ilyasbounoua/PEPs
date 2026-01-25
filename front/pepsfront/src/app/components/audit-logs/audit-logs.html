@@ -1,0 +1,128 @@
+<mat-card class="audit-logs-card">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>history</mat-icon>
+            Journal d'Audit
+        </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Filtres -->
+        <div class="filters">
+            <mat-form-field appearance="outline">
+                <mat-label>Type d'entité</mat-label>
+                <mat-select [(ngModel)]="filterEntity" (selectionChange)="onFilterChange()">
+                    <mat-option value="all">Tous</mat-option>
+                    <mat-option value="module">Modules</mat-option>
+                    <mat-option value="sound">Sons</mat-option>
+                    <mat-option value="user">Utilisateurs</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button mat-icon-button (click)="loadLogs()" matTooltip="Actualiser">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </div>
+
+        <!-- Loading -->
+        @if (loading()) {
+        <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        }
+
+        <!-- Error -->
+        @if (error()) {
+        <div class="error-message">
+            {{ error() }}
+        </div>
+        }
+
+        <!-- Table -->
+        @if (!loading() && !error()) {
+        @if (logs().length === 0) {
+        <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>Aucun log d'audit trouvé</p>
+        </div>
+        } @else {
+        <div class="table-container">
+            <table mat-table [dataSource]="logs()" class="audit-table">
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                    <td mat-cell *matCellDef="let log">
+                        <span class="action-badge" [ngClass]="getActionClass(log.action)">
+                            <mat-icon>{{ getActionIcon(log.action) }}</mat-icon>
+                            {{ log.action }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Entity Column -->
+                <ng-container matColumnDef="entity">
+                    <th mat-header-cell *matHeaderCellDef>Entité</th>
+                    <td mat-cell *matCellDef="let log">
+                        <span class="entity-cell" [matTooltip]="formatEntityInfo(log)">
+                            {{ formatEntityInfo(log) }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- User Column -->
+                <ng-container matColumnDef="userLogin">
+                    <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+                    <td mat-cell *matCellDef="let log">{{ log.userLogin }}</td>
+                </ng-container>
+
+                <!-- Timestamp Column -->
+                <ng-container matColumnDef="timestamp">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let log">{{ formatTimestamp(log.timestamp) }}</td>
+                </ng-container>
+
+                <!-- Details Column -->
+                <ng-container matColumnDef="details">
+                    <th mat-header-cell *matHeaderCellDef>Détails</th>
+                    <td mat-cell *matCellDef="let log">
+                        <button mat-icon-button (click)="toggleExpand(log.id)"
+                            [matTooltip]="isExpanded(log.id) ? 'Réduire' : 'Voir les changements'">
+                            <mat-icon>{{ isExpanded(log.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let log; columns: displayedColumns;" [class.expanded-row]="isExpanded(log.id)">
+                </tr>
+            </table>
+
+            <!-- Expanded Details -->
+            @for (log of logs(); track log.id) {
+            @if (isExpanded(log.id)) {
+            <div class="expanded-details" [ngClass]="getActionClass(log.action)">
+                <div class="detail-header">
+                    <strong>{{ log.details || 'Détails de la modification' }}</strong>
+                </div>
+                <div class="detail-content">
+                    @if (log.oldValue) {
+                    <div class="value-block old-value">
+                        <span class="value-label">Avant :</span>
+                        <pre>{{ log.oldValue | json }}</pre>
+                    </div>
+                    }
+                    @if (log.newValue) {
+                    <div class="value-block new-value">
+                        <span class="value-label">Après :</span>
+                        <pre>{{ log.newValue | json }}</pre>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+            }
+        </div>
+        }
+        }
+    </mat-card-content>
+</mat-card>

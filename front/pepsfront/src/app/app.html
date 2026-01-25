@@ -1,4 +1,6 @@
-@if (isLoggedIn()) {
+@if (!isInitialized()) {
+<!-- Prevent flash: show nothing until session check is complete -->
+} @else if (isLoggedIn()) {
 <mat-sidenav-container class="app-container">
   <mat-sidenav [opened]="isSidenavOpen()" mode="side" class="sidenav">
     <div class="sidenav-header">
@@ -38,6 +40,13 @@
         <mat-icon matListItemIcon>people</mat-icon>
         <span matListItemTitle>Utilisateurs</span>
       </mat-list-item>
+
+      <!-- Journal d'Audit - visible uniquement pour les admins -->
+      <mat-list-item (click)="setCurrentPage('audit-logs')" (keydown.enter)="setCurrentPage('audit-logs')"
+        [class.active]="currentPage() === 'audit-logs'">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle>Journal d'Audit</span>
+      </mat-list-item>
       }
 
       <!-- Mon Compte - visible pour tous les utilisateurs connectés -->
@@ -72,19 +81,21 @@
       } @case ('interactions') {
       <app-interactions />
       } @case ('modules') {
-      <app-modules-list (selectModule)="onSelectModule($event)" (addModule)="onAddModule()" />
+      <app-modules-list (selectModule)="onSelectModule($event)" (addModule)="onAddModule($event)" />
       } @case ('module-detail') {
       @if(selectedModule(); as module) {
       <app-module-detail [module]="module" (moduleSaved)="onModuleSaved()" />
       }
       } @case ('add-module') {
-      <app-module-form (moduleSaved)="onModuleSaved()" />
+      <app-module-form [targetRole]="targetRoleForNewModule()" (moduleSaved)="onModuleSaved()" />
       } @case ('sounds') {
       <app-sounds />
       } @case ('users') {
       <app-users />
       } @case ('account') {
       <app-account />
+      } @case ('audit-logs') {
+      <app-audit-logs />
       } }
     </div>
   </mat-sidenav-content>

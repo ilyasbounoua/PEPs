@@ -45,7 +45,8 @@ public class DashBoardControllerTest {
         System.out.println("dashboard");
         DashBoardController instance = new DashBoardController();
         ResponseEntity<DashboardStats> expResult = null;
-        ResponseEntity<DashboardStats> result = instance.dashboard(null);
+        // Updated to match new signature: dashboard(role, startDate, endDate)
+        ResponseEntity<DashboardStats> result = instance.dashboard(null, null, null);
         assertEquals(expResult, result);
     }
 

@@ -20,4 +20,15 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
      * @author Anas EL HOUDI
      */
     List<Interaction> findByOwnerRole(String ownerRole);
+
+    /**
+     * Retrieves interactions by role within a specific time range.
+     */
+    List<Interaction> findByOwnerRoleAndTimeLancementBetween(String ownerRole, java.util.Date startDate,
+            java.util.Date endDate);
+
+    /**
+     * Retrieves all interactions within a specific time range.
+     */
+    List<Interaction> findByTimeLancementBetween(java.util.Date startDate, java.util.Date endDate);
 }

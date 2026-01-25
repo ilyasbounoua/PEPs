@@ -9,6 +9,8 @@
     <class>peps.peps_back.items.Interaction</class>
     <class>peps.peps_back.items.Sound</class>
     <class>peps.peps_back.items.Module</class>
+    <class>peps.peps_back.items.User</class>
+    <class>peps.peps_back.items.AuditLog</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
 

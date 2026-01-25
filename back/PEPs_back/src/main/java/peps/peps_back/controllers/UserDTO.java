@@ -15,6 +15,7 @@ public class UserDTO {
     private Integer id;
     private String login;
     private String role;
+    private String permission;
     private Boolean enabled;
 
     // Constructeur par défaut
@@ -22,10 +23,11 @@ public class UserDTO {
     }
 
     // Constructeur complet
-    public UserDTO(Integer id, String login, String role, Boolean enabled) {
+    public UserDTO(Integer id, String login, String role, String permission, Boolean enabled) {
         this.id = id;
         this.login = login;
         this.role = role;
+        this.permission = permission;
         this.enabled = enabled;
     }
 
@@ -55,6 +57,14 @@ public class UserDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 
     public Boolean getEnabled() {

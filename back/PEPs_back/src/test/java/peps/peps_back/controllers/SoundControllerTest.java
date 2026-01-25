@@ -72,7 +72,7 @@ public class SoundControllerTest {
         when(soundRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         try {
-            ResponseEntity result = instance.uploadSound(name, type, file);
+            ResponseEntity result = instance.uploadSound(name, type, file, null, null);
             assertNotNull(result);
         } catch (Exception e) {
             // Catch potential IOExceptions from file handling
@@ -92,7 +92,7 @@ public class SoundControllerTest {
 
         try {
             // Pass null or new DTO just to check execution flow
-            ResponseEntity result = instance.updateSound(id, null);
+            ResponseEntity result = instance.updateSound(id, null, null);
         } catch (Exception e) {
             System.out.println("Ignored update error: " + e.getMessage());
         }
@@ -108,7 +108,7 @@ public class SoundControllerTest {
         when(soundRepository.existsById(id)).thenReturn(true);
         doNothing().when(soundRepository).deleteById(id);
 
-        ResponseEntity result = instance.deleteSound(id);
+        ResponseEntity result = instance.deleteSound(id, null);
         assertNotNull(result);
     }
 }

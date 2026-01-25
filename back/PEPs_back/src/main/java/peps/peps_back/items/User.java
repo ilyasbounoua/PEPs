@@ -40,6 +40,15 @@ public class User {
     @Column(nullable = false, length = 20)
     private String role = "dauphin";
 
+    /**
+     * Permission de l'utilisateur : "viewer", "editor" ou "admin".
+     * - viewer : lecture seule
+     * - editor : lecture + modification
+     * - admin : tout + gestion users + voir audit logs
+     */
+    @Column(nullable = false, length = 20)
+    private String permission = "viewer";
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -88,5 +97,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 }
