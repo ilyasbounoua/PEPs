@@ -46,7 +46,8 @@ public class DailyStatsControllerTest {
         System.out.println("getDailyStats");
         DailyStatsController instance = new DailyStatsController();
         ResponseEntity<List<DailyDataDTO>> expResult = null;
-        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats(null);
+        // Updated to match new signature: getDailyStats(role, startDate, endDate)
+        ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats(null, null, null);
         assertEquals(expResult, result);
     }
 

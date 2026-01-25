@@ -99,7 +99,28 @@ export class Users implements OnInit {
      */
     loadUsers(): void {
         this.api.getUsers().subscribe({
-            next: (users) => this.users.set(users),
+            next: (users) => {
+                // Sort users: Admin (Role) > Editor (Permission) > Viewer (Permission)
+                // Note: Permission 'admin' is deprecated.
+                const sortedUsers = users.sort((a, b) => {
+                    // Helper to get score
+                    const getScore = (u: UserDTO) => {
+                        if (u.role.toLowerCase() === 'admin') return 3;
+                        const p = u.permission.toLowerCase();
+                        if (p === 'editor' || p === 'admin') return 2;
+                        return 1;
+                    };
+
+                    const scoreA = getScore(a);
+                    const scoreB = getScore(b);
+
+                    if (scoreA !== scoreB) {
+                        return scoreB - scoreA; // Descending score
+                    }
+                    return a.login.localeCompare(b.login); // Ascending login
+                });
+                this.users.set(sortedUsers);
+            },
             error: (err) => {
                 console.error('Erreur chargement utilisateurs:', err);
                 this.snackBar.open('Erreur lors du chargement des utilisateurs', 'Fermer', { duration: 3000 });
@@ -123,7 +144,7 @@ export class Users implements OnInit {
         this.formLogin = user.login;
         this.formPassword = '';
         this.formRole = user.role;
-        this.formPermission = user.permission || 'viewer';
+        this.formPermission = ((user.permission as string) === 'admin' ? 'editor' : user.permission) || 'viewer';
         this.originalRole = user.role; // Store original role for validation
         this.roleError = '';
         this.editingUserId.set(user.id);
@@ -164,12 +185,6 @@ export class Users implements OnInit {
 
         const roleLower = this.formRole.toLowerCase().trim();
 
-        // Block 'admin' as it's reserved
-        if (roleLower === 'admin') {
-            this.roleError = 'Le rôle "admin" est réservé';
-            return false;
-        }
-
         // Check if role is already used by another user (case-insensitive)
         // Exclude the original role when editing (user can keep their own role)
         const isRoleUsed = this.existingRoles.some(r => {
@@ -194,6 +209,11 @@ export class Users implements OnInit {
         // Clear error on input change
         if (this.roleError) {
             this.roleError = '';
+        }
+
+        // Auto-select 'editor' permission if role is admin
+        if (this.formRole && this.formRole.toLowerCase().trim() === 'admin') {
+            this.formPermission = 'editor';
         }
     }
 

@@ -43,25 +43,41 @@ export class ApiService {
    * - Admin: stats for ALL data (no role) or filtered by selected role
    * @author Anas EL HOUDI
    */
-  getDashboardStats(filterRole?: string): Observable<StatCard> {
+  getDashboardStats(filterRole?: string, start?: string, end?: string): Observable<StatCard> {
     const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
     // Admin can filter by role, regular users always use their own role
     let targetRole = isAdmin ? filterRole : userRole;
-    const params = targetRole ? `?role=${targetRole}` : '';
 
-    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${params}`);
+    let params = `?role=${targetRole || ''}`; // If targetRole is undefined/empty, send empty string (backend handles this)
+    // Actually backend handles "role" param being present. If empty string passed, it might be weird.
+    // Let's stick to existing logic where we construct query string.
+
+    let queryParams: string[] = [];
+    if (targetRole) queryParams.push(`role=${targetRole}`);
+    if (start) queryParams.push(`startDate=${start}`);
+    if (end) queryParams.push(`endDate=${end}`);
+
+    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${queryString}`);
   }
 
-  getDailyStats(filterRole?: string): Observable<DailyData[]> {
+  getDailyStats(filterRole?: string, start?: string, end?: string): Observable<DailyData[]> {
     const userRole = this.authService.currentUserRole();
     const isAdmin = this.authService.isAdmin();
 
     let targetRole = isAdmin ? filterRole : userRole;
-    const params = targetRole ? `?role=${targetRole}` : '';
 
-    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${params}`);
+    let queryParams: string[] = [];
+    if (targetRole) queryParams.push(`role=${targetRole}`);
+    if (start) queryParams.push(`startDate=${start}`);
+    if (end) queryParams.push(`endDate=${end}`);
+
+    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${queryString}`);
   }
 
   // Interactions

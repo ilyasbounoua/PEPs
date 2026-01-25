@@ -35,48 +35,74 @@ public class DashBoardController {
     /**
      * Returns dashboard statistics.
      * 
-     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
-     *             stats for ALL.
+     * @param role      Role to filter by (e.g., 'dauphin', 'aras'). If null,
+     *                  returns
+     *                  stats for ALL.
+     * @param startDate Optional start date (ISO format).
+     * @param endDate   Optional end date (ISO format).
      * @author Anas EL HOUDI
      */
     @GetMapping("/dashboard")
-    public ResponseEntity<DashboardStats> dashboard(@RequestParam(required = false) String role) {
+    public ResponseEntity<DashboardStats> dashboard(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+
         List<Interaction> interactions;
         List<Module> modules;
 
-        // If role is provided, filter by owner_role
-        if (role != null && !role.isEmpty()) {
-            interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
-            modules = moduleRepository.findByOwnerRole(role.toLowerCase());
-        } else {
-            // No role (admin view): get all
-            interactions = interactionRepository.findAll();
-            modules = moduleRepository.findAll();
-        }
+        try {
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            java.util.Date start = (startDate != null && !startDate.isEmpty()) ? isoFormat.parse(startDate) : null;
+            java.util.Date end = (endDate != null && !endDate.isEmpty()) ? isoFormat.parse(endDate) : null;
 
-        long totalInteractions = interactions.size();
-        long activeModules = modules.stream()
-                .filter(Module::getActif)
-                .count();
-
-        String lastInteraction = "No interactions";
-        if (!interactions.isEmpty()) {
-            Interaction latest = interactions.stream()
-                    .max((i1, i2) -> i1.getTimeLancement().compareTo(i2.getTimeLancement()))
-                    .orElse(null);
-
-            if (latest != null && latest.getTimeLancement() != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                lastInteraction = sdf.format(latest.getTimeLancement());
+            // If role is provided, filter by owner_role
+            if (role != null && !role.isEmpty()) {
+                if (start != null && end != null) {
+                    interactions = interactionRepository.findByOwnerRoleAndTimeLancementBetween(role.toLowerCase(),
+                            start, end);
+                } else {
+                    interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
+                }
+                modules = moduleRepository.findByOwnerRole(role.toLowerCase());
+            } else {
+                // No role (admin view): get all
+                if (start != null && end != null) {
+                    interactions = interactionRepository.findByTimeLancementBetween(start, end);
+                } else {
+                    interactions = interactionRepository.findAll();
+                }
+                modules = moduleRepository.findAll();
             }
+
+            long totalInteractions = interactions.size();
+            long activeModules = modules.stream()
+                    .filter(Module::getActif)
+                    .count();
+
+            String lastInteraction = "No interactions";
+            if (!interactions.isEmpty()) {
+                Interaction latest = interactions.stream()
+                        .max((i1, i2) -> i1.getTimeLancement().compareTo(i2.getTimeLancement()))
+                        .orElse(null);
+
+                if (latest != null && latest.getTimeLancement() != null) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    lastInteraction = sdf.format(latest.getTimeLancement());
+                }
+            }
+
+            DashboardStats stats = new DashboardStats(
+                    (int) totalInteractions,
+                    (int) activeModules,
+                    lastInteraction);
+
+            return ResponseEntity.ok(stats);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
         }
-
-        DashboardStats stats = new DashboardStats(
-                (int) totalInteractions,
-                (int) activeModules,
-                lastInteraction);
-
-        return ResponseEntity.ok(stats);
     }
 
 }

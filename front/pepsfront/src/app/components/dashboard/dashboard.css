@@ -1,0 +1,151 @@
+/* Dashboard Controls */
+.dashboard-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dashboard-filter {
+    /* Filters should take only necessary space */
+    min-width: 200px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    height: 100%;
+}
+
+.stat-card mat-card-header {
+    display: flex;
+    align-items: flex-start;
+}
+
+.stat-card mat-icon {
+    font-size: 40px;
+    height: 40px;
+    width: 40px;
+    margin-right: 16px;
+    color: #3f51b5;
+    /* Primary color */
+}
+
+.stat-card .icon-active {
+    color: #4caf50;
+    /* Green/Success */
+}
+
+.stat-card mat-card-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stat-card mat-card-subtitle {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Chart Card */
+.chart-card {
+    padding: 24px;
+    min-height: 400px;
+}
+
+/* Navigation */
+.chart-navigation {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.chart-navigation button {
+    /* Optional: Style buttons to be more prominent if needed */
+    margin: 0 8px;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    width: 100%;
+    margin-top: 24px;
+    flex: 1;
+    /* Allow chart to take remaining width */
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    /* Align bars to bottom */
+    justify-content: space-between;
+    height: 100%;
+    /* Occupy full height available inside container (minus labels) */
+    flex: 1;
+    border-bottom: 2px solid #e0e0e0;
+    /* Solid axis line */
+    padding-bottom: 0;
+    gap: 8px;
+    /* Space between bars */
+}
+
+.bar-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100%;
+    position: relative;
+    /* Removed transition/hover from wrapper, applied to bar */
+}
+
+.bar {
+    width: 100%;
+    max-width: 40px;
+    /* Max width for bars so they look like columns */
+    background-color: #3f51b5;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 4px;
+    /* Ensure even 0 values have a tiny visibility or just use 0 */
+}
+
+/* Specific fix: ensure bars start from bottom line (border-bottom of chart-bars handles visually) */
+
+.bar:hover {
+    background-color: #303f9f;
+    transform: scaleY(1.05);
+    transform-origin: bottom;
+}
+
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 0 4px;
+    /* Align roughly with bars */
+}
+
+.label {
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.week-range-label {
+    text-align: center;
+    margin-top: 12px;
+    font-weight: 500;
+    color: #3f51b5;
+    font-size: 0.9rem;
+}

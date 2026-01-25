@@ -52,7 +52,7 @@ export interface NewSound {
 
 export type SoundFilter = 'all' | 'Vocal' | 'Ambiance' | 'Naturel' | 'Autre';
 export type PageType = 'dashboard' | 'interactions' | 'modules' | 'module-detail' | 'add-module' | 'sounds' | 'users' | 'account' | 'audit-logs';
-export type PermissionType = 'viewer' | 'editor' | 'admin';
+export type PermissionType = 'viewer' | 'editor';
 
 /* ===================== */
 /* Interfaces Utilisateurs (Système multi-profils) */
