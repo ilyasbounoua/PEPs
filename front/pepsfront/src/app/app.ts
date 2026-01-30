@@ -26,6 +26,7 @@ import { ModuleForm } from './components/modules/module-form/module-form';
 import { AuthService } from './services/auth';
 import { Account } from './components/account/account';
 import { AuditLogsComponent } from './components/audit-logs/audit-logs';
+import { ArchiveComponent } from './components/archive/archive';
 
 /** Clé pour stocker la page courante */
 const PAGE_KEY = 'peps_current_page';
@@ -49,6 +50,7 @@ const PAGE_KEY = 'peps_current_page';
     Users,
     Account,
     AuditLogsComponent,
+    ArchiveComponent,
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
@@ -93,6 +95,8 @@ export class App {
         return 'Mon Compte';
       case 'audit-logs':
         return "Journal d'Audit";
+      case 'archive':
+        return 'Archive des Données';
       default:
         return "PEP'S";
     }

@@ -47,6 +47,13 @@
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>Journal d'Audit</span>
       </mat-list-item>
+
+      <!-- Archive - visible uniquement pour les admins -->
+      <mat-list-item (click)="setCurrentPage('archive')" (keydown.enter)="setCurrentPage('archive')"
+        [class.active]="currentPage() === 'archive'">
+        <mat-icon matListItemIcon>archive</mat-icon>
+        <span matListItemTitle>Archive</span>
+      </mat-list-item>
       }
 
       <!-- Mon Compte - visible pour tous les utilisateurs connectés -->
@@ -96,6 +103,8 @@
       <app-account />
       } @case ('audit-logs') {
       <app-audit-logs />
+      } @case ('archive') {
+      <app-archive />
       } }
     </div>
   </mat-sidenav-content>
