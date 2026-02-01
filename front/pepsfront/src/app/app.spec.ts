@@ -83,8 +83,13 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
 
-    // Simulate successful login
-    app.onLoginSuccess();
+    // Inject the mock service to manipulate state
+    const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
+
+    // Simulate successful login directly on the service (signals are reactive)
+    authService.login('test', 'pass');
+
+    // Trigger change detection to update the view based on new signal state
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
