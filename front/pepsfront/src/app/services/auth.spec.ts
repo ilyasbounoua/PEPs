@@ -8,6 +8,9 @@ describe('AuthService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    // Clear session storage to ensure clean state
+    sessionStorage.clear();
+
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
@@ -85,7 +88,7 @@ describe('AuthService', () => {
     const promise = service.login(login, password);
     const req = httpMock.expectOne('http://localhost:8080/PEPs_back/auth/login');
     req.flush(mockResponse);
-    
+
     // then, logout
     service.logout();
     expect(service.isAuthenticated()).toBe(false);

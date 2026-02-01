@@ -50,6 +50,9 @@ class MockApiService {
 
 describe('App', () => {
   beforeEach(async () => {
+    // Clear storage to prevent interference from other tests
+    sessionStorage.clear();
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
