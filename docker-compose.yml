@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: peps-database
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - peps-network
+    restart: unless-stopped
+
+  # Backend Service (Java/Spring)
+  backend:
+    build:
+      context: ./back/PEPs_back
+      dockerfile: Dockerfile
+    container_name: peps-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - peps-network
+    restart: unless-stopped
+
+  # Frontend Service (Angular)
+  frontend:
+    build:
+      context: ./front/pepsfront
+      dockerfile: Dockerfile
+    container_name: peps-frontend
+    environment:
+      - API_URL=${API_URL}
+    ports:
+      - "4200:80"
+    networks:
+      - peps-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: peps-proxy
+    ports:
+      - "${PROXY_PORT}:80"
+      - "${PROXY_SSL_PORT}:443"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - peps-network
+    restart: unless-stopped
+
+networks:
+  peps-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
