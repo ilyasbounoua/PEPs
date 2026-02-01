@@ -13,11 +13,13 @@ class MockAuthService {
   private readonly _userId = signal<number | null>(null);
   private readonly _userLogin = signal('');
   private readonly _userRole = signal('');
+  private readonly _isInitialized = signal(true); // Mock initialized by default
 
   isAuthenticated = this._isLoggedIn.asReadonly();
   currentUserId = this._userId.asReadonly();
   currentLogin = this._userLogin.asReadonly();
   currentRole = this._userRole.asReadonly();
+  isInitialized = this._isInitialized.asReadonly();
   isAdmin = computed(() => this._userRole() === 'admin');
 
   login(user: string, pass: string) {
@@ -77,7 +79,7 @@ describe('App', () => {
   it('should render dashboard when logged in', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
-    
+
     // Simulate successful login
     app.onLoginSuccess();
     fixture.detectChanges();
