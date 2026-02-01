@@ -45,6 +45,9 @@ class MockApiService {
   getDailyStats() {
     return of([]);
   }
+  getRoles() {
+    return of(['admin', 'user']);
+  }
 }
 
 
