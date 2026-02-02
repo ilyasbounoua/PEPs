@@ -5,6 +5,10 @@
  * Multi-profile system:
  * - Uses role to filter interactions by profile
  * - Each profile only sees its own interactions
+ * 
+ * Archive system:
+ * - Only shows interactions from the last 3 months
+ * - Older interactions are managed via the Archive section
  */
 package peps.peps_back.controllers;
 
@@ -18,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import peps.peps_back.items.Interaction;
 import peps.peps_back.repositories.InteractionRepository;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +37,8 @@ public class InteractionController {
 
     /**
      * Lists interactions filtered by role.
+     * Only returns interactions from the last 3 months.
+     * Older interactions are available via the Archive section.
      * 
      * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
      *             all.
@@ -39,11 +47,16 @@ public class InteractionController {
     public ResponseEntity<List<InteractionDTO>> getAllInteractions(@RequestParam(required = false) String role) {
         List<Interaction> interactions;
 
-        // If role is provided, filter by owner_role
+        // Calculate the cutoff date (3 months ago)
+        Calendar cutoff = Calendar.getInstance();
+        cutoff.add(Calendar.MONTH, -3);
+        Date cutoffDate = cutoff.getTime();
+
+        // If role is provided, filter by owner_role AND date
         if (role != null && !role.isEmpty()) {
-            interactions = interactionRepository.findByOwnerRole(role.toLowerCase());
+            interactions = interactionRepository.findByOwnerRoleAndTimeLancementAfter(role.toLowerCase(), cutoffDate);
         } else {
-            interactions = interactionRepository.findAll();
+            interactions = interactionRepository.findByTimeLancementAfter(cutoffDate);
         }
 
         List<InteractionDTO> dtos = interactions.stream()

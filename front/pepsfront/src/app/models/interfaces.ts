@@ -51,8 +51,38 @@ export interface NewSound {
 }
 
 export type SoundFilter = 'all' | 'Vocal' | 'Ambiance' | 'Naturel' | 'Autre';
-export type PageType = 'dashboard' | 'interactions' | 'modules' | 'module-detail' | 'add-module' | 'sounds' | 'users' | 'account' | 'audit-logs';
+export type PageType = 'dashboard' | 'interactions' | 'modules' | 'module-detail' | 'add-module' | 'sounds' | 'users' | 'account' | 'audit-logs' | 'archive';
 export type PermissionType = 'viewer' | 'editor';
+
+/* ===================== */
+/* Archive Period Interface */
+/* ===================== */
+
+/**
+ * Represents a 3-month archive period for interaction logs.
+ * Used by the Archive section to display available periods for export.
+ * @author Anas EL HOUDI
+ */
+export interface ArchivePeriod {
+  periodId: string;       // e.g., "2025-07"
+  periodLabel: string;    // e.g., "Juillet 2025 - Septembre 2025"
+  startDate: string;
+  endDate: string;
+  interactionCount: number;
+}
+
+/**
+ * Represents a 3-month archive period for audit logs.
+ * Used by the Archive section to display available audit log periods for export.
+ * @author Anas EL HOUDI
+ */
+export interface AuditArchivePeriod {
+  periodId: string;       // e.g., "2025-07"
+  periodLabel: string;    // e.g., "Juillet 2025 - Septembre 2025"
+  startDate: string;
+  endDate: string;
+  interactionCount: number;  // Note: backend uses same field name for count
+}
 
 /* ===================== */
 /* Interfaces Utilisateurs (Système multi-profils) */

@@ -10,7 +10,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog } from '../models/interfaces';
+import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod } from '../models/interfaces';
 import { AuthService } from './auth';
 
 @Injectable({
@@ -261,5 +261,73 @@ export class ApiService {
    */
   getAuditLogsByUser(userLogin: string): Observable<AuditLog[]> {
     return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-user/${userLogin}`);
+  }
+
+  /* ===================== */
+  /* Archive Management (Admin only) */
+  /* ===================== */
+
+  /**
+   * Gets available archive periods (quarters older than 3 months).
+   * @author Anas EL HOUDI
+   */
+  getArchivePeriods(): Observable<ArchivePeriod[]> {
+    return this.http.get<ArchivePeriod[]>(`${this.BASE_URL}/archive/periods`);
+  }
+
+  /**
+   * Exports and deletes interactions for a specific period.
+   * Returns a Blob for file download.
+   * @author Anas EL HOUDI
+   */
+  exportAndDeletePeriod(periodId: string): Observable<Blob> {
+    return this.http.post(`${this.BASE_URL}/archive/export?periodId=${periodId}`, null, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Exports and deletes ALL archive periods.
+   * Returns a Blob for file download.
+   * @author Anas EL HOUDI
+   */
+  exportAndDeleteAllPeriods(): Observable<Blob> {
+    return this.http.post(`${this.BASE_URL}/archive/export-all`, null, {
+      responseType: 'blob'
+    });
+  }
+
+  /* ===================== */
+  /* Audit Log Archive Management (Admin only) */
+  /* ===================== */
+
+  /**
+   * Gets available audit log archive periods (quarters older than 3 months).
+   * @author Anas EL HOUDI
+   */
+  getAuditArchivePeriods(): Observable<AuditArchivePeriod[]> {
+    return this.http.get<AuditArchivePeriod[]>(`${this.BASE_URL}/archive/audit-periods`);
+  }
+
+  /**
+   * Exports and deletes audit logs for a specific period.
+   * Returns a Blob for file download.
+   * @author Anas EL HOUDI
+   */
+  exportAndDeleteAuditPeriod(periodId: string): Observable<Blob> {
+    return this.http.post(`${this.BASE_URL}/archive/audit-export?periodId=${periodId}`, null, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Exports and deletes ALL audit log archive periods.
+   * Returns a Blob for file download.
+   * @author Anas EL HOUDI
+   */
+  exportAndDeleteAllAuditPeriods(): Observable<Blob> {
+    return this.http.post(`${this.BASE_URL}/archive/audit-export-all`, null, {
+      responseType: 'blob'
+    });
   }
 }
