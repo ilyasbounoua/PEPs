@@ -14,6 +14,7 @@ import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 /** Interface pour la réponse du backend lors du login */
 interface LoginResponse {
@@ -136,9 +137,10 @@ export class AuthService {
 
     try {
       // Récupérer la réponse du backend avec userId et role
+      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(
-          'http://localhost:8080/PEPs_back/auth/login',
+          `${baseUrl}/auth/login`,
           { login, password }
         )
       );
