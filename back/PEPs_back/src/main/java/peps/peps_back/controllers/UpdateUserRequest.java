@@ -8,6 +8,7 @@ package peps.peps_back.controllers;
  * - login : nouveau login (si modification)
  * - password : nouveau mot de passe (si modification, sera hashé)
  * - role : nouveau rôle ("admin", "dauphin" ou "aras")
+ * - permission : nouvelle permission ("viewer", "editor" ou "admin")
  * 
  * @author Anas EL HOUDI
  */
@@ -16,6 +17,7 @@ public class UpdateUserRequest {
     private String login;
     private String password;
     private String role;
+    private String permission;
 
     /* ===================== */
     /* Getters & Setters */
@@ -43,5 +45,13 @@ public class UpdateUserRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 }

@@ -27,7 +27,7 @@
 
     <!-- ADD PERSISTENCE SUPPORT HERE (jpa, hibernate, etc) -->
     <mvc:annotation-driven/>
-    <context:component-scan base-package="peps.peps_back.controllers" />
+    <context:component-scan base-package="peps.peps_back.controllers,peps.peps_back.services" />
 
     <context:load-time-weaver/>
 

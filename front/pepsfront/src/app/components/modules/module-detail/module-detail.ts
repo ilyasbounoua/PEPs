@@ -14,6 +14,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../../../services/api';
+import { AuthService } from '../../../services/auth';
 import { Module } from '../../../models/interfaces';
 
 @Component({
@@ -34,8 +35,11 @@ import { Module } from '../../../models/interfaces';
 })
 export class ModuleDetail {
   private api = inject(ApiService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private document = inject(DOCUMENT);
+
+  readonly canEdit = this.authService.canEdit;
 
   module = input.required<Module>();
   saveSuccess = output<void>();
@@ -68,7 +72,7 @@ export class ModuleDetail {
 
   onSave() {
     const moduleToSave = this.module();
-    
+
     if (!moduleToSave.name || moduleToSave.name.trim() === '') {
       alert('Le nom du module est obligatoire');
       return;
@@ -116,7 +120,7 @@ export class ModuleDetail {
 
   onDelete() {
     const moduleToDelete = this.module();
-    
+
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le module "${moduleToDelete.name}" ?`)) {
       return;
     }

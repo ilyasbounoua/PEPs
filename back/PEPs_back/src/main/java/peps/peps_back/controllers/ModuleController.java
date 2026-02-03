@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Module;
 import peps.peps_back.repositories.ModuleRepository;
+import peps.peps_back.repositories.UserRepository;
+import peps.peps_back.items.User;
+import peps.peps_back.services.AuditService;
+import javax.persistence.OptimisticLockException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +30,12 @@ public class ModuleController {
 
     @Autowired
     private ModuleRepository moduleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AuditService auditService;
 
     /**
      * Lists modules filtered by role.
@@ -84,7 +94,19 @@ public class ModuleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateModule(@PathVariable Integer id, @RequestBody ModuleDTO dto) {
+    public ResponseEntity<?> updateModule(@PathVariable Integer id, @RequestBody ModuleDTO dto,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
         Module module = moduleRepository.findById(id).orElse(null);
         if (module == null) {
             Map<String, String> error = new HashMap<>();
@@ -128,6 +150,12 @@ public class ModuleController {
             return ResponseEntity.badRequest().body(error);
         }
 
+        // Capture old values for audit log
+        String oldValue = String.format(
+                "{\"name\":\"%s\",\"ip\":\"%s\",\"volume\":%d,\"mode\":\"%s\",\"actif\":%b}",
+                module.getNom(), module.getIpAdress(), module.getVolume(),
+                module.getCurrentMode(), module.getActif());
+
         module.setNom(dto.getName());
         module.setIpAdress(dto.getIp());
         module.setVolume(dto.getConfig().getVolume());
@@ -138,23 +166,56 @@ public class ModuleController {
 
         moduleRepository.save(module);
 
-        ModuleDTO updatedDto = new ModuleDTO(
-                module.getIdmodule(),
-                module.getNom(),
-                dto.getLocation(),
-                module.getActif() ? "Actif" : "Inactif",
-                module.getIpAdress(),
-                new ModuleConfigDTO(
-                        module.getVolume(),
-                        module.getCurrentMode(),
-                        module.getActif(),
-                        dto.getConfig().isSon()));
+        // Capture new values for audit log
+        String newValue = String.format(
+                "{\"name\":\"%s\",\"ip\":\"%s\",\"volume\":%d,\"mode\":\"%s\",\"actif\":%b}",
+                module.getNom(), module.getIpAdress(), module.getVolume(),
+                module.getCurrentMode(), module.getActif());
 
-        return ResponseEntity.ok(updatedDto);
+        try {
+            moduleRepository.save(module);
+
+            // Log update
+            String userLogin = (login != null) ? login : "unknown";
+            auditService.log("UPDATE", "module", module.getIdmodule(), module.getNom(),
+                    module.getOwnerRole(), userLogin, oldValue, newValue, "Modification du module");
+
+            ModuleDTO updatedDto = new ModuleDTO(
+                    module.getIdmodule(),
+                    module.getNom(),
+                    dto.getLocation(),
+                    module.getActif() ? "Actif" : "Inactif",
+                    module.getIpAdress(),
+                    new ModuleConfigDTO(
+                            module.getVolume(),
+                            module.getCurrentMode(),
+                            module.getActif(),
+                            dto.getConfig().isSon()));
+
+            return ResponseEntity.ok(updatedDto);
+
+        } catch (OptimisticLockException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Conflit de modification : le module a été modifié par un autre utilisateur.");
+            return ResponseEntity.status(409).body(error);
+        }
     }
 
     @PostMapping
-    public ResponseEntity<?> createModule(@RequestBody ModuleDTO dto) {
+    public ResponseEntity<?> createModule(@RequestBody ModuleDTO dto,
+            @RequestParam(required = false) String role,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
         if (dto.getName() == null || dto.getName().trim().isEmpty()) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Le nom du module est obligatoire");
@@ -188,7 +249,22 @@ public class ModuleController {
         module.setStatus(dto.getConfig().isActif() ? "actif" : "inactif");
         module.setLastSeen(new java.util.Date());
 
+        // Set owner role for multi-profile filtering
+        if (role != null && !role.isEmpty()) {
+            module.setOwnerRole(role.toLowerCase());
+        }
+
         module = moduleRepository.save(module);
+
+        // Log creation in audit
+        String newValue = String.format(
+                "{\"name\":\"%s\",\"ip\":\"%s\",\"volume\":%d,\"mode\":\"%s\",\"actif\":%b}",
+                module.getNom(), module.getIpAdress(), module.getVolume(),
+                module.getCurrentMode(), module.getActif());
+
+        String userLogin = (login != null) ? login : "unknown";
+        auditService.log("CREATE", "module", module.getIdmodule(), module.getNom(),
+                module.getOwnerRole(), userLogin, null, newValue, "Création d'un module");
 
         ModuleDTO createdDto = new ModuleDTO(
                 module.getIdmodule(),
@@ -206,13 +282,34 @@ public class ModuleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteModule(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteModule(@PathVariable Integer id,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission Check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Accès refusé : Vous avez la permission Viewer uniquement.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
         Module module = moduleRepository.findById(id).orElse(null);
         if (module == null) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Module introuvable");
             return ResponseEntity.notFound().build();
         }
+
+        // Log deletion in audit
+        String oldValue = String.format(
+                "{\"name\":\"%s\",\"ip\":\"%s\",\"ownerRole\":\"%s\"}",
+                module.getNom(), module.getIpAdress(), module.getOwnerRole());
+
+        String userLogin = (login != null) ? login : "unknown";
+        auditService.log("DELETE", "module", id, module.getNom(),
+                module.getOwnerRole(), userLogin, oldValue, null, "Suppression d'un module");
 
         moduleRepository.delete(module);
 

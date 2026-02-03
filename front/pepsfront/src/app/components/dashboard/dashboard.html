@@ -1,25 +1,39 @@
 <div class="page-content dashboard-page">
 
-  <!-- Admin Profile Filter -->
-  @if (isAdmin()) {
-  <div class="dashboard-filter">
-    <mat-form-field appearance="outline" class="profile-select">
-      <mat-label>Filtrer par profil</mat-label>
-      <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
-        @for (profile of profiles; track $index) {
-        <mat-option [value]="profile.role">{{profile.name}}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+  <div class="dashboard-controls">
+    <!-- Admin Profile Filter -->
+    @if (isAdmin()) {
+    <div class="dashboard-filter">
+      <mat-form-field appearance="outline" class="profile-select">
+        <mat-label>Filtrer par profil</mat-label>
+        <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+          @for (profile of profiles; track $index) {
+          <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    }
+
+    <!-- Date Period Filter -->
+    <div class="dashboard-filter">
+      <mat-form-field appearance="outline" class="period-select">
+        <mat-label>Période</mat-label>
+        <mat-select [ngModel]="selectedPeriod" (ngModelChange)="onPeriodChange($event)">
+          @for (period of periods; track $index) {
+          <mat-option [value]="period.value">{{period.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
-  }
 
   <div class="stats-grid">
     <mat-card class="stat-card">
       <mat-card-header>
         <mat-icon mat-card-avatar>touch_app</mat-icon>
         <mat-card-title>{{ stats().totalInteractions }}</mat-card-title>
-        <mat-card-subtitle>Interactions du jour</mat-card-subtitle>
+        <mat-card-subtitle>{{ interactionLabel }}</mat-card-subtitle>
       </mat-card-header>
     </mat-card>
 
@@ -42,16 +56,52 @@
 
   <mat-card class="chart-card">
     <mat-card-header>
-      <mat-card-title>Utilisations du jour</mat-card-title>
+      <mat-card-title>{{ chartLabel }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div class="chart-placeholder">
-        <div class="chart-mock">
-          @for(item of dailyChartData(); track item.time) {
-          <div class="bar" [style.height.%]="(item.count / 30) * 100" [matTooltip]="item.time + ': ' + item.count">
+      <div class="chart-navigation">
+        <!-- Prev Button: Only show if we can paginate back OR forward (meaning pagination is active) 
+             Actually user wants buttons only if > 8 items.
+             We can check if dailyChartData().length > pageSize.
+        -->
+        <button mat-icon-button (click)="previousPage()" [disabled]="!hasPreviousPage()"
+          [style.visibility]="(dailyChartData().length > pageSize && selectedPeriod !== 'week') ? 'visible' : 'hidden'">
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+
+        <div class="chart-container">
+          <!-- Bars area -->
+          <div class="chart-bars">
+            @for(item of paginatedChartData; track item.time) {
+            <div class="bar-wrapper">
+              <!-- Tooltip on the bar -->
+              <div class="bar" [style.height.%]="(item.count / 30) * 100"
+                [matTooltip]="item.time + ': ' + item.count + ' interactions'">
+              </div>
+            </div>
+            }
           </div>
-          }
+
+          <!-- X-Axis Labels -->
+          <div class="chart-labels">
+            @for(item of paginatedChartData; track item.time) {
+            <div class="label">
+              {{ formatLabel(item.time) }}
+            </div>
+            }
+          </div>
+
+          <!-- Range Label -->
+          <div class="week-range-label">
+            {{ getRangeLabel() }}
+          </div>
         </div>
+
+        <!-- Next Button -->
+        <button mat-icon-button (click)="nextPage()" [disabled]="!hasNextPage()"
+          [style.visibility]="(dailyChartData().length > pageSize && selectedPeriod !== 'week') ? 'visible' : 'hidden'">
+          <mat-icon>navigate_next</mat-icon>
+        </button>
       </div>
     </mat-card-content>
   </mat-card>

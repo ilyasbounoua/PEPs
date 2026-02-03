@@ -62,6 +62,15 @@ public class Sound implements Serializable {
     @Column(name = "owner_role")
     private String ownerRole;
 
+    /**
+     * Version for optimistic locking (concurrency control).
+     * Automatically incremented on each update.
+     * 
+     * @author Anas EL HOUDI
+     */
+    @Column(nullable = false)
+    private Integer version = 0;
+
     public Sound() {
     }
 
@@ -130,6 +139,14 @@ public class Sound implements Serializable {
 
     public void setOwnerRole(String ownerRole) {
         this.ownerRole = ownerRole;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     @Override

@@ -13,11 +13,13 @@ class MockAuthService {
   private readonly _userId = signal<number | null>(null);
   private readonly _userLogin = signal('');
   private readonly _userRole = signal('');
+  private readonly _isInitialized = signal(true); // Mock initialized by default
 
   isAuthenticated = this._isLoggedIn.asReadonly();
   currentUserId = this._userId.asReadonly();
   currentLogin = this._userLogin.asReadonly();
   currentRole = this._userRole.asReadonly();
+  isInitialized = this._isInitialized.asReadonly();
   isAdmin = computed(() => this._userRole() === 'admin');
 
   login(user: string, pass: string) {
@@ -43,11 +45,17 @@ class MockApiService {
   getDailyStats() {
     return of([]);
   }
+  getRoles() {
+    return of(['admin', 'user']);
+  }
 }
 
 
 describe('App', () => {
   beforeEach(async () => {
+    // Clear storage to prevent interference from other tests
+    sessionStorage.clear();
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
@@ -77,9 +85,14 @@ describe('App', () => {
   it('should render dashboard when logged in', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
-    
-    // Simulate successful login
-    app.onLoginSuccess();
+
+    // Inject the mock service to manipulate state
+    const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
+
+    // Simulate successful login directly on the service (signals are reactive)
+    authService.login('test', 'pass');
+
+    // Trigger change detection to update the view based on new signal state
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;

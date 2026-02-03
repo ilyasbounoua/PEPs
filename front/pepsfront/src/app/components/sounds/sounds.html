@@ -2,10 +2,12 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>Bibliothèque de Sons</mat-card-title>
+      @if (canEdit()) {
       <button mat-raised-button color="primary" (click)="toggleAddForm()" class="add-sound-btn">
         <mat-icon>{{ showAddSoundForm() ? 'close' : 'add' }}</mat-icon>
         {{ showAddSoundForm() ? 'Annuler' : 'Ajouter un son' }}
       </button>
+      }
     </mat-card-header>
     <mat-card-content>
 
@@ -158,12 +160,14 @@
                   matTooltip="{{ currentlyPlayingId() === sound.id ? 'Arrêter' : 'Écouter' }}">
                   <mat-icon>{{ currentlyPlayingId() === sound.id ? 'stop' : 'play_arrow' }}</mat-icon>
                 </button>
+                @if (canEdit()) {
                 <button mat-icon-button (click)="startEditSound(sound)" matTooltip="Modifier">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button color="warn" (click)="deleteSound(sound)" matTooltip="Supprimer">
                   <mat-icon>delete</mat-icon>
                 </button>
+                }
               </div>
             </div>
             }
