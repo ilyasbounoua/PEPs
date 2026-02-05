@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod } from '../models/interfaces';
 import { AuthService } from './auth';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class ApiService {
   // private readonly BASE_URL = 'https://peps-backend.onrender.com';
   // Fix for local development (NetBeans/Tomcat)
   // Fix for local development (NetBeans/Tomcat)
-  private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
+  private readonly BASE_URL = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
 
   /**
    * Helper to get headers with user login for audit logging.

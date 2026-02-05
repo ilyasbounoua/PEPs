@@ -26,15 +26,15 @@ import { AuthService } from '../../services/auth';
 export class Login implements OnInit {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
-  
-  hidePassword = true; 
+
+  hidePassword = true;
   loginSuccess = output<void>();
   loginError = signal('');
-  
+
   isReady = signal(false);
 
   ngOnInit() {
-    this.preloadBackground('../../../../public/backgroundlogin.jpg');
+    this.preloadBackground('/backgroundlogin.jpg');
   }
 
   preloadBackground(url: string) {
