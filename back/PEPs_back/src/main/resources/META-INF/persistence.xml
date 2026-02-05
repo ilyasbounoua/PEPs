@@ -35,6 +35,7 @@
     	<!-- Désactiver toute génération automatique du schéma -->
     	<property name="eclipselink.ddl-generation"
              	 value="none"/>
+        <property name="eclipselink.weaving" value="false"/>
 
     </properties>
 	

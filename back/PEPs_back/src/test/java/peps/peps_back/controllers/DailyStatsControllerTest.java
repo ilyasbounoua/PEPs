@@ -1,42 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package peps.peps_back.controllers;
 
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-/**
- *
- * @author Clément
- */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
+@WebAppConfiguration
 public class DailyStatsControllerTest {
 
-    public DailyStatsControllerTest() {
-    }
-
-    @BeforeAll
-    public static void setUpClass() {
-    }
-
-    @AfterAll
-    public static void tearDownClass() {
-    }
-
-    @BeforeEach
-    public void setUp() {
-    }
-
-    @AfterEach
-    public void tearDown() {
-    }
+    @Autowired
+    private DailyStatsController instance;
 
     /**
      * Test of getDailyStats method, of class DailyStatsController.
@@ -44,11 +24,8 @@ public class DailyStatsControllerTest {
     @Test
     public void testGetDailyStats() {
         System.out.println("getDailyStats");
-        DailyStatsController instance = new DailyStatsController();
-        ResponseEntity<List<DailyDataDTO>> expResult = null;
-        // Updated to match new signature: getDailyStats(role, startDate, endDate)
         ResponseEntity<List<DailyDataDTO>> result = instance.getDailyStats(null, null, null);
-        assertEquals(expResult, result);
+        assertNotNull(result);
     }
 
 }
