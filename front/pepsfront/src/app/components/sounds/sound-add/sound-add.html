@@ -1,0 +1,74 @@
+<div class="page-content">
+  <mat-card class="add-sound-card">
+    <mat-card-header>
+      <mat-card-title>Ajouter un nouveau son</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form class="sound-form">
+        
+        @if (isAdmin()) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Assigner à quel profil animal</mat-label>
+            <mat-select [(ngModel)]="selectedRole" name="targetRole" required>
+              @for (profile of profiles; track profile.role) {
+                <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom du son</mat-label>
+          <input matInput [value]="newSound().name" 
+                 (input)="updateSoundName($any($event.target).value)"
+                 name="soundName" placeholder="Ex: Chant d'oiseau">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type</mat-label>
+          <mat-select [value]="newSound().type" 
+                      (selectionChange)="updateSoundType($event.value)" 
+                      name="soundType">
+            <mat-option value="Vocal">Vocal</mat-option>
+            <mat-option value="Ambiance">Ambiance</mat-option>
+            <mat-option value="Naturel">Naturel</mat-option>
+            <mat-option value="Autre">Autre</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="file-input-container">
+          <input type="file" #fileInput accept=".mp3,.wav,.ogg,.m4a" 
+                 (change)="onFileSelected($event)" style="display: none">
+          
+          <div class="file-selection-area">
+            <button mat-stroked-button type="button" (click)="fileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Choisir un fichier
+            </button>
+            @if (newSound().file) {
+              <span class="file-name">{{ newSound().file?.name }}</span>
+            } @else {
+              <span class="file-placeholder">Aucun fichier choisi</span>
+            }
+          </div>
+        </div>
+
+        @if (uploadError()) {
+          <mat-error class="upload-error">{{ uploadError() }}</mat-error>
+        }
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onCancel()">Annuler</button>
+          
+          <button mat-raised-button color="primary" type="button" 
+                  (click)="uploadSound()" [disabled]="isUploading()">
+            @if (isUploading()) { <span>Envoi...</span> } 
+            @else { <mat-icon>save</mat-icon> <span>Enregistrer</span> }
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
