@@ -1,35 +1,176 @@
+/* 1. État initial : Fond noir pour éviter le flash blanc au chargement */
+:host {
+  display: block;
+  background-color: #000;
+  min-height: 100vh;
+}
+
+/* 2. Animation d'entrée fluide (Fade-in + Scale) */
+.fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.98);
+    filter: brightness(0.5);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* 3. Conteneur principal avec image de fond */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #ecf0f1;
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
+    url('../../../../public/5403826.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Roboto', sans-serif;
 }
 
-.login-card {
-  width: 100%;
-  max-width: 400px;
+/* 4. Carte Glassmorphism */
+.login-card.glass-effect {
+  width: 90%;
+  max-width: 450px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(5px) saturate(140%);
+  -webkit-backdrop-filter: blur(5px) saturate(140%);
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0); /* Bordure très fine presque invisible */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
+/* 5. Titres et textes */
+mat-card-title {
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 2rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+mat-card-subtitle {
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-bottom: 25px;
+}
+
+/* 6. Formulaire et Inputs Style Verre */
 .login-form {
   display: flex;
   flex-direction: column;
+  gap: 15px;
 }
 
-.login-form mat-form-field {
+::ng-deep .glass-input .mat-mdc-text-field-wrapper {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 5px !important;
+}
+
+::ng-deep .glass-input input, 
+::ng-deep .glass-input mat-icon {
+  color: #ffffff !important;
+}
+
+/* Couleurs des labels */
+::ng-deep .glass-input .mdc-floating-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+::ng-deep .glass-input .mdc-floating-label--float-above {
+  color: #ffffff !important;
+}
+
+/* --- CORRECTION : SUPPRESSION TOTALE DES BORDURES --- */
+::ng-deep .glass-input .mdc-outlined-input__notched-outline--leading,
+::ng-deep .glass-input .mdc-outlined-input__notched-outline--notched,
+::ng-deep .glass-input .mdc-outlined-input__notched-outline--trailing {
+  border-color: transparent !important;
+  border-width: 0 !important;
+}
+
+/* Désactivation du contour au focus */
+::ng-deep .glass-input.mat-focused .mdc-outlined-input__notched-outline--leading,
+::ng-deep .glass-input.mat-focused .mdc-outlined-input__notched-outline--notched,
+::ng-deep .glass-input.mat-focused .mdc-outlined-input__notched-outline--trailing {
+  border-color: transparent !important;
+}
+
+/* 7. Bouton Entrer - Bleu Sombre */
+.submit-btn {
   width: 100%;
+  height: 55px;
+  margin-top: 20px;
+  border-radius: 14px;
+  background-color: #002f65 !important; /* Bleu vif pour contraster le verre */
+  color: white !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
-.login-form mat-card-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 8px 8px;
+.submit-btn:hover {
+  background-color: #134363 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
 }
 
+/* 8. Erreurs et Icônes */
 .login-general-error {
-  font-size: 14px;
-  margin-top: -16px;
-  margin-bottom: 16px;
-  text-align: center;
-  display: block;
+  color: #ff4d4d;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 12px;
+  border-radius: 0px;
+  border-left: 5px solid #ff4d4d;
+  margin-bottom: 10px;
+}
+
+button[matSuffix] {
+  color: white !important;
+}
+/* Positionnement du Logo */
+.top-left-logo {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+
+  width: 80px;
+  height: auto;
+
+  border: 3px solid #80b8c9; /* bordure extérieure */
+  border-radius: 1000px;
+
+  /* bordure intérieure de 3px */
+  box-shadow:
+    inset 0 0 0 3px #80b8c9,
+    0 4px 8px rgba(0, 0, 0, 0.4); /* ombre existante */
+
+  z-index: 10;
+}
+
+
+/* On s'assure que le container parent gère bien le positionnement absolu */
+.login-container {
+  position: relative; /* Ajout important pour le logo */
+  display: flex;
+  /* ... reste de ton code existant ... */
+}
+
+/* Optionnel : Ajustement pour mobile */
+@media (max-width: 600px) {
+  .top-left-logo {
+    top: 20px;
+    left: 20px;
+    width: 50px;
+  }
 }

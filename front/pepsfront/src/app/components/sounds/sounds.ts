@@ -1,6 +1,10 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the logic for the sounds component, which handles listing, filtering, playing, uploading, editing, and deleting sounds.
+ * 
+ * Multi-profile system:
+ * - Admin can filter by role using dropdown
+ * - Regular users see only their own data
  */
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 import { AudioService } from '../../services/audio';
 import { Sound, SoundFilter } from '../../models/interfaces';
 
@@ -34,16 +39,28 @@ import { Sound, SoundFilter } from '../../models/interfaces';
 })
 export class Sounds implements OnInit {
   private api = inject(ApiService);
+  private authService = inject(AuthService);
   private audioService = inject(AudioService);
+
+  readonly isAdmin = this.authService.isAdmin;
+  readonly canEdit = this.authService.canEdit;
+
+  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  selectedRole = '';
+
+  // Profiles for dropdown - loaded from DB (regular array for template iteration)
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
+  ];
 
   sounds = signal<Sound[]>([]);
   soundFilter = signal<SoundFilter>('all');
   showAddSoundForm = signal(false);
   isUploading = signal(false);
   uploadError = signal('');
-  
+
   newSound = signal({ name: '', type: '', file: null as File | null });
-  
+
   editingSoundId = signal<number | null>(null);
   editSoundData = signal<{ name: string, type: string }>({ name: '', type: '' });
   editSoundError = signal('');
@@ -53,26 +70,59 @@ export class Sounds implements OnInit {
   filteredSounds = computed(() => {
     const filter = this.soundFilter();
     const allSounds = this.sounds();
-    
+
     if (filter === 'all') {
       return allSounds;
     }
-    
+
     return allSounds.filter(s => s.type === filter);
   });
 
   ngOnInit() {
+    console.log('[Sounds] ngOnInit - isAdmin:', this.isAdmin());
+    // Load available roles for admin filter
+    if (this.isAdmin()) {
+      this.api.getRoles().subscribe({
+        next: (roles) => {
+          console.log('[Sounds] Loaded roles:', roles);
+          // Use array reassignment (not mutation) for proper change detection
+          this.profiles = [
+            { role: '', name: 'Tous les profils' },
+            ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))
+          ];
+          console.log('[Sounds] profiles set to:', this.profiles);
+        },
+        error: (err) => console.error('Error loading roles:', err)
+      });
+    }
     this.loadData();
   }
 
   loadData() {
-    this.api.getSounds().subscribe({
-      next: (data) => this.sounds.set(data),
+    const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
+    console.log('[Sounds] loadData - isAdmin:', this.isAdmin(), 'selectedRole:', this.selectedRole, 'filterRole:', filterRole);
+
+    this.api.getSounds(filterRole).subscribe({
+      next: (data) => {
+        console.log('[Sounds] Received', data.length, 'sounds');
+        this.sounds.set(data);
+      },
       error: (err) => console.error('Error loading sounds:', err)
     });
   }
 
+  onProfileChange(role: string) {
+    console.log('[Sounds] onProfileChange - role:', role);
+    this.selectedRole = role;
+    this.loadData();
+  }
+
   toggleAddForm() {
+    // Admin must select a specific role before adding a sound
+    if (this.isAdmin() && !this.selectedRole) {
+      alert('Veuillez sélectionner un profil spécifique avant de créer un son.');
+      return;
+    }
     this.showAddSoundForm.update(show => !show);
     this.newSound.set({ name: '', type: '', file: null });
     this.uploadError.set('');
@@ -92,11 +142,11 @@ export class Sounds implements OnInit {
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    
+
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const extension = file.name.split('.').pop()?.toLowerCase();
-      
+
       if (!['mp3', 'wav', 'ogg', 'm4a'].includes(extension || '')) {
         this.uploadError.set('Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a');
         input.value = '';
@@ -110,7 +160,7 @@ export class Sounds implements OnInit {
 
   uploadSound() {
     const sound = this.newSound();
-    
+
     if (!sound.name || sound.name.trim() === '') {
       this.uploadError.set('Le nom est obligatoire');
       return;
@@ -126,6 +176,12 @@ export class Sounds implements OnInit {
       return;
     }
 
+    // Admin must select a specific role before uploading a sound
+    if (this.isAdmin() && !this.selectedRole) {
+      this.uploadError.set('Veuillez sélectionner un profil spécifique avant de créer un son.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', sound.name);
     formData.append('type', sound.type);
@@ -134,7 +190,9 @@ export class Sounds implements OnInit {
     this.isUploading.set(true);
     this.uploadError.set('');
 
-    this.api.uploadSound(formData).subscribe({
+    // Pass selectedRole for admin, undefined for non-admin (api will use their role)
+    const overrideRole = this.isAdmin() ? this.selectedRole : undefined;
+    this.api.uploadSound(formData, overrideRole).subscribe({
       next: (newSound) => {
         this.sounds.update(sounds => [...sounds, newSound]);
         this.showAddSoundForm.set(false);
@@ -181,7 +239,7 @@ export class Sounds implements OnInit {
 
   saveEditSound(soundId: number) {
     const data = this.editSoundData();
-    
+
     if (!data.name || data.name.trim() === '') {
       this.editSoundError.set('Le nom est obligatoire');
       return;
@@ -194,7 +252,7 @@ export class Sounds implements OnInit {
 
     this.api.updateSound(soundId, data).subscribe({
       next: (updatedSound) => {
-        this.sounds.update(sounds => 
+        this.sounds.update(sounds =>
           sounds.map(s => s.id === updatedSound.id ? updatedSound : s)
         );
         this.cancelEditSound();

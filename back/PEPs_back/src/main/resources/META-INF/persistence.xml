@@ -9,20 +9,36 @@
     <class>peps.peps_back.items.Interaction</class>
     <class>peps.peps_back.items.Sound</class>
     <class>peps.peps_back.items.Module</class>
+    <class>peps.peps_back.items.User</class>
+    <class>peps.peps_back.items.AuditLog</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-        <!-- Configuration Cloud (Supabase) - ANCIENNE CONFIG
-        <property name="javax.persistence.jdbc.url" value="https://omaninfcfmrvrgmxqgah.supabase.co"/>
-        <property name="javax.persistence.jdbc.user" value="postgres"/>
-        <property name="javax.persistence.jdbc.password" value="CcOipla*676"/>
-        -->
 
-        <!-- Configuration Locale (PostgreSQL) -->
-        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>
-        <property name="javax.persistence.jdbc.user" value="postgres"/>
-        <!-- ATTENTION : Remplacez 'postgres' ci-dessous par votre vrai mot de passe local si différent -->
-        <property name="javax.persistence.jdbc.password" value="CcOipla*676"/>
-        <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+    	<!-- PostgreSQL JDBC -->
+    	<property name="javax.persistence.jdbc.driver"
+             	 value="org.postgresql.Driver"/>
+
+    	<property name="javax.persistence.jdbc.url"
+      	        value="jdbc:postgresql://appli-pfe.ec-nantes.fr:5432/infosi_21?currentSchema=peps"/>
+
+    	<property name="javax.persistence.jdbc.user"
+         	     value="infosi_21"/>
+
+    	<property name="javax.persistence.jdbc.password"
+            	  value="frieren"/>
+
+    	<!-- Forcer le schéma PostgreSQL -->
+    	<property name="eclipselink.default-schema"
+         	     value="peps"/>
+
+
+    	<!-- Désactiver toute génération automatique du schéma -->
+    	<property name="eclipselink.ddl-generation"
+             	 value="none"/>
+        <property name="eclipselink.weaving" value="false"/>
+
     </properties>
+	
+
   </persistence-unit>
 </persistence>

@@ -1,36 +1,9 @@
 package peps.peps_back.controllers;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- *
- * @author Clément
- */
 public class DashboardStatsTest {
-    
-    public DashboardStatsTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
-    @BeforeEach
-    public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
-    }
 
     /**
      * Test of getTotalInteractions method, of class DashboardStats.
@@ -49,39 +22,32 @@ public class DashboardStatsTest {
      */
     @Test
     public void testGetSetTotalInteractions() {
-        System.out.println("setTotalInteractions");
+        System.out.println("get/set totalInteractions");
+        DashboardStats instance = new DashboardStats(13, 3, "11/28/2025");
         int totalInteractions = 13;
-        DashboardStats instance = new DashboardStats();
         instance.setTotalInteractions(totalInteractions);
         
         int result = instance.getTotalInteractions();
         assertEquals(totalInteractions, result);
     }
 
-    /**
-     * Test of getActiveModules and setActiveModules method, of class DashboardStats.
-     */
     @Test
     public void testGetSetActiveModules() {
-        System.out.println("setActiveModules");
+        System.out.println("get/set activeModules");
+        DashboardStats instance = new DashboardStats(13, 3, "11/28/2025");
         int activeModules = 3;
-        DashboardStats instance = new DashboardStats();
         instance.setActiveModules(activeModules);
         
         int result = instance.getActiveModules();
         assertEquals(activeModules, result);
     }
     
-    /**
-     * Test of setLastInteraction method, of class DashboardStats.
-     */
     @Test
     public void testGetSetLastInteraction() {
-        System.out.println("setLastInteraction");
+        System.out.println("get/set lastInteraction");
+        DashboardStats instance = new DashboardStats(13, 3, "11/28/2025");
         String lastInteraction = "11/28/2025";
-        DashboardStats instance = new DashboardStats();
         instance.setLastInteraction(lastInteraction);
-        
         
         String result = instance.getLastInteraction();
         assertEquals(lastInteraction, result);

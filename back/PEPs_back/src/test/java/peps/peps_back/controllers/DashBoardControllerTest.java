@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package peps.peps_back.controllers;
 
 import java.util.ArrayList;
@@ -20,11 +16,18 @@ import peps.peps_back.items.Interaction;
 import peps.peps_back.items.Module;
 import peps.peps_back.repositories.InteractionRepository;
 import peps.peps_back.repositories.ModuleRepository;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-/**
- *
- * @author Clément
- */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
+@WebAppConfiguration
 public class DashBoardControllerTest {
     
     private InteractionRepository interactionRepository;
@@ -78,5 +81,5 @@ public class DashBoardControllerTest {
         ResponseEntity result = controller.dashboard();
         assertNotNull(result);
     }
-    
+
 }

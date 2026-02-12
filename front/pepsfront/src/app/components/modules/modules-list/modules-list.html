@@ -1,9 +1,24 @@
 <div class="page-content">
   <div class="modules-header">
+
+    <!-- Admin Profile Filter -->
+    @if (isAdmin()) {
+    <mat-form-field appearance="outline" class="profile-select">
+      <mat-label>Filtrer par profil</mat-label>
+      <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+        @for (profile of profiles; track $index) {
+        <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    }
+
+    @if (canEdit()) {
     <button mat-raised-button color="primary" (click)="onAddClick()">
       <mat-icon>add</mat-icon>
       Ajouter un module
     </button>
+    }
   </div>
   <div class="modules-grid">
     @for (module of modules(); track module.id) {

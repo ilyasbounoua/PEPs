@@ -1,0 +1,130 @@
+<div class="page-content users-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Gestion des Utilisateurs</mat-card-title>
+      <button mat-raised-button color="primary" (click)="openCreateForm()" class="add-btn">
+        <mat-icon>add</mat-icon>
+        Nouvel utilisateur
+      </button>
+    </mat-card-header>
+
+    <mat-card-content class="table-container">
+      <table mat-table [dataSource]="users()">
+
+        <!-- Colonne ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+        </ng-container>
+
+        <!-- Colonne Login -->
+        <ng-container matColumnDef="login">
+          <th mat-header-cell *matHeaderCellDef>Login</th>
+          <td mat-cell *matCellDef="let user">{{ user.login }}</td>
+        </ng-container>
+
+        <!-- Colonne Role -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Rôle</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="role-badge" [class]="'role-' + user.role">
+              {{ user.role | uppercase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Permission -->
+        <ng-container matColumnDef="permission">
+          <th mat-header-cell *matHeaderCellDef>Permission</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="permission-badge"
+              [class]="'permission-' + ((user.permission === 'admin' || user.permission === 'editor') ? 'editor' : user.permission)">
+              {{ getPermissionLabel(user.permission === 'admin' ? 'editor' : user.permission) | uppercase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Enabled -->
+        <ng-container matColumnDef="enabled">
+          <th mat-header-cell *matHeaderCellDef>Actif</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-icon [class.active]="user.enabled">
+              {{ user.enabled ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let user">
+            <button mat-icon-button color="primary" (click)="openEditForm(user)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Formulaire Création/Édition -->
+  @if (showForm()) {
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        {{ isEditing() ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="user-form" (submit)="submitForm(); $event.preventDefault()">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Login</mat-label>
+          <input matInput [(ngModel)]="formLogin" name="login" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput type="password" [(ngModel)]="formPassword" name="password" [required]="!isEditing()"
+            placeholder="{{ isEditing() ? 'Laisser vide pour ne pas changer' : '' }}">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Rôle</mat-label>
+          <input matInput [(ngModel)]="formRole" name="role" (ngModelChange)="onRoleInputChange()"
+            placeholder="Ex: tortue, lion, elephant..." required>
+          <mat-hint>Rôles déjà utilisés: admin{{ existingRoles.length ? ', ' + existingRoles.join(', ') : ''
+            }}</mat-hint>
+        </mat-form-field>
+        @if (roleError) {
+        <div class="role-error">{{ roleError }}</div>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Permission</mat-label>
+          <mat-select [(ngModel)]="formPermission" name="permission" [disabled]="formRole?.toLowerCase() === 'admin'"
+            required>
+            <mat-option value="viewer">Lecteur (lecture seule)</mat-option>
+            <mat-option value="editor">Éditeur (lecture + écriture)</mat-option>
+          </mat-select>
+          <mat-hint>Lecteur: voir, Éditeur: modifier, Admin: tous les droits</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="closeForm()">Annuler</button>
+          <button mat-raised-button color="primary" type="submit">
+            {{ isEditing() ? 'Enregistrer' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

@@ -1,5 +1,4 @@
 *.log
-**\persistence.xml
 
 # Uploaded audio files (exclude from version control)
 back/PEPs_back/sons/**/*
@@ -8,5 +7,13 @@ back/PEPs_back/sons/**/*
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
 
+# Build artifacts
 back/PEPs_back/target/*
-*.class
+
+# Environment files (Docker) - SECURITY CRITICAL
+.env
+.env.local
+.env.*.local
+.env.production
+# Allow .env.dev (safe development defaults)
+!.env.dev

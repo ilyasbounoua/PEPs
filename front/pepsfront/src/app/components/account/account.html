@@ -1,0 +1,58 @@
+<mat-card class="account-card">
+    <mat-card-header>
+        <mat-card-title>Mon Compte</mat-card-title>
+        <mat-card-subtitle>{{ userLogin() }} - {{ userRole() }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <h3>Changer le mot de passe</h3>
+
+        <form class="password-form" (ngSubmit)="submitPasswordChange()">
+            <!-- Mot de passe actuel -->
+            <mat-form-field appearance="outline">
+                <mat-label>Mot de passe actuel</mat-label>
+                <input matInput [type]="showCurrentPassword() ? 'text' : 'password'" [ngModel]="currentPassword()"
+                    (ngModelChange)="currentPassword.set($event)" name="currentPassword"
+                    autocomplete="current-password">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowCurrentPassword()">
+                    <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+            </mat-form-field>
+
+            <!-- Nouveau mot de passe -->
+            <mat-form-field appearance="outline">
+                <mat-label>Nouveau mot de passe</mat-label>
+                <input matInput [type]="showNewPassword() ? 'text' : 'password'" [ngModel]="newPassword()"
+                    (ngModelChange)="newPassword.set($event)" name="newPassword" autocomplete="new-password">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowNewPassword()">
+                    <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                <mat-hint>Au moins 4 caractères</mat-hint>
+            </mat-form-field>
+
+            <!-- Confirmation du nouveau mot de passe -->
+            <mat-form-field appearance="outline">
+                <mat-label>Confirmer le nouveau mot de passe</mat-label>
+                <input matInput [type]="showConfirmPassword() ? 'text' : 'password'" [ngModel]="confirmPassword()"
+                    (ngModelChange)="confirmPassword.set($event)" name="confirmPassword" autocomplete="new-password">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowConfirmPassword()">
+                    <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+            </mat-form-field>
+
+            @if (error()) {
+            <mat-error class="error-message">{{ error() }}</mat-error>
+            }
+
+            <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+                    @if (isLoading()) {
+                    Modification en cours...
+                    } @else {
+                    Modifier le mot de passe
+                    }
+                </button>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>

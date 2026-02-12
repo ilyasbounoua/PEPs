@@ -2,12 +2,29 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>Bibliothèque de Sons</mat-card-title>
+      @if (canEdit()) {
       <button mat-raised-button color="primary" (click)="toggleAddForm()" class="add-sound-btn">
         <mat-icon>{{ showAddSoundForm() ? 'close' : 'add' }}</mat-icon>
         {{ showAddSoundForm() ? 'Annuler' : 'Ajouter un son' }}
       </button>
+      }
     </mat-card-header>
     <mat-card-content>
+
+      <!-- Admin Profile Filter -->
+      @if (isAdmin()) {
+      <div class="profile-filter-container">
+        <mat-form-field appearance="outline" class="profile-select">
+          <mat-label>Filtrer par profil</mat-label>
+          <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
+            @for (profile of profiles; track $index) {
+            <mat-option [value]="profile.role">{{profile.name}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+
       <!-- Filter buttons -->
       <div class="filter-buttons">
         <button mat-button [class.active-filter]="soundFilter() === 'all'" (click)="setSoundFilter('all')">
@@ -40,8 +57,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Type</mat-label>
-              <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)"
-                name="soundType">
+              <mat-select [value]="newSound().type" (selectionChange)="updateSoundType($event.value)" name="soundType">
                 <mat-option value="Vocal">Vocal</mat-option>
                 <mat-option value="Ambiance">Ambiance</mat-option>
                 <mat-option value="Naturel">Naturel</mat-option>
@@ -97,14 +113,12 @@
             <div class="sound-edit-form">
               <mat-form-field appearance="outline">
                 <mat-label>Nom du son</mat-label>
-                <input matInput [value]="editSoundData().name" 
-                  (input)="updateEditSoundName($any($event.target).value)">
+                <input matInput [value]="editSoundData().name" (input)="updateEditSoundName($any($event.target).value)">
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Type</mat-label>
-                <mat-select [value]="editSoundData().type" 
-                  (selectionChange)="updateEditSoundType($event.value)">
+                <mat-select [value]="editSoundData().type" (selectionChange)="updateEditSoundType($event.value)">
                   <mat-option value="Vocal">Vocal</mat-option>
                   <mat-option value="Ambiance">Ambiance</mat-option>
                   <mat-option value="Naturel">Naturel</mat-option>
@@ -146,12 +160,14 @@
                   matTooltip="{{ currentlyPlayingId() === sound.id ? 'Arrêter' : 'Écouter' }}">
                   <mat-icon>{{ currentlyPlayingId() === sound.id ? 'stop' : 'play_arrow' }}</mat-icon>
                 </button>
+                @if (canEdit()) {
                 <button mat-icon-button (click)="startEditSound(sound)" matTooltip="Modifier">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button color="warn" (click)="deleteSound(sound)" matTooltip="Supprimer">
                   <mat-icon>delete</mat-icon>
                 </button>
+                }
               </div>
             </div>
             }

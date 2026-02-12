@@ -1,0 +1,189 @@
+.archive-container {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.archive-card {
+    margin-bottom: 24px;
+}
+
+.archive-card mat-card-header {
+    margin-bottom: 16px;
+}
+
+.archive-card mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5rem;
+}
+
+.header-icon {
+    color: #673ab7;
+}
+
+.audit-icon {
+    color: #2196f3;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px;
+    gap: 16px;
+    color: #666;
+}
+
+.no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px;
+    color: #666;
+    text-align: center;
+}
+
+.no-data-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+}
+
+.no-data .hint {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 8px;
+}
+
+.export-all-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.export-all-container button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.periods-table {
+    width: 100%;
+}
+
+.periods-table th {
+    font-weight: 600;
+    color: #333;
+}
+
+.period-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.period-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 4px 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 16px;
+    font-weight: 500;
+}
+
+.audit-count {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.periods-table button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.exporting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 10;
+}
+
+mat-card-content {
+    position: relative;
+}
+
+.warning-card {
+    background: #fff8e1;
+    border-left: 4px solid #ffc107;
+    margin-bottom: 24px;
+}
+
+.warning-card mat-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+}
+
+.warning-icon {
+    color: #ffc107;
+    flex-shrink: 0;
+}
+
+.warning-text {
+    color: #5d4037;
+    line-height: 1.5;
+}
+
+.warning-text strong {
+    color: #bf360c;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .period-label {
+        color: #e0e0e0;
+    }
+
+    .count-badge {
+        background: #1a237e;
+        color: #90caf9;
+    }
+
+    .audit-count {
+        background: #1b5e20;
+        color: #a5d6a7;
+    }
+
+    .warning-card {
+        background: #3e2723;
+        border-left-color: #ff9800;
+    }
+
+    .warning-text {
+        color: #ffcc80;
+    }
+
+    .warning-text strong {
+        color: #ff8a65;
+    }
+}
