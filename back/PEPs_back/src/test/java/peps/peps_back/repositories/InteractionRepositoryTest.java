@@ -6,6 +6,7 @@ package peps.peps_back.repositories;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,35 +23,28 @@ import peps.peps_back.items.Interaction;
  */
 public class InteractionRepositoryTest {
     
-    public InteractionRepositoryTest() {
-    }
+    private InteractionRepository mockRepository;   
     
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
     
     @BeforeEach
     public void setUp() {
+        mockRepository = mock(InteractionRepository.class);
+        
     }
-    
-    @AfterEach
-    public void tearDown() {
-    }
+
 
     @Test
-    public void testSomeMethod() {
-        InteractionRepository mockRepository = mock(InteractionRepository.class);
-        
+    public void testSomeMethod() {        
 
         Interaction interac = new Interaction(1, "sound", new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime());
-        when(mockRepository.findById(1)).thenReturn(interac);
+        Optional<Interaction> interactionOpt= Optional.of(interac);
+        Integer id = 1;
+         when(mockRepository.findById(id)).thenReturn(interactionOpt);
 
-        User result = userService.getUserById("123");
-        assertEquals("John Doe", result.getName());
+        Optional<Interaction> result = mockRepository.findById(id);
+        assertTrue(result.isPresent());
+        Interaction interactionType = result.get();
+        assertEquals("sound", interactionType.getTypeinteraction());
     }
     
 }

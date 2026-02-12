@@ -24,6 +24,11 @@ public class InteractionController {
     @Autowired
     private InteractionRepository interactionRepository;
 
+    public InteractionController(InteractionRepository interactionRepository)
+    {
+        this.interactionRepository=interactionRepository;
+    }
+    
     @GetMapping
     public ResponseEntity<List<InteractionDTO>> getAllInteractions() {
         List<Interaction> interactions = interactionRepository.findAll();

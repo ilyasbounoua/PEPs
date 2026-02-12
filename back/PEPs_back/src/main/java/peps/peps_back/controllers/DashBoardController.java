@@ -27,6 +27,12 @@ public class DashBoardController {
     @Autowired
     private ModuleRepository moduleRepository;
 
+    DashBoardController(InteractionRepository interactionRepository, ModuleRepository moduleRepository)
+    {
+        this.interactionRepository = interactionRepository;
+        this.moduleRepository = moduleRepository;
+    }
+    
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardStats> dashboard() {
         long totalInteractions = interactionRepository.count();

@@ -22,6 +22,11 @@ public class ModuleController {
 
     @Autowired
     private ModuleRepository moduleRepository;
+    
+    public ModuleController(ModuleRepository moduleRepository)
+    {
+        this.moduleRepository = moduleRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<ModuleDTO>> getAllModules() {

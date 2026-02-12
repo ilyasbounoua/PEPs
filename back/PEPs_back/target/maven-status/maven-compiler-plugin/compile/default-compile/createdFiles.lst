@@ -13,7 +13,10 @@ peps\peps_back\repositories\InteractionRepositoryCustom.class
 peps\peps_back\JakartaRestConfiguration.class
 peps\peps_back\controllers\DashboardStats.class
 peps\peps_back\repositories\ModuleRepositoryCustomImpl.class
+peps\peps_back\items\Interaction_.class
+peps\peps_back\items\Module_.class
 peps\peps_back\items\Module.class
+peps\peps_back\items\Sound_.class
 peps\peps_back\repositories\InteractionRepositoryCustomImpl.class
 peps\peps_back\items\Module$ModuleConfig.class
 peps\peps_back\repositories\ModuleRepositoryCustom.class

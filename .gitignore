@@ -9,3 +9,4 @@ back/PEPs_back/sons/**/*
 .github/instructions/snyk_rules.instructions.md
 
 back/PEPs_back/target/*
+*.class
