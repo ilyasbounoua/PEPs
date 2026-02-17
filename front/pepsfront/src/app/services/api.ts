@@ -1,7 +1,7 @@
 /**
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the ApiService, which handles all HTTP requests to the backend.
- * 
+ *
  * Multi-profile system:
  * - Uses AuthService to get the logged-in user's role
  * - Passes role to endpoints to filter data by profile

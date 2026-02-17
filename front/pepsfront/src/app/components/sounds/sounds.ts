@@ -1,14 +1,7 @@
-/**
- * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
- * @description This file contains the logic for the sounds component, which handles listing, filtering, playing, uploading, editing, and deleting sounds.
- * 
- * Multi-profile system:
- * - Admin can filter by role using dropdown
- * - Regular users see only their own data
- */
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+// PLUS BESOIN de RouterLink ici
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,21 +13,18 @@ import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
 import { AudioService } from '../../services/audio';
 import { Sound, SoundFilter } from '../../models/interfaces';
+// IMPORT DU COMPOSANT ENFANT
+import { SoundAddComponent } from './sound-add/sound-add';
 
 @Component({
   selector: 'app-sounds',
+  standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTooltipModule
+    CommonModule, FormsModule, MatCardModule, MatButtonModule, 
+    MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatTooltipModule,
+    SoundAddComponent // Ajouté aux imports
   ],
-  templateUrl: './sounds.html',
+  templateUrl: './sounds.html', // On garde le même fichier HTML
   styleUrl: './sounds.css',
 })
 export class Sounds implements OnInit {
@@ -45,54 +35,33 @@ export class Sounds implements OnInit {
   readonly isAdmin = this.authService.isAdmin;
   readonly canEdit = this.authService.canEdit;
 
-  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  // --- NOUVEAU : État de l'affichage ---
+  // 'list' = on voit les sons, 'add' = on voit le formulaire
+  viewMode = signal<'list' | 'add'>('list');
+
   selectedRole = '';
-
-  // Profiles for dropdown - loaded from DB (regular array for template iteration)
-  profiles: { role: string; name: string }[] = [
-    { role: '', name: 'Tous les profils' }
-  ];
-
+  profiles: { role: string; name: string }[] = [{ role: '', name: 'Tous les profils' }];
+  
   sounds = signal<Sound[]>([]);
   soundFilter = signal<SoundFilter>('all');
-  showAddSoundForm = signal(false);
-  isUploading = signal(false);
-  uploadError = signal('');
-
-  newSound = signal({ name: '', type: '', file: null as File | null });
-
+  
+  // ... (Gardez editingSoundId, editSoundData, etc. comme avant) ...
   editingSoundId = signal<number | null>(null);
   editSoundData = signal<{ name: string, type: string }>({ name: '', type: '' });
   editSoundError = signal('');
-
   currentlyPlayingId = this.audioService.currentlyPlayingId;
 
   filteredSounds = computed(() => {
     const filter = this.soundFilter();
     const allSounds = this.sounds();
-
-    if (filter === 'all') {
-      return allSounds;
-    }
-
+    if (filter === 'all') return allSounds;
     return allSounds.filter(s => s.type === filter);
   });
 
   ngOnInit() {
-    console.log('[Sounds] ngOnInit - isAdmin:', this.isAdmin());
-    // Load available roles for admin filter
     if (this.isAdmin()) {
-      this.api.getRoles().subscribe({
-        next: (roles) => {
-          console.log('[Sounds] Loaded roles:', roles);
-          // Use array reassignment (not mutation) for proper change detection
-          this.profiles = [
-            { role: '', name: 'Tous les profils' },
-            ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))
-          ];
-          console.log('[Sounds] profiles set to:', this.profiles);
-        },
-        error: (err) => console.error('Error loading roles:', err)
+      this.api.getRoles().subscribe(roles => {
+        this.profiles = [{ role: '', name: 'Tous les profils' }, ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))];
       });
     }
     this.loadData();
@@ -100,194 +69,39 @@ export class Sounds implements OnInit {
 
   loadData() {
     const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
-    console.log('[Sounds] loadData - isAdmin:', this.isAdmin(), 'selectedRole:', this.selectedRole, 'filterRole:', filterRole);
-
-    this.api.getSounds(filterRole).subscribe({
-      next: (data) => {
-        console.log('[Sounds] Received', data.length, 'sounds');
-        this.sounds.set(data);
-      },
-      error: (err) => console.error('Error loading sounds:', err)
-    });
+    this.api.getSounds(filterRole).subscribe(data => this.sounds.set(data));
   }
 
-  onProfileChange(role: string) {
-    console.log('[Sounds] onProfileChange - role:', role);
-    this.selectedRole = role;
-    this.loadData();
+  // --- ACTIONS DE NAVIGATION ---
+  openAddPage() {
+    this.viewMode.set('add'); // Passe en mode ajout
   }
 
-  toggleAddForm() {
-    // Admin must select a specific role before adding a sound
-    if (this.isAdmin() && !this.selectedRole) {
-      alert('Veuillez sélectionner un profil spécifique avant de créer un son.');
-      return;
-    }
-    this.showAddSoundForm.update(show => !show);
-    this.newSound.set({ name: '', type: '', file: null });
-    this.uploadError.set('');
-  }
-
-  setSoundFilter(filter: SoundFilter) {
-    this.soundFilter.set(filter);
-  }
-
-  updateSoundName(name: string) {
-    this.newSound.update(s => ({ ...s, name }));
-  }
-
-  updateSoundType(type: string) {
-    this.newSound.update(s => ({ ...s, type }));
-  }
-
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const extension = file.name.split('.').pop()?.toLowerCase();
-
-      if (!['mp3', 'wav', 'ogg', 'm4a'].includes(extension || '')) {
-        this.uploadError.set('Format de fichier non supporté. Utilisez mp3, wav, ogg ou m4a');
-        input.value = '';
-        return;
-      }
-
-      this.newSound.update(current => ({ ...current, file }));
-      this.uploadError.set('');
+  closeAddPage(shouldReload: boolean) {
+    this.viewMode.set('list'); // Revient en mode liste
+    if (shouldReload) {
+      this.loadData(); // Recharge les données si un son a été ajouté
     }
   }
 
-  uploadSound() {
-    const sound = this.newSound();
-
-    if (!sound.name || sound.name.trim() === '') {
-      this.uploadError.set('Le nom est obligatoire');
-      return;
-    }
-
-    if (!sound.type || sound.type.trim() === '') {
-      this.uploadError.set('Le type est obligatoire');
-      return;
-    }
-
-    if (!sound.file) {
-      this.uploadError.set('Veuillez sélectionner un fichier');
-      return;
-    }
-
-    // Admin must select a specific role before uploading a sound
-    if (this.isAdmin() && !this.selectedRole) {
-      this.uploadError.set('Veuillez sélectionner un profil spécifique avant de créer un son.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('name', sound.name);
-    formData.append('type', sound.type);
-    formData.append('file', sound.file, sound.file.name);
-
-    this.isUploading.set(true);
-    this.uploadError.set('');
-
-    // Pass selectedRole for admin, undefined for non-admin (api will use their role)
-    const overrideRole = this.isAdmin() ? this.selectedRole : undefined;
-    this.api.uploadSound(formData, overrideRole).subscribe({
-      next: (newSound) => {
-        this.sounds.update(sounds => [...sounds, newSound]);
-        this.showAddSoundForm.set(false);
-        this.newSound.set({ name: '', type: '', file: null });
-        this.isUploading.set(false);
-      },
-      error: (err) => {
-        console.error('Error uploading sound:', err);
-        this.isUploading.set(false);
-        if (err.error && err.error.error) {
-          this.uploadError.set(err.error.error);
-        } else {
-          this.uploadError.set('Erreur lors de l\'upload du son');
-        }
-      }
-    });
+  // ... (Gardez onProfileChange, setSoundFilter, playSound, deleteSound, etc.) ...
+  onProfileChange(role: string) { this.selectedRole = role; this.loadData(); }
+  setSoundFilter(filter: SoundFilter) { this.soundFilter.set(filter); }
+  playSound(sound: Sound) { this.audioService.playSound(this.api.getSoundFileUrl(sound.id), sound.id); }
+  
+  // ... (Gardez tout le bloc Edit et Delete du code précédent) ...
+  startEditSound(sound: Sound) { this.editingSoundId.set(sound.id); this.editSoundData.set({ name: sound.name, type: sound.type }); }
+  cancelEditSound() { this.editingSoundId.set(null); }
+  updateEditSoundName(name: string) { this.editSoundData.update(d => ({...d, name})); }
+  updateEditSoundType(type: string) { this.editSoundData.update(d => ({...d, type})); }
+  saveEditSound(id: number) { /* Code update... */ 
+      const data = this.editSoundData();
+      this.api.updateSound(id, data).subscribe(updated => {
+          this.sounds.update(s => s.map(x => x.id === id ? updated : x));
+          this.cancelEditSound();
+      });
   }
-
-  playSound(sound: Sound) {
-    const url = this.api.getSoundFileUrl(sound.id);
-    console.log('Playing sound:', sound.name, 'URL:', url);
-    this.audioService.playSound(url, sound.id);
-  }
-
-  startEditSound(sound: Sound) {
-    this.editingSoundId.set(sound.id);
-    this.editSoundData.set({ name: sound.name, type: sound.type });
-    this.editSoundError.set('');
-  }
-
-  cancelEditSound() {
-    this.editingSoundId.set(null);
-    this.editSoundData.set({ name: '', type: '' });
-    this.editSoundError.set('');
-  }
-
-  updateEditSoundName(name: string) {
-    this.editSoundData.update(data => ({ ...data, name }));
-  }
-
-  updateEditSoundType(type: string) {
-    this.editSoundData.update(data => ({ ...data, type }));
-  }
-
-  saveEditSound(soundId: number) {
-    const data = this.editSoundData();
-
-    if (!data.name || data.name.trim() === '') {
-      this.editSoundError.set('Le nom est obligatoire');
-      return;
-    }
-
-    if (!data.type || data.type.trim() === '') {
-      this.editSoundError.set('Le type est obligatoire');
-      return;
-    }
-
-    this.api.updateSound(soundId, data).subscribe({
-      next: (updatedSound) => {
-        this.sounds.update(sounds =>
-          sounds.map(s => s.id === updatedSound.id ? updatedSound : s)
-        );
-        this.cancelEditSound();
-      },
-      error: (err) => {
-        console.error('Error updating sound:', err);
-        if (err.error && err.error.error) {
-          this.editSoundError.set(err.error.error);
-        } else {
-          this.editSoundError.set('Erreur lors de la modification du son');
-        }
-      }
-    });
-  }
-
-  deleteSound(sound: Sound) {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer le son "${sound.name}" ?`)) {
-      return;
-    }
-
-    this.api.deleteSound(sound.id).subscribe({
-      next: () => {
-        this.sounds.update(sounds => sounds.filter(s => s.id !== sound.id));
-        if (this.currentlyPlayingId() === sound.id) {
-          this.audioService.stopSound();
-        }
-      },
-      error: (err) => {
-        console.error('Error deleting sound:', err);
-        if (err.error && err.error.error) {
-          alert('Erreur: ' + err.error.error);
-        } else {
-          alert('Erreur lors de la suppression du son');
-        }
-      }
-    });
+  deleteSound(sound: Sound) { /* Code delete... */ 
+      if(confirm('Supprimer ?')) this.api.deleteSound(sound.id).subscribe(() => this.sounds.update(s => s.filter(x => x.id !== sound.id)));
   }
 }

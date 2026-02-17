@@ -1,13 +1,13 @@
 /**
  * AuthService
  * Authentification via backend Spring uniquement.
- * 
+ *
  * Système multi-profils :
  * - Stocke userId pour filtrer les données propres à l'utilisateur
  * - Stocke userRole pour contrôler l'accès aux fonctionnalités (ex: gestion users pour admin)
  * - Rôles possibles : "admin", "dauphin", "aras"
  * - Persiste la session dans sessionStorage pour survivre aux refresh
- * 
+ *
  * @author Anas EL HOUDI
  */
 import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core';
