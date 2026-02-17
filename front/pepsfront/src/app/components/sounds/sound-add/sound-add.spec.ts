@@ -1,18 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SoundAdd } from './sound-add';
+// 1. On importe le bon nom de classe
+import { SoundAddComponent } from './sound-add'; 
 
-describe('SoundAdd', () => {
-  let component: SoundAdd;
-  let fixture: ComponentFixture<SoundAdd>;
+describe('SoundAddComponent', () => {
+  // 2. On met à jour les types ici
+  let component: SoundAddComponent;
+  let fixture: ComponentFixture<SoundAddComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SoundAdd]
+      // 3. On met à jour l'import du module standalone
+      imports: [SoundAddComponent] 
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SoundAdd);
+    // 4. On crée le composant avec la bonne classe
+    fixture = TestBed.createComponent(SoundAddComponent); 
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
