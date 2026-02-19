@@ -137,7 +137,7 @@ export class AuthService {
 
     try {
       // Récupérer la réponse du backend avec userId et role
-      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+      const baseUrl = (environment as any).apiUrl;
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(
           `${baseUrl}/auth/login`,
