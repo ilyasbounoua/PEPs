@@ -22,7 +22,6 @@ import peps.peps_back.repositories.SoundRepository;
 import peps.peps_back.repositories.UserRepository;
 import peps.peps_back.items.User;
 import peps.peps_back.services.AuditService;
-import javax.persistence.OptimisticLockException;
 
 import java.io.IOException;
 import java.nio.file.Files;
