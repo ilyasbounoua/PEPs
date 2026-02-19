@@ -86,7 +86,7 @@ public class DashBoardController {
                     .filter(Module::getActif)
                     .count();
 
-            String lastInteraction = "No interactions";
+            String lastInteraction = "Pas d'interactions";
             if (!interactions.isEmpty()) {
                 Interaction latest = interactions.stream()
                         .max((i1, i2) -> i1.getTimeLancement().compareTo(i2.getTimeLancement()))
