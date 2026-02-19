@@ -1,13 +1,13 @@
 /**
  * AuthService
  * Authentification via backend Spring uniquement.
- * 
+ *
  * Système multi-profils :
  * - Stocke userId pour filtrer les données propres à l'utilisateur
  * - Stocke userRole pour contrôler l'accès aux fonctionnalités (ex: gestion users pour admin)
  * - Rôles possibles : "admin", "dauphin", "aras"
  * - Persiste la session dans sessionStorage pour survivre aux refresh
- * 
+ *
  * @author Anas EL HOUDI
  */
 import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core';
@@ -137,7 +137,7 @@ export class AuthService {
 
     try {
       // Récupérer la réponse du backend avec userId et role
-      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+      const baseUrl = (environment as any).apiUrl;
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(
           `${baseUrl}/auth/login`,
