@@ -1,5 +1,6 @@
 package peps.peps_back.controllers;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Calendar;
@@ -46,11 +47,23 @@ public class DailyStatsControllerTest {
     public void testGetDailyStats() {
         System.out.println("getDailyStats");
         
-        ArrayList<Interaction> listInter = new ArrayList<>();
-        listInter.add(new Interaction(1, "sound", new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime()));
-        when(interactionRepository.findAll()).thenReturn(listInter);
+        String role = null;
+        String startDate = "2026-01-01T12:08:56";
+        String endDate = "2026-01-01T12:20:56";
         
-        ResponseEntity result = controller.getDailyStats();
-        assertNotNull(result);
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        
+        try {
+            ArrayList<Interaction> listInter = new ArrayList<>();
+            listInter.add(new Interaction(1, "sound", new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime()));
+            when(interactionRepository.findByTimeLancementBetween(isoFormat.parse(startDate),isoFormat.parse(endDate))).thenReturn(listInter);
+
+            ResponseEntity result = controller.getDailyStats(role, startDate, endDate);
+            assertNotNull(result);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
     }
 }

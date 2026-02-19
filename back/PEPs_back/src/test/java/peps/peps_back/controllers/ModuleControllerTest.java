@@ -71,7 +71,8 @@ public class ModuleControllerTest {
         listModules.add(module);
         when(moduleRepository.findAll()).thenReturn(listModules);
         
-        ResponseEntity result = controller.getAllModules();
+        String role = null;
+        ResponseEntity result = controller.getAllModules(role);
         assertNotNull(result);
         
     }
@@ -107,7 +108,8 @@ public class ModuleControllerTest {
         ModuleConfigDTO config =  new ModuleConfigDTO(10, "OFF", false, false);
         ModuleDTO dto = new ModuleDTO(2, "module", "zone1", "active", "8.8.8.8", config);
                 
-        ResponseEntity result = controller.updateModule(id, dto);
+        String login = null;
+        ResponseEntity result = controller.updateModule(id, dto, login);
         assertNotNull(result);
     }
 
@@ -125,7 +127,10 @@ public class ModuleControllerTest {
         ModuleConfigDTO config =  new ModuleConfigDTO(10, "OFF", false, false);
         ModuleDTO dto = new ModuleDTO(2, "module", "zone1", "active", "8.8.8.8", config);
         
-        ResponseEntity result = controller.createModule(dto);
+        String role = "admin";
+        String login = null;
+                
+        ResponseEntity result = controller.createModule(dto, role, login);
         assertNotNull(result);
     }
 
@@ -142,7 +147,8 @@ public class ModuleControllerTest {
         
         doNothing().when(moduleRepository).delete(module.orElse(null));
         
-        ResponseEntity result = controller.deleteModule(id);
+        String admin = null;
+        ResponseEntity result = controller.deleteModule(id, admin);
         assertNotNull(result);
     }
     

@@ -78,7 +78,11 @@ public class DashBoardControllerTest {
         listModules.add(module);
         when(moduleRepository.findAll()).thenReturn(listModules);
         
-        ResponseEntity result = controller.dashboard();
+        String role = null;
+        String startDate = null;
+        String endDate = null;
+        
+        ResponseEntity result = controller.dashboard(role, startDate, endDate);
         assertNotNull(result);
     }
 

@@ -268,7 +268,7 @@ public class ModuleController {
                 module.getCurrentMode(), module.getActif());
 
         String userLogin = (login != null) ? login : "unknown";
-        auditService.log("CREATE", "module", module.getIdmodule(), module.getNom(),
+        if(auditService !=null) auditService.log("CREATE", "module", module.getIdmodule(), module.getNom(),
                 module.getOwnerRole(), userLogin, null, newValue, "Création d'un module");
 
         ModuleDTO createdDto = new ModuleDTO(
@@ -313,7 +313,7 @@ public class ModuleController {
                 module.getNom(), module.getIpAdress(), module.getOwnerRole());
 
         String userLogin = (login != null) ? login : "unknown";
-        auditService.log("DELETE", "module", id, module.getNom(),
+        if(auditService !=null) auditService.log("DELETE", "module", id, module.getNom(),
                 module.getOwnerRole(), userLogin, oldValue, null, "Suppression d'un module");
 
         moduleRepository.delete(module);

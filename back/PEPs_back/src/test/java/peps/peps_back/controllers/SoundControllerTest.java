@@ -48,8 +48,8 @@ public class SoundControllerTest {
         List<Sound> sounds = new ArrayList<>();
         sounds.add(sound);
         when(soundRepository.findAll()).thenReturn(sounds);
-        
-        ResponseEntity result = instance.getAllSounds();
+        String role = null;
+        ResponseEntity result = instance.getAllSounds(role);
         assertNotNull(result);
     }
 
@@ -80,8 +80,10 @@ public class SoundControllerTest {
         // (You might need to cast this to your actual Entity class if strictly typed)
         when(soundRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
+        String role = "admin";
+        String login = null;
         try {
-             ResponseEntity result = instance.uploadSound(name, type, file);
+             ResponseEntity result = instance.uploadSound(name, type, file, role, login);
              assertNotNull(result);
         } catch (Exception e) {
              assertEquals(true,false);
@@ -99,9 +101,12 @@ public class SoundControllerTest {
         when(soundRepository.existsById(id)).thenReturn(true);
         when(soundRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
+        
+        String login = null;
+        
         try {
              // Pass null or new DTO just to check execution flow
-             ResponseEntity result = instance.updateSound(id, null);
+             ResponseEntity result = instance.updateSound(id, null, login);
         } catch (Exception e) {
              System.out.println("Ignored update error: " + e.getMessage());
         }
@@ -117,7 +122,8 @@ public class SoundControllerTest {
         when(soundRepository.existsById(id)).thenReturn(true);
         doNothing().when(soundRepository).deleteById(id);
 
-        ResponseEntity result = instance.deleteSound(id);
+        String login = null;
+        ResponseEntity result = instance.deleteSound(id, null);
         assertNotNull(result);
     }
 }

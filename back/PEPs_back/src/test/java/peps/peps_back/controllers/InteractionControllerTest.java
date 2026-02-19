@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,8 @@ public class InteractionControllerTest {
         listInter.add(new Interaction(1, "sound", new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime()));
         when(interactionRepository.findAll()).thenReturn(listInter);
         
-        ResponseEntity result = controller.getAllInteractions();
+        String role = null;
+        ResponseEntity result = controller.getAllInteractions(role);
         assertNotNull(result);
     }
 
