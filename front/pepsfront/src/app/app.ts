@@ -5,6 +5,13 @@
  * Système multi-profils :
  * - Utilise AuthService pour vérifier le rôle de l'utilisateur
  * - La page "Utilisateurs" n'est visible que pour les admins
+/**
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
+ * @description This file contains the main application component, which acts as the root of the application and manages the overall layout and navigation.
+ * 
+ * Système multi-profils :
+ * - Utilise AuthService pour vérifier le rôle de l'utilisateur
+ * - La page "Utilisateurs" n'est visible que pour les admins
  * - Persiste la page courante pour survivre aux refresh
  */
 import { Component, computed, signal, inject, PLATFORM_ID } from '@angular/core';
@@ -14,6 +21,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Login } from './components/login/login';
 import { Dashboard } from './components/dashboard/dashboard';
 import { Interactions } from './components/interactions/interactions';
@@ -24,6 +32,7 @@ import { Module } from './models/interfaces';
 import { ModuleDetail } from './components/modules/module-detail/module-detail';
 import { ModuleForm } from './components/modules/module-form/module-form';
 import { AuthService } from './services/auth';
+import { I18nService } from './services/i18n';
 import { Account } from './components/account/account';
 import { AuditLogsComponent } from './components/audit-logs/audit-logs';
 import { ArchiveComponent } from './components/archive/archive';
@@ -40,6 +49,7 @@ const PAGE_KEY = 'peps_current_page';
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
     Login,
     Dashboard,
     Interactions,
@@ -58,6 +68,7 @@ const PAGE_KEY = 'peps_current_page';
 export class App {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
+  readonly i18n = inject(I18nService);
 
   // Use AuthService's isAuthenticated to check login state (survives page refresh)
   isLoggedIn = computed(() => this.authService.isAuthenticated());
@@ -78,27 +89,27 @@ export class App {
   pageTitle = computed(() => {
     switch (this.currentPage()) {
       case 'dashboard':
-        return 'Tableau de Bord';
+        return this.i18n.t('pageTitles.dashboard');
       case 'interactions':
-        return 'Historique des Interactions';
+        return this.i18n.t('pageTitles.interactions');
       case 'modules':
-        return 'Gestion des Modules';
+        return this.i18n.t('pageTitles.modules');
       case 'module-detail':
-        return `Détail: ${this.selectedModule()?.name || ''}`;
+        return `${this.i18n.t('pageTitles.moduleDetail')}: ${this.selectedModule()?.name || ''}`;
       case 'add-module':
-        return 'Ajouter un Module';
+        return this.i18n.t('pageTitles.addModule');
       case 'sounds':
-        return 'Bibliothèque de Sons';
+        return this.i18n.t('pageTitles.sounds');
       case 'users':
-        return 'Gestion des Utilisateurs';
+        return this.i18n.t('pageTitles.users');
       case 'account':
-        return 'Mon Compte';
+        return this.i18n.t('pageTitles.account');
       case 'audit-logs':
-        return "Journal d'Audit";
+        return this.i18n.t('pageTitles.auditLogs');
       case 'archive':
-        return 'Archive des Données';
+        return this.i18n.t('pageTitles.archive');
       default:
-        return "PEP'S";
+        return this.i18n.t('pageTitles.default');
     }
   });
 
@@ -143,6 +154,14 @@ export class App {
     sessionStorage.removeItem(PAGE_KEY);
   }
 
+  /**
+   * Clear archive warning dismissal state (shows warning on next login)
+   */
+  private clearArchiveWarningState(): void {
+    if (!this.isBrowser()) return;
+    sessionStorage.removeItem('peps_archive_warning_dismissed');
+  }
+
   onLoginSuccess() {
     // No longer need to set local signal - AuthService manages state
   }
@@ -166,7 +185,7 @@ export class App {
   onAddModule(selectedRole?: string) {
     // Admin must select a specific role before creating a module
     if (this.isAdmin() && !selectedRole) {
-      alert('Veuillez sélectionner un profil spécifique avant de créer un module.');
+      alert(this.i18n.t('modules.selectProfileFirst'));
       return;
     }
     this.targetRoleForNewModule.set(selectedRole);
@@ -187,5 +206,18 @@ export class App {
     this.authService.logout();
     this.currentPage.set('dashboard');
     this.clearCurrentPage();  // Clear saved navigation on logout
+    this.clearArchiveWarningState();
+  }
+
+  /**
+   * Toggle language between FR and EN.
+   * Saves preference to database if user is logged in.
+   */
+  toggleLang() {
+    const newLang = this.i18n.toggle();
+    const userId = this.authService.currentUserId();
+    if (userId) {
+      this.i18n.saveToDatabase(userId, newLang);
+    }
   }
 }

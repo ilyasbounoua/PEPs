@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
+import { I18nService } from '../../services/i18n';
 import { StatCard, DailyData } from '../../models/interfaces';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
@@ -28,6 +29,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class Dashboard implements OnInit {
   private readonly api = inject(ApiService);
   private readonly authService = inject(AuthService);
+  readonly i18n = inject(I18nService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -35,14 +37,12 @@ export class Dashboard implements OnInit {
   selectedRole = '';
 
   // Profiles for dropdown - loaded from DB
-  profiles: { role: string; name: string }[] = [
-    { role: '', name: 'Tous les profils' }
-  ];
+  profiles: { role: string; name: string }[] = [];
 
   stats = signal<StatCard>({
     totalInteractions: 0,
     activeModules: 0,
-    lastInteraction: 'Chargement...'
+    lastInteraction: '...'
   });
 
   dailyChartData = signal<DailyData[]>([]);
@@ -53,22 +53,22 @@ export class Dashboard implements OnInit {
   // Pagination State
   visibleWeekIndex = 0;
 
-  periods = [
-    { value: 'today', label: "Aujourd'hui" },
-    { value: 'yesterday', label: 'Hier' },
-    { value: 'week', label: '7 derniers jours' },
-    { value: 'month', label: '30 derniers jours' }
+  periods: { value: string; labelKey: string }[] = [
+    { value: 'today', labelKey: 'dashboard.today' },
+    { value: 'yesterday', labelKey: 'dashboard.yesterday' },
+    { value: 'week', labelKey: 'dashboard.last7days' },
+    { value: 'month', labelKey: 'dashboard.last30days' }
   ];
 
-  interactionLabel = 'Interactions du jour';
-  chartLabel = 'Utilisations du jour';
+  interactionLabelKey = 'dashboard.interactionsToday';
+  chartLabelKey = 'dashboard.usageToday';
 
   ngOnInit() {
     // Load available roles for admin filter
     if (this.isAdmin()) {
       this.api.getRoles().subscribe({
         next: (roles) => {
-          this.profiles = [{ role: '', name: 'Tous les profils' }];
+          this.profiles = [{ role: '', name: this.i18n.t('common.allProfiles') }];
           roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
         },
         error: (err) => console.error('Error loading roles:', err)
@@ -123,20 +123,20 @@ export class Dashboard implements OnInit {
   updateLabels() {
     switch (this.selectedPeriod) {
       case 'today':
-        this.interactionLabel = 'Interactions du jour';
-        this.chartLabel = 'Utilisations du jour';
+        this.interactionLabelKey = 'dashboard.interactionsToday';
+        this.chartLabelKey = 'dashboard.usageToday';
         break;
       case 'yesterday':
-        this.interactionLabel = "Interactions d'hier";
-        this.chartLabel = "Utilisations d'hier";
+        this.interactionLabelKey = 'dashboard.interactionsYesterday';
+        this.chartLabelKey = 'dashboard.usageYesterday';
         break;
       case 'week':
-        this.interactionLabel = 'Interactions (7 derniers jours)';
-        this.chartLabel = 'Utilisations (7 derniers jours)';
+        this.interactionLabelKey = 'dashboard.interactionsWeek';
+        this.chartLabelKey = 'dashboard.usageWeek';
         break;
       case 'month':
-        this.interactionLabel = 'Interactions (30 derniers jours)';
-        this.chartLabel = 'Utilisations (30 derniers jours)';
+        this.interactionLabelKey = 'dashboard.interactionsMonth';
+        this.chartLabelKey = 'dashboard.usageMonth';
         break;
     }
   }
@@ -155,7 +155,7 @@ export class Dashboard implements OnInit {
         this.stats.update(current => ({
           ...current,
           totalInteractions: 0,
-          lastInteraction: 'Erreur de connexion'
+          lastInteraction: this.i18n.t('common.connectionError')
         }));
       }
     });
@@ -282,7 +282,7 @@ export class Dashboard implements OnInit {
       return `${start} - ${end}`;
     }
 
-    return `Du ${start} au ${end}`;
+    return `${this.i18n.t('dashboard.from')} ${start} ${this.i18n.t('dashboard.to')} ${end}`;
   }
 
   onPeriodChange(period: string) {

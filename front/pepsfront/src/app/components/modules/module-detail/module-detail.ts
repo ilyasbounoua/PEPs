@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { Module } from '../../../models/interfaces';
+import { I18nService } from '../../../services/i18n';
 
 @Component({
   selector: 'app-module-detail',
@@ -38,6 +39,7 @@ export class ModuleDetail {
   private authService = inject(AuthService);
   private router = inject(Router);
   private document = inject(DOCUMENT);
+  readonly i18n = inject(I18nService);
 
   readonly canEdit = this.authService.canEdit;
 
@@ -74,22 +76,22 @@ export class ModuleDetail {
     const moduleToSave = this.module();
 
     if (!moduleToSave.name || moduleToSave.name.trim() === '') {
-      alert('Le nom du module est obligatoire');
+      alert(this.i18n.t('modules.nameRequiredFull'));
       return;
     }
 
     if (!moduleToSave.ip || moduleToSave.ip.trim() === '') {
-      alert('L\'adresse IP est obligatoire');
+      alert(this.i18n.t('modules.ipRequiredFull'));
       return;
     }
 
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(moduleToSave.ip)) {
-      alert('Format d\'adresse IP invalide');
+      alert(this.i18n.t('modules.ipInvalid'));
       return;
     }
 
     if (moduleToSave.config.volume < 0 || moduleToSave.config.volume > 100) {
-      alert('Le volume doit être entre 0 et 100');
+      alert(this.i18n.t('modules.volumeRange'));
       return;
     }
 
@@ -105,9 +107,9 @@ export class ModuleDetail {
       error: (err) => {
         console.error('Error saving module:', err);
         if (err.error && err.error.error) {
-          alert('Erreur: ' + err.error.error);
+          alert(this.i18n.t('common.error') + ': ' + err.error.error);
         } else {
-          alert('Erreur lors de la sauvegarde du module');
+          alert(this.i18n.t('modules.saveError'));
         }
       }
     });
@@ -121,7 +123,7 @@ export class ModuleDetail {
   onDelete() {
     const moduleToDelete = this.module();
 
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer le module "${moduleToDelete.name}" ?`)) {
+    if (!confirm(`${this.i18n.t('modules.deleteConfirm')} "${moduleToDelete.name}" ?`)) {
       return;
     }
 
@@ -133,9 +135,9 @@ export class ModuleDetail {
       error: (err) => {
         console.error('Error deleting module:', err);
         if (err.error && err.error.error) {
-          alert('Erreur: ' + err.error.error);
+          alert(this.i18n.t('common.error') + ': ' + err.error.error);
         } else {
-          alert('Erreur lors de la suppression du module');
+          alert(this.i18n.t('modules.deleteError'));
         }
       }
     });

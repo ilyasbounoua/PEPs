@@ -1,26 +1,29 @@
-<div class="archive-container">
-    <!-- Warning Notice - AT THE TOP -->
+﻿<div class="archive-container">
+    <!-- Warning Notice -->
+    @if (showWarning()) {
     <mat-card class="warning-card">
+        <button mat-icon-button class="warning-close" (click)="dismissWarning()"
+            [aria-label]="i18n.t('archive.hideWarning')" [matTooltip]="i18n.t('archive.hide')">
+            <mat-icon>close</mat-icon>
+        </button>
         <mat-card-content>
             <mat-icon class="warning-icon">warning</mat-icon>
             <div class="warning-text">
-                <strong>Important:</strong> L'export d'une période télécharge un fichier JSON contenant toutes les
-                données,
-                puis supprime définitivement ces données de la base de données.
-                Assurez-vous de conserver les fichiers exportés en lieu sûr.
+                <strong>{{ i18n.t('archive.important') }}:</strong> {{ i18n.t('archive.warningText') }}
             </div>
         </mat-card-content>
     </mat-card>
+    }
 
     <!-- Interactions Archive Table -->
     <mat-card class="archive-card">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon class="header-icon">folder_open</mat-icon>
-                Archive des Interactions
+                {{ i18n.t('archive.interactionsTitle') }}
             </mat-card-title>
             <mat-card-subtitle>
-                Les périodes de plus de 3 mois peuvent être exportées et supprimées de la base de données
+                {{ i18n.t('archive.interactionsSubtitle') }}
             </mat-card-subtitle>
         </mat-card-header>
 
@@ -28,21 +31,21 @@
             @if (isLoading()) {
             <div class="loading-container">
                 <mat-spinner diameter="40"></mat-spinner>
-                <p>Chargement des périodes...</p>
+                <p>{{ i18n.t('archive.loadingPeriods') }}</p>
             </div>
             } @else if (periods().length === 0) {
             <div class="no-data">
                 <mat-icon class="no-data-icon">inbox</mat-icon>
-                <p>Aucune période d'interactions à archiver pour le moment.</p>
-                <p class="hint">Les interactions de plus de 3 mois apparaîtront ici.</p>
+                <p>{{ i18n.t('archive.noInteractionPeriods') }}</p>
+                <p class="hint">{{ i18n.t('archive.interactionsHint') }}</p>
             </div>
             } @else {
             <!-- Export All Button -->
             <div class="export-all-container">
                 <button mat-raised-button color="primary" (click)="exportAll()" [disabled]="isExporting()"
-                    matTooltip="Exporter toutes les périodes en un seul fichier JSON">
+                    [matTooltip]="i18n.t('archive.exportAllTooltip')">
                     <mat-icon>download</mat-icon>
-                    Exporter Tout
+                    {{ i18n.t('archive.exportAll') }}
                 </button>
             </div>
 
@@ -50,7 +53,7 @@
             <table mat-table [dataSource]="periods()" class="periods-table">
                 <!-- Period Column -->
                 <ng-container matColumnDef="period">
-                    <th mat-header-cell *matHeaderCellDef>Période</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('archive.period') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <div class="period-info">
                             <span class="period-label">{{ period.periodLabel }}</span>
@@ -60,7 +63,7 @@
 
                 <!-- Count Column -->
                 <ng-container matColumnDef="count">
-                    <th mat-header-cell *matHeaderCellDef>Interactions</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('app.interactions') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <span class="count-badge">{{ period.interactionCount }}</span>
                     </td>
@@ -68,12 +71,12 @@
 
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('common.actions') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <button mat-raised-button color="accent" (click)="exportPeriod(period)"
-                            [disabled]="isExporting()" matTooltip="Exporter et supprimer cette période">
+                            [disabled]="isExporting()" [matTooltip]="i18n.t('archive.exportPeriodTooltip')">
                             <mat-icon>file_download</mat-icon>
-                            Exporter
+                            {{ i18n.t('archive.export') }}
                         </button>
                     </td>
                 </ng-container>
@@ -87,7 +90,7 @@
             @if (isExporting()) {
             <div class="exporting-overlay">
                 <mat-spinner diameter="30"></mat-spinner>
-                <span>Export en cours...</span>
+                <span>{{ i18n.t('archive.exporting') }}</span>
             </div>
             }
         </mat-card-content>
@@ -98,10 +101,10 @@
         <mat-card-header>
             <mat-card-title>
                 <mat-icon class="header-icon audit-icon">history</mat-icon>
-                Archive du Journal d'Audit
+                {{ i18n.t('archive.auditTitle') }}
             </mat-card-title>
             <mat-card-subtitle>
-                Les entrées d'audit de plus de 3 mois peuvent être exportées et supprimées de la base de données
+                {{ i18n.t('archive.auditSubtitle') }}
             </mat-card-subtitle>
         </mat-card-header>
 
@@ -109,21 +112,21 @@
             @if (isLoadingAudit()) {
             <div class="loading-container">
                 <mat-spinner diameter="40"></mat-spinner>
-                <p>Chargement des périodes...</p>
+                <p>{{ i18n.t('archive.loadingPeriods') }}</p>
             </div>
             } @else if (auditPeriods().length === 0) {
             <div class="no-data">
                 <mat-icon class="no-data-icon">inbox</mat-icon>
-                <p>Aucune période d'audit à archiver pour le moment.</p>
-                <p class="hint">Les entrées d'audit de plus de 3 mois apparaîtront ici.</p>
+                <p>{{ i18n.t('archive.noAuditPeriods') }}</p>
+                <p class="hint">{{ i18n.t('archive.auditHint') }}</p>
             </div>
             } @else {
             <!-- Export All Button -->
             <div class="export-all-container">
                 <button mat-raised-button color="primary" (click)="exportAllAudit()" [disabled]="isExportingAudit()"
-                    matTooltip="Exporter toutes les périodes d'audit en un seul fichier JSON">
+                    [matTooltip]="i18n.t('archive.exportAllAuditTooltip')">
                     <mat-icon>download</mat-icon>
-                    Exporter Tout
+                    {{ i18n.t('archive.exportAll') }}
                 </button>
             </div>
 
@@ -131,7 +134,7 @@
             <table mat-table [dataSource]="auditPeriods()" class="periods-table">
                 <!-- Period Column -->
                 <ng-container matColumnDef="period">
-                    <th mat-header-cell *matHeaderCellDef>Période</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('archive.period') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <div class="period-info">
                             <span class="period-label">{{ period.periodLabel }}</span>
@@ -141,7 +144,7 @@
 
                 <!-- Count Column -->
                 <ng-container matColumnDef="count">
-                    <th mat-header-cell *matHeaderCellDef>Entrées</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('archive.entries') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <span class="count-badge audit-count">{{ period.interactionCount }}</span>
                     </td>
@@ -149,12 +152,12 @@
 
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('common.actions') }}</th>
                     <td mat-cell *matCellDef="let period">
                         <button mat-raised-button color="accent" (click)="exportAuditPeriod(period)"
-                            [disabled]="isExportingAudit()" matTooltip="Exporter et supprimer cette période d'audit">
+                            [disabled]="isExportingAudit()" [matTooltip]="i18n.t('archive.exportAuditPeriodTooltip')">
                             <mat-icon>file_download</mat-icon>
-                            Exporter
+                            {{ i18n.t('archive.export') }}
                         </button>
                     </td>
                 </ng-container>
@@ -168,7 +171,7 @@
             @if (isExportingAudit()) {
             <div class="exporting-overlay">
                 <mat-spinner diameter="30"></mat-spinner>
-                <span>Export en cours...</span>
+                <span>{{ i18n.t('archive.exporting') }}</span>
             </div>
             }
         </mat-card-content>

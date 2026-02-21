@@ -226,10 +226,10 @@ export class ApiService {
   /* ===================== */
 
   /**
-   * Allows the user to change their own password.
-   * Requires current password for validation.
-   * @author Anas EL HOUDI
-   */
+ * Allows the user to change their own password.
+ * Requires current password for validation.
+ * @author Anas EL HOUDI
+ */
   changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
     return this.http.put<any>(`${this.BASE_URL}/users/${userId}/password`, {
       currentPassword,
@@ -237,6 +237,27 @@ export class ApiService {
     }, { headers: this.getHeaders() });
   }
 
+  /**
+   * Allows the user to change their own login (username).
+   * @author Anas EL HOUDI
+   */
+  changeLogin(userId: number, newLogin: string): Observable<any> {
+    return this.http.put<any>(`${this.BASE_URL}/users/${userId}`, {
+      login: newLogin
+    }, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Resets a user's password using their login (self-service from login page).
+   * No authentication required.
+   * @author Anas EL HOUDI
+   */
+  resetPassword(login: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/auth/reset-password`, {
+      login,
+      newPassword
+    });
+  }
   /* ===================== */
   /* Audit Logs */
   /* ===================== */

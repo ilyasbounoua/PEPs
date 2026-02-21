@@ -5,7 +5,7 @@
         <!-- Admin Profile Filter -->
         @if (isAdmin()) {
         <mat-form-field appearance="outline" class="profile-select">
-          <mat-label>Filtrer par profil</mat-label>
+          <mat-label>{{ i18n.t('common.filterByProfile') }}</mat-label>
           <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
             @for (profile of profiles; track $index) {
             <mat-option [value]="profile.role">{{profile.name}}</mat-option>
@@ -15,10 +15,10 @@
         }
 
         <mat-radio-group [(ngModel)]="filter" (ngModelChange)="setFilter($event)">
-          <mat-radio-button value="all" checked>Toutes</mat-radio-button>
-          <mat-radio-button value="today">Aujourd'hui</mat-radio-button>
-          <mat-radio-button value="yesterday">Hier</mat-radio-button>
-          <mat-radio-button value="week">Semaine</mat-radio-button>
+          <mat-radio-button value="all" checked>{{ i18n.t('interactions.all') }}</mat-radio-button>
+          <mat-radio-button value="today">{{ i18n.t('interactions.today') }}</mat-radio-button>
+          <mat-radio-button value="yesterday">{{ i18n.t('interactions.yesterday') }}</mat-radio-button>
+          <mat-radio-button value="week">{{ i18n.t('interactions.week') }}</mat-radio-button>
         </mat-radio-group>
       </div>
 
@@ -27,26 +27,26 @@
         <button mat-flat-button color="primary" (click)="exportAsCsv()"
           [disabled]="filteredInteractions().length === 0">
           <mat-icon>download</mat-icon>
-          Exporter CSV
+          {{ i18n.t('interactions.exportCsv') }}
         </button>
         @if (filteredInteractions().length === 0) {
-        <span style="font-size: 11px; color: gray; margin-top: 4px;">Aucune donnée à exporter</span>
+        <span style="font-size: 11px; color: gray; margin-top: 4px;">{{ i18n.t('interactions.noData') }}</span>
         }
       </div>
     </mat-card-header>
     <mat-card-content class="table-container">
       <table mat-table [dataSource]="filteredInteractions()">
-        <!-- Colonne Date/Heure -->
+        <!-- Date/Time Column -->
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef> Date/Heure </th>
+          <th mat-header-cell *matHeaderCellDef> {{ i18n.t('interactions.dateTime') }} </th>
           <td mat-cell *matCellDef="let item"> {{item.date}} </td>
         </ng-container>
-        <!-- Colonne Module -->
+        <!-- Module Column -->
         <ng-container matColumnDef="module">
           <th mat-header-cell *matHeaderCellDef> Module </th>
           <td mat-cell *matCellDef="let item"> {{item.module}} </td>
         </ng-container>
-        <!-- Colonne Type -->
+        <!-- Type Column -->
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef> Type </th>
           <td mat-cell *matCellDef="let item"> {{item.type}} </td>

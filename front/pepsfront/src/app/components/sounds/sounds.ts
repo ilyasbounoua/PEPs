@@ -15,12 +15,13 @@ import { AudioService } from '../../services/audio';
 import { Sound, SoundFilter } from '../../models/interfaces';
 // IMPORT DU COMPOSANT ENFANT
 import { SoundAddComponent } from './sound-add/sound-add';
+import { I18nService } from '../../services/i18n';
 
 @Component({
   selector: 'app-sounds',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatCardModule, MatButtonModule, 
+    CommonModule, FormsModule, MatCardModule, MatButtonModule,
     MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatTooltipModule,
     SoundAddComponent // Ajouté aux imports
   ],
@@ -31,6 +32,7 @@ export class Sounds implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
   private audioService = inject(AudioService);
+  readonly i18n = inject(I18nService);
 
   readonly isAdmin = this.authService.isAdmin;
   readonly canEdit = this.authService.canEdit;
@@ -40,11 +42,11 @@ export class Sounds implements OnInit {
   viewMode = signal<'list' | 'add'>('list');
 
   selectedRole = '';
-  profiles: { role: string; name: string }[] = [{ role: '', name: 'Tous les profils' }];
-  
+  profiles: { role: string; name: string }[] = [];
+
   sounds = signal<Sound[]>([]);
   soundFilter = signal<SoundFilter>('all');
-  
+
   // ... (Gardez editingSoundId, editSoundData, etc. comme avant) ...
   editingSoundId = signal<number | null>(null);
   editSoundData = signal<{ name: string, type: string }>({ name: '', type: '' });
@@ -61,7 +63,7 @@ export class Sounds implements OnInit {
   ngOnInit() {
     if (this.isAdmin()) {
       this.api.getRoles().subscribe(roles => {
-        this.profiles = [{ role: '', name: 'Tous les profils' }, ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))];
+        this.profiles = [{ role: '', name: this.i18n.t('common.allProfiles') }, ...roles.map(r => ({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }))];
       });
     }
     this.loadData();
@@ -88,20 +90,31 @@ export class Sounds implements OnInit {
   onProfileChange(role: string) { this.selectedRole = role; this.loadData(); }
   setSoundFilter(filter: SoundFilter) { this.soundFilter.set(filter); }
   playSound(sound: Sound) { this.audioService.playSound(this.api.getSoundFileUrl(sound.id), sound.id); }
-  
+
   // ... (Gardez tout le bloc Edit et Delete du code précédent) ...
   startEditSound(sound: Sound) { this.editingSoundId.set(sound.id); this.editSoundData.set({ name: sound.name, type: sound.type }); }
   cancelEditSound() { this.editingSoundId.set(null); }
-  updateEditSoundName(name: string) { this.editSoundData.update(d => ({...d, name})); }
-  updateEditSoundType(type: string) { this.editSoundData.update(d => ({...d, type})); }
-  saveEditSound(id: number) { /* Code update... */ 
-      const data = this.editSoundData();
-      this.api.updateSound(id, data).subscribe(updated => {
-          this.sounds.update(s => s.map(x => x.id === id ? updated : x));
-          this.cancelEditSound();
-      });
+  updateEditSoundName(name: string) { this.editSoundData.update(d => ({ ...d, name })); }
+  updateEditSoundType(type: string) { this.editSoundData.update(d => ({ ...d, type })); }
+  saveEditSound(id: number) { /* Code update... */
+    const data = this.editSoundData();
+    this.api.updateSound(id, data).subscribe(updated => {
+      this.sounds.update(s => s.map(x => x.id === id ? updated : x));
+      this.cancelEditSound();
+    });
   }
-  deleteSound(sound: Sound) { /* Code delete... */ 
-      if(confirm('Supprimer ?')) this.api.deleteSound(sound.id).subscribe(() => this.sounds.update(s => s.filter(x => x.id !== sound.id)));
+  deleteSound(sound: Sound) { /* Code delete... */
+    if (confirm(this.i18n.t('sounds.deleteConfirm'))) this.api.deleteSound(sound.id).subscribe(() => this.sounds.update(s => s.filter(x => x.id !== sound.id)));
+  }
+
+  /** Translate database sound type to current language */
+  translateType(type: string): string {
+    const typeMap: Record<string, string> = {
+      'Vocal': this.i18n.t('sounds.filterVocal'),
+      'Ambiance': this.i18n.t('sounds.filterAmbiance'),
+      'Naturel': this.i18n.t('sounds.filterNatural'),
+      'Autre': this.i18n.t('sounds.filterOther')
+    };
+    return typeMap[type] || type;
   }
 }

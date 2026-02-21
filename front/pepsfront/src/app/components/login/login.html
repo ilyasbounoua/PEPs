@@ -1,54 +1,134 @@
 @if (isReady()) {
 <div class="login-container fade-in">
   <img src="web-app-manifest-512x512.png" alt="Logo" class="top-left-logo">
+
+  <!-- Language toggle on login page -->
+  <button mat-icon-button class="login-lang-btn" (click)="i18n.toggle()" [title]="i18n.t('lang.switchTo')">
+    <mat-icon>language</mat-icon>
+    <span class="lang-label">{{ i18n.t('lang.current') }}</span>
+  </button>
+
+  @if (!showResetForm()) {
+  <!-- ============ LOGIN FORM ============ -->
   <mat-card class="login-card glass-effect">
     <mat-card-header>
-      <mat-card-title>PEP'S Login</mat-card-title>
-      <mat-card-subtitle>Accès au panneau de supervision</mat-card-subtitle>
+      <mat-card-title>{{ i18n.t('login.title') }}</mat-card-title>
+      <mat-card-subtitle>{{ i18n.t('login.subtitle') }}</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <form class="login-form" (submit)="onSubmit($event)">
 
         <mat-form-field appearance="outline" class="glass-input">
-          <mat-label>Login</mat-label>
+          <mat-label>{{ i18n.t('login.loginLabel') }}</mat-label>
           <input matInput type="text" name="login" required autocomplete="username">
           <mat-icon matSuffix>person</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="glass-input">
-          <mat-label>Mot de passe</mat-label>
-          <input 
-            matInput 
-            [type]="hidePassword ? 'password' : 'text'" 
-            name="password" 
-            required 
+          <mat-label>{{ i18n.t('login.password') }}</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" name="password" required
             autocomplete="current-password">
-          <button 
-            type="button"
-            mat-icon-button 
-            matSuffix 
-            (click)="hidePassword = !hidePassword">
+          <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
             <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>
         </mat-form-field>
 
         @if (loginError()) {
-          <div class="login-general-error">
-            {{ loginError() }}
-          </div>
+        <div class="login-general-error">
+          {{ loginError() }}
+        </div>
         }
 
         <mat-card-actions>
           <button mat-flat-button class="submit-btn" type="submit">
-            Entrer
+            {{ i18n.t('login.submit') }}
           </button>
         </mat-card-actions>
+
+        <div class="forgot-password-link">
+          <a (click)="showReset()">{{ i18n.t('login.forgotPassword') }}</a>
+        </div>
 
       </form>
     </mat-card-content>
   </mat-card>
+
+  } @else {
+  <!-- ============ RESET PASSWORD FORM ============ -->
+  <mat-card class="login-card glass-effect">
+    <mat-card-header>
+      <mat-card-title>{{ i18n.t('login.resetTitle') }}</mat-card-title>
+      <mat-card-subtitle>{{ i18n.t('login.resetSubtitle') }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      @if (!resetDone()) {
+      <!-- Form fields (hidden after success to avoid red validation borders) -->
+      <form class="login-form" (submit)="$event.preventDefault(); submitReset()">
+
+        <mat-form-field appearance="outline" class="glass-input">
+          <mat-label>{{ i18n.t('login.resetLogin') }}</mat-label>
+          <input matInput type="text" [ngModel]="resetLogin()" (ngModelChange)="resetLogin.set($event)"
+            name="resetLogin" required autocomplete="username">
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="glass-input">
+          <mat-label>{{ i18n.t('login.resetNewPassword') }}</mat-label>
+          <input matInput [type]="hideNewPassword ? 'password' : 'text'" [ngModel]="resetNewPassword()"
+            (ngModelChange)="resetNewPassword.set($event)" name="resetNewPassword" required autocomplete="new-password">
+          <button type="button" mat-icon-button matSuffix (click)="hideNewPassword = !hideNewPassword">
+            <mat-icon>{{hideNewPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="glass-input">
+          <mat-label>{{ i18n.t('login.resetConfirmPassword') }}</mat-label>
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" [ngModel]="resetConfirmPassword()"
+            (ngModelChange)="resetConfirmPassword.set($event)" name="resetConfirmPassword" required
+            autocomplete="new-password">
+          <button type="button" mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword">
+            <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        @if (resetError()) {
+        <div class="login-general-error">
+          {{ resetError() }}
+        </div>
+        }
+
+        <mat-card-actions>
+          <button mat-flat-button class="submit-btn" type="submit" [disabled]="isResetting()">
+            @if (isResetting()) {
+            {{ i18n.t('login.resetting') }}
+            } @else {
+            {{ i18n.t('login.resetBtn') }}
+            }
+          </button>
+        </mat-card-actions>
+
+      </form>
+      } @else {
+      <!-- Success state: form hidden, show success + countdown -->
+      <div class="reset-success-message">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <p class="success-text">{{ resetSuccess() }}</p>
+        <p class="redirect-text">{{ i18n.t('login.redirecting') }} {{ redirectCountdown() }}s</p>
+      </div>
+      }
+
+      <div class="forgot-password-link">
+        <a (click)="backToLogin()">{{ i18n.t('login.backToLogin') }}</a>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+  }
+
 </div>
 } @else {
-  <div style="background: #000; height: 100vh; width: 100vw;"></div>
+<div style="background: #000; height: 100vh; width: 100vw;"></div>
 }

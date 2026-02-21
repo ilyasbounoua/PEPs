@@ -2,24 +2,24 @@
     <mat-card-header>
         <mat-card-title>
             <mat-icon>history</mat-icon>
-            Journal d'Audit
+            {{ i18n.t('auditLogs.title') }}
         </mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-        <!-- Filtres -->
+        <!-- Filters -->
         <div class="filters">
             <mat-form-field appearance="outline">
-                <mat-label>Type d'entité</mat-label>
+                <mat-label>{{ i18n.t('auditLogs.entityType') }}</mat-label>
                 <mat-select [(ngModel)]="filterEntity" (selectionChange)="onFilterChange()">
-                    <mat-option value="all">Tous</mat-option>
+                    <mat-option value="all">{{ i18n.t('auditLogs.filterAll') }}</mat-option>
                     <mat-option value="module">Modules</mat-option>
-                    <mat-option value="sound">Sons</mat-option>
-                    <mat-option value="user">Utilisateurs</mat-option>
+                    <mat-option value="sound">{{ i18n.t('auditLogs.filterSounds') }}</mat-option>
+                    <mat-option value="user">{{ i18n.t('auditLogs.filterUsers') }}</mat-option>
                 </mat-select>
             </mat-form-field>
 
-            <button mat-icon-button (click)="loadLogs()" matTooltip="Actualiser">
+            <button mat-icon-button (click)="loadLogs()" [matTooltip]="i18n.t('auditLogs.refresh')">
                 <mat-icon>refresh</mat-icon>
             </button>
         </div>
@@ -43,7 +43,7 @@
         @if (logs().length === 0) {
         <div class="empty-state">
             <mat-icon>inbox</mat-icon>
-            <p>Aucun log d'audit trouvé</p>
+            <p>{{ i18n.t('auditLogs.noLogs') }}</p>
         </div>
         } @else {
         <div class="table-container">
@@ -61,7 +61,7 @@
 
                 <!-- Entity Column -->
                 <ng-container matColumnDef="entity">
-                    <th mat-header-cell *matHeaderCellDef>Entité</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('auditLogs.entity') }}</th>
                     <td mat-cell *matCellDef="let log">
                         <span class="entity-cell" [matTooltip]="formatEntityInfo(log)">
                             {{ formatEntityInfo(log) }}
@@ -71,22 +71,22 @@
 
                 <!-- User Column -->
                 <ng-container matColumnDef="userLogin">
-                    <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('auditLogs.user') }}</th>
                     <td mat-cell *matCellDef="let log">{{ log.userLogin }}</td>
                 </ng-container>
 
                 <!-- Timestamp Column -->
                 <ng-container matColumnDef="timestamp">
-                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('auditLogs.date') }}</th>
                     <td mat-cell *matCellDef="let log">{{ formatTimestamp(log.timestamp) }}</td>
                 </ng-container>
 
                 <!-- Details Column -->
                 <ng-container matColumnDef="details">
-                    <th mat-header-cell *matHeaderCellDef>Détails</th>
+                    <th mat-header-cell *matHeaderCellDef>{{ i18n.t('auditLogs.details') }}</th>
                     <td mat-cell *matCellDef="let log">
                         <button mat-icon-button (click)="toggleExpand(log.id)"
-                            [matTooltip]="isExpanded(log.id) ? 'Réduire' : 'Voir les changements'">
+                            [matTooltip]="isExpanded(log.id) ? i18n.t('auditLogs.collapse') : i18n.t('auditLogs.viewChanges')">
                             <mat-icon>{{ isExpanded(log.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
                         </button>
                     </td>
@@ -102,18 +102,18 @@
             @if (isExpanded(log.id)) {
             <div class="expanded-details" [ngClass]="getActionClass(log.action)">
                 <div class="detail-header">
-                    <strong>{{ log.details || 'Détails de la modification' }}</strong>
+                    <strong>{{ log.details || i18n.t('auditLogs.modificationDetails') }}</strong>
                 </div>
                 <div class="detail-content">
                     @if (log.oldValue) {
                     <div class="value-block old-value">
-                        <span class="value-label">Avant :</span>
+                        <span class="value-label">{{ i18n.t('auditLogs.before') }} :</span>
                         <pre>{{ log.oldValue | json }}</pre>
                     </div>
                     }
                     @if (log.newValue) {
                     <div class="value-block new-value">
-                        <span class="value-label">Après :</span>
+                        <span class="value-label">{{ i18n.t('auditLogs.after') }} :</span>
                         <pre>{{ log.newValue | json }}</pre>
                     </div>
                     }

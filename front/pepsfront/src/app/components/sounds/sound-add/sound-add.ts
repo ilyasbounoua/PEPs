@@ -9,12 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ApiService } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
+import { I18nService } from '../../../services/i18n';
 
 @Component({
   selector: 'app-sound-add', // Ce sélecteur est important
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatCardModule, MatButtonModule, 
+    CommonModule, FormsModule, MatCardModule, MatButtonModule,
     MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule
   ],
   templateUrl: './sound-add.html',
@@ -23,19 +24,20 @@ import { AuthService } from '../../../services/auth';
 export class SoundAddComponent implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
+  readonly i18n = inject(I18nService);
 
   // --- NOUVEAU : Événements vers le parent ---
   // Dit au parent de fermer le formulaire
-  cancel = output<void>(); 
+  cancel = output<void>();
   // Dit au parent que c'est fini et qu'il faut recharger la liste
   soundAdded = output<void>();
 
   readonly isAdmin = this.authService.isAdmin;
-  
+
   newSound = signal({ name: '', type: '', file: null as File | null });
   isUploading = signal(false);
   uploadError = signal('');
-  
+
   selectedRole = '';
   profiles: { role: string; name: string }[] = [];
 
@@ -61,7 +63,7 @@ export class SoundAddComponent implements OnInit {
       const file = input.files[0];
       // Validation simple de l'extension
       if (!['mp3', 'wav', 'ogg', 'm4a'].includes(file.name.split('.').pop()?.toLowerCase() || '')) {
-        this.uploadError.set('Format non supporté (mp3, wav, ogg, m4a)');
+        this.uploadError.set(this.i18n.t('sounds.formatError'));
         return;
       }
       this.newSound.update(c => ({ ...c, file }));
@@ -71,10 +73,10 @@ export class SoundAddComponent implements OnInit {
 
   uploadSound() {
     const sound = this.newSound();
-    if (!sound.name?.trim()) { this.uploadError.set('Nom obligatoire'); return; }
-    if (!sound.type?.trim()) { this.uploadError.set('Type obligatoire'); return; }
-    if (!sound.file) { this.uploadError.set('Fichier obligatoire'); return; }
-    if (this.isAdmin() && !this.selectedRole) { this.uploadError.set('Profil cible obligatoire'); return; }
+    if (!sound.name?.trim()) { this.uploadError.set(this.i18n.t('sounds.nameRequired')); return; }
+    if (!sound.type?.trim()) { this.uploadError.set(this.i18n.t('sounds.typeRequired')); return; }
+    if (!sound.file) { this.uploadError.set(this.i18n.t('sounds.fileRequired')); return; }
+    if (this.isAdmin() && !this.selectedRole) { this.uploadError.set(this.i18n.t('sounds.profileRequired')); return; }
 
     const formData = new FormData();
     formData.append('name', sound.name);
@@ -82,7 +84,7 @@ export class SoundAddComponent implements OnInit {
     formData.append('file', sound.file, sound.file.name);
 
     this.isUploading.set(true);
-    
+
     const overrideRole = this.isAdmin() ? this.selectedRole : undefined;
 
     this.api.uploadSound(formData, overrideRole).subscribe({
@@ -92,7 +94,7 @@ export class SoundAddComponent implements OnInit {
       },
       error: (err) => {
         this.isUploading.set(false);
-        this.uploadError.set(err.error?.error || 'Erreur upload');
+        this.uploadError.set(err.error?.error || this.i18n.t('sounds.uploadError'));
       }
     });
   }

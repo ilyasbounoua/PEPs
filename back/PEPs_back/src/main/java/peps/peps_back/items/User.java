@@ -49,6 +49,13 @@ public class User {
     @Column(nullable = false, length = 20)
     private String permission = "viewer";
 
+    /**
+     * Langue préférée de l'utilisateur : "fr" ou "en".
+     * Utilisée pour l'internationalisation de l'interface.
+     */
+    @Column(name = "preferred_lang", nullable = false, length = 2)
+    private String preferredLang = "fr";
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -105,5 +112,13 @@ public class User {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    public String getPreferredLang() {
+        return preferredLang;
+    }
+
+    public void setPreferredLang(String preferredLang) {
+        this.preferredLang = preferredLang;
     }
 }

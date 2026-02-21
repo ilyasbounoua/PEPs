@@ -4,7 +4,7 @@
     <!-- Admin Profile Filter -->
     @if (isAdmin()) {
     <mat-form-field appearance="outline" class="profile-select">
-      <mat-label>Filtrer par profil</mat-label>
+      <mat-label>{{ i18n.t('common.filterByProfile') }}</mat-label>
       <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
         @for (profile of profiles; track $index) {
         <mat-option [value]="profile.role">{{profile.name}}</mat-option>
@@ -16,7 +16,7 @@
     @if (canEdit()) {
     <button mat-raised-button color="primary" (click)="onAddClick()">
       <mat-icon>add</mat-icon>
-      Ajouter un module
+      {{ i18n.t('modules.addModule') }}
     </button>
     }
   </div>
@@ -32,7 +32,7 @@
       </mat-card-header>
       <mat-card-content>
         <p><strong>IP:</strong> {{ module.ip }}</p>
-        <p><strong>Statut:</strong>
+        <p><strong>{{ i18n.t('modules.status') }}:</strong>
           <span [class]="module.status === 'Actif' ? 'status-active' : 'status-inactive'">
             {{ module.status }}
           </span>
