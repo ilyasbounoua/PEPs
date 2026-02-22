@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Module;
 import peps.peps_back.repositories.ModuleRepository;
 import peps.peps_back.repositories.UserRepository;
+import peps.peps_back.repositories.UserRepository;
 import peps.peps_back.items.User;
+import peps.peps_back.items.Notification;
+import peps.peps_back.repositories.NotificationRepository;
 import peps.peps_back.services.AuditService;
 import javax.persistence.OptimisticLockException;
 
@@ -30,14 +33,16 @@ public class ModuleController {
 
     @Autowired
     private ModuleRepository moduleRepository;
-    
-    public ModuleController(ModuleRepository moduleRepository)
-    {
+
+    public ModuleController(ModuleRepository moduleRepository) {
         this.moduleRepository = moduleRepository;
     }
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private AuditService auditService;
@@ -155,11 +160,14 @@ public class ModuleController {
             return ResponseEntity.badRequest().body(error);
         }
 
-        // Capture old values for audit log
+        // Capture old values for audit log and notification logic
         String oldValue = String.format(
                 "{\"name\":\"%s\",\"ip\":\"%s\",\"volume\":%d,\"mode\":\"%s\",\"actif\":%b}",
                 module.getNom(), module.getIpAdress(), module.getVolume(),
                 module.getCurrentMode(), module.getActif());
+
+        boolean wasActive = module.getActif();
+        boolean isNowActive = dto.getConfig().isActif();
 
         module.setNom(dto.getName());
         module.setIpAdress(dto.getIp());
@@ -184,6 +192,14 @@ public class ModuleController {
             String userLogin = (login != null) ? login : "unknown";
             auditService.log("UPDATE", "module", module.getIdmodule(), module.getNom(),
                     module.getOwnerRole(), userLogin, oldValue, newValue, "Modification du module");
+
+            // Notification Trigger: module offline
+            if (wasActive && !isNowActive) {
+                Notification notif = new Notification(
+                        "MODULE_OFFLINE|" + module.getNom() + "|" + module.getIpAdress() + "|" + module.getOwnerRole(),
+                        module.getOwnerRole());
+                notificationRepository.save(notif);
+            }
 
             ModuleDTO updatedDto = new ModuleDTO(
                     module.getIdmodule(),
@@ -268,8 +284,9 @@ public class ModuleController {
                 module.getCurrentMode(), module.getActif());
 
         String userLogin = (login != null) ? login : "unknown";
-        if(auditService !=null) auditService.log("CREATE", "module", module.getIdmodule(), module.getNom(),
-                module.getOwnerRole(), userLogin, null, newValue, "Création d'un module");
+        if (auditService != null)
+            auditService.log("CREATE", "module", module.getIdmodule(), module.getNom(),
+                    module.getOwnerRole(), userLogin, null, newValue, "Création d'un module");
 
         ModuleDTO createdDto = new ModuleDTO(
                 module.getIdmodule(),
@@ -313,8 +330,9 @@ public class ModuleController {
                 module.getNom(), module.getIpAdress(), module.getOwnerRole());
 
         String userLogin = (login != null) ? login : "unknown";
-        if(auditService !=null) auditService.log("DELETE", "module", id, module.getNom(),
-                module.getOwnerRole(), userLogin, oldValue, null, "Suppression d'un module");
+        if (auditService != null)
+            auditService.log("DELETE", "module", id, module.getNom(),
+                    module.getOwnerRole(), userLogin, oldValue, null, "Suppression d'un module");
 
         moduleRepository.delete(module);
 

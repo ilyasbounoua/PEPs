@@ -52,6 +52,11 @@
         <mat-icon matListItemIcon>archive</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.archive') }}</span>
       </mat-list-item>
+      <mat-list-item (click)="setCurrentPage('notifications')" (keydown.enter)="setCurrentPage('notifications')"
+        [class.active]="currentPage() === 'notifications'">
+        <mat-icon matListItemIcon>notifications</mat-icon>
+        <span matListItemTitle>{{ i18n.t('app.notifications') }}</span>
+      </mat-list-item>
       }
 
       <mat-list-item (click)="setCurrentPage('account')" (keydown.enter)="setCurrentPage('account')"
@@ -108,6 +113,8 @@
       <app-audit-logs />
       } @case ('archive') {
       <app-archive />
+      } @case ('notifications') {
+      <app-notifications />
       } }
     </div>
   </mat-sidenav-content>
@@ -115,3 +122,5 @@
 } @else {
 <app-login (loginSuccess)="onLoginSuccess()" />
 }
+
+<app-toast-overlay />

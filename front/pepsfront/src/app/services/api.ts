@@ -10,7 +10,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod } from '../models/interfaces';
+import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod, Notification } from '../models/interfaces';
 import { AuthService } from './auth';
 import { environment } from '../../environments/environment';
 
@@ -352,4 +352,37 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  // ==========================================
+  // NOTIFICATIONS
+  // ==========================================
+
+  getNotifications(): Observable<Notification[]> {
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications`, { headers: this.getHeaders() });
+  }
+
+  getUnreadNotifications(): Observable<Notification[]> {
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/unread`, { headers: this.getHeaders() });
+  }
+
+  pollNewNotifications(lastId: number): Observable<Notification[]> {
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/poll?lastId=${lastId}`, { headers: this.getHeaders() });
+  }
+
+  getUnreadNotificationCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.BASE_URL}/notifications/unread/count`, { headers: this.getHeaders() });
+  }
+
+  markNotificationAsRead(id: number): Observable<any> {
+    return this.http.put(`${this.BASE_URL}/notifications/${id}/read`, {}, { headers: this.getHeaders() });
+  }
+
+  deleteNotification(id: number): Observable<any> {
+    return this.http.delete(`${this.BASE_URL}/notifications/${id}`, { headers: this.getHeaders() });
+  }
+
+  deleteAllNotifications(): Observable<any> {
+    return this.http.delete(`${this.BASE_URL}/notifications/all`, { headers: this.getHeaders() });
+  }
+
 }

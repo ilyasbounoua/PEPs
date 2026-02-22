@@ -8,6 +8,7 @@
         "auditLogs": "Journal d'Audit",
         "archive": "Archive",
         "account": "Mon Profil",
+        "notifications": "Notifications",
         "logout": "Déconnexion",
         "menu": "Menu"
     },
@@ -22,6 +23,7 @@
         "account": "Mon Profil",
         "auditLogs": "Journal d'Audit",
         "archive": "Archive des Données",
+        "notifications": "Notifications",
         "default": "PEP'S"
     },
     "lang": {
@@ -281,5 +283,21 @@
         "exportAllConfirm": "Voulez-vous vraiment exporter et supprimer TOUTES les données archivables ?",
         "exportSuccess": "Export et suppression effectués avec succès",
         "exportError": "Erreur lors de l'export"
+    },
+    "notifications": {
+        "title": "Historique des Notifications",
+        "empty": "Pas encore de notifications",
+        "deleteAllBtn": "Tout supprimer",
+        "deleteTitle": "Supprimer la notification",
+        "deleteMessage": "Êtes-vous sûr de vouloir supprimer cette notification ?",
+        "deleteAllTitle": "Supprimer toutes les notifications",
+        "deleteAllMessage": "Êtes-vous sûr de vouloir supprimer toutes vos notifications ?",
+        "deleteBtn": "Supprimer",
+        "moduleOffline": "Le module {name} (IP: {ip}) a été mis hors ligne.",
+        "profileLabel": "Profil",
+        "welcomeToast": "Vous avez {count} notification(s) non lue(s)",
+        "viewNotifs": "Voir",
+        "details": "Détails",
+        "dismiss": "✕"
     }
 }

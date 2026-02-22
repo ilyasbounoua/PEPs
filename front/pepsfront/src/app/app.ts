@@ -14,7 +14,7 @@
  * - La page "Utilisateurs" n'est visible que pour les admins
  * - Persiste la page courante pour survivre aux refresh
  */
-import { Component, computed, signal, inject, PLATFORM_ID } from '@angular/core';
+import { Component, computed, signal, inject, PLATFORM_ID, effect } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -36,6 +36,9 @@ import { I18nService } from './services/i18n';
 import { Account } from './components/account/account';
 import { AuditLogsComponent } from './components/audit-logs/audit-logs';
 import { ArchiveComponent } from './components/archive/archive';
+import { NotificationsComponent } from './components/notifications/notifications';
+import { NotificationService } from './services/notification.service';
+import { ToastOverlayComponent } from './components/toast-overlay/toast-overlay';
 
 /** Clé pour stocker la page courante */
 const PAGE_KEY = 'peps_current_page';
@@ -61,14 +64,36 @@ const PAGE_KEY = 'peps_current_page';
     Account,
     AuditLogsComponent,
     ArchiveComponent,
+    NotificationsComponent,
+    ToastOverlayComponent
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })
 export class App {
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   private platformId = inject(PLATFORM_ID);
   readonly i18n = inject(I18nService);
+
+  constructor() {
+    effect(() => {
+      if (this.isLoggedIn() && this.authService.isAdmin()) {
+        // Set navigation callback for toast clicks
+        this.notificationService.onNavigateToNotifications = () => {
+          this.notificationService.dismissAllToasts();
+          this.setCurrentPage('notifications');
+        };
+        // Trigger welcome toast only once on fresh login
+        this.notificationService.showWelcomeToastIfNeeded();
+        // Start polling for newly arriving offline notifications
+        this.notificationService.startPolling();
+      } else {
+        this.notificationService.onNavigateToNotifications = null;
+        this.notificationService.stopPolling();
+      }
+    });
+  }
 
   // Use AuthService's isAuthenticated to check login state (survives page refresh)
   isLoggedIn = computed(() => this.authService.isAuthenticated());
@@ -108,6 +133,8 @@ export class App {
         return this.i18n.t('pageTitles.auditLogs');
       case 'archive':
         return this.i18n.t('pageTitles.archive');
+      case 'notifications':
+        return this.i18n.t('pageTitles.notifications');
       default:
         return this.i18n.t('pageTitles.default');
     }
@@ -204,6 +231,8 @@ export class App {
    */
   logout() {
     this.authService.logout();
+    this.notificationService.stopPolling();
+    this.notificationService.resetWelcomeFlag();
     this.currentPage.set('dashboard');
     this.clearCurrentPage();  // Clear saved navigation on logout
     this.clearArchiveWarningState();

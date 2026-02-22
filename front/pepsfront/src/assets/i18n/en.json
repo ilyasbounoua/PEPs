@@ -8,6 +8,7 @@
         "auditLogs": "Audit Log",
         "archive": "Archive",
         "account": "My Profile",
+        "notifications": "Notifications",
         "logout": "Logout",
         "menu": "Menu"
     },
@@ -22,6 +23,7 @@
         "account": "My Profile",
         "auditLogs": "Audit Log",
         "archive": "Data Archive",
+        "notifications": "Notifications",
         "default": "PEP'S"
     },
     "lang": {
@@ -281,5 +283,21 @@
         "exportAllConfirm": "Do you really want to export and delete ALL archivable data?",
         "exportSuccess": "Export and deletion completed successfully",
         "exportError": "Error during export"
+    },
+    "notifications": {
+        "title": "Notifications History",
+        "empty": "No notifications yet.",
+        "deleteAllBtn": "Delete All",
+        "deleteTitle": "Delete Notification",
+        "deleteMessage": "Are you sure you want to delete this notification?",
+        "deleteAllTitle": "Delete All Notifications",
+        "deleteAllMessage": "Are you sure you want to delete all your notifications?",
+        "deleteBtn": "Delete",
+        "moduleOffline": "Module {name} (IP: {ip}) has been set offline.",
+        "profileLabel": "Profile",
+        "welcomeToast": "You have {count} unread notification(s)",
+        "viewNotifs": "View",
+        "details": "Details",
+        "dismiss": "✕"
     }
 }
