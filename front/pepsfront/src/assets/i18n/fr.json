@@ -129,7 +129,12 @@
         "addError": "Erreur lors de l'ajout du module",
         "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le module",
         "deleteError": "Erreur lors de la suppression du module",
-        "selectProfileFirst": "Veuillez sélectionner un profil spécifique avant de créer un module."
+        "selectProfileFirst": "Veuillez sélectionner un profil spécifique avant de créer un module.",
+        "assignedSounds": "Sons assignés",
+        "noAssignedSounds": "Aucun son assigné à ce module.",
+        "assignSound": "Assigner",
+        "unassignSound": "Désassigner",
+        "selectSound": "Sélectionner un son à assigner"
     },
     "sounds": {
         "title": "Bibliothèque de Sons",
@@ -160,7 +165,14 @@
         "fileRequired": "Fichier obligatoire",
         "profileRequired": "Profil cible obligatoire",
         "formatError": "Format non supporté (mp3, wav, ogg, m4a)",
-        "uploadError": "Erreur upload"
+        "fileTooLarge": "Fichier trop volumineux (5 Mo max)",
+        "fileEmpty": "Le fichier est vide",
+        "uploadError": "Erreur upload",
+        "assignedModules": "Assigné aux modules",
+        "noAssignedModules": "Non assigné à aucun module.",
+        "assignToModule": "Assigner au module",
+        "unassignFromModule": "Désassigner",
+        "selectModule": "Sélectionner un module"
     },
     "users": {
         "title": "Gestion des Utilisateurs",

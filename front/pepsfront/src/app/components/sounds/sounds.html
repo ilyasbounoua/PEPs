@@ -82,6 +82,47 @@
               <mat-error class="edit-error">{{ editSoundError() }}</mat-error>
               }
 
+              <!-- Module assignment info -->
+              <div class="sound-modules-section">
+                <h4>{{ i18n.t('sounds.assignedModules') }}</h4>
+                @if (soundModules().length === 0) {
+                <p class="no-modules">{{ i18n.t('sounds.noAssignedModules') }}</p>
+                } @else {
+                <div class="module-chips">
+                  @for (mod of soundModules(); track mod.id) {
+                  <span class="module-chip">
+                    {{ mod.name }}
+                    @if (canEdit()) {
+                    <button class="chip-remove-btn" (click)="unassignFromModule(sound.id, mod.id)"
+                      [matTooltip]="i18n.t('sounds.unassignFromModule')">
+                      ×
+                    </button>
+                    }
+                  </span>
+                  }
+                </div>
+                }
+
+                <!-- Assign to module dropdown -->
+                @if (canEdit() && getAvailableModulesForSound().length > 0) {
+                <div class="assign-module-row">
+                  <mat-form-field appearance="outline" class="module-select">
+                    <mat-label>{{ i18n.t('sounds.selectModule') }}</mat-label>
+                    <mat-select [value]="assignToModuleId()" (selectionChange)="assignToModuleId.set($event.value)">
+                      @for (mod of getAvailableModulesForSound(); track mod.id) {
+                      <mat-option [value]="mod.id">{{ mod.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" (click)="assignToModule(sound.id)"
+                    [disabled]="!assignToModuleId()">
+                    <mat-icon>link</mat-icon>
+                    {{ i18n.t('sounds.assignToModule') }}
+                  </button>
+                </div>
+                }
+              </div>
+
               <div class="edit-actions">
                 <button mat-raised-button color="primary" (click)="saveEditSound(sound.id)">
                   <mat-icon>save</mat-icon>
@@ -106,6 +147,14 @@
                   {{ sound.fileName }}
                 </p>
               </div>
+
+              <!-- Module count badge -->
+              @if (soundModuleCounts()[sound.id] > 0) {
+              <div class="module-count-badge" [matTooltip]="i18n.t('sounds.assignedModules')">
+                <mat-icon>devices</mat-icon>
+                <span>{{ soundModuleCounts()[sound.id] }}</span>
+              </div>
+              }
 
               <div class="sound-actions">
                 <button mat-icon-button [color]="currentlyPlayingId() === sound.id ? 'accent' : 'primary'"

@@ -13,11 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import peps.peps_back.items.Module;
 import peps.peps_back.repositories.ModuleRepository;
-import peps.peps_back.repositories.UserRepository;
-import peps.peps_back.repositories.UserRepository;
 import peps.peps_back.items.User;
+import peps.peps_back.repositories.UserRepository;
 import peps.peps_back.items.Notification;
 import peps.peps_back.repositories.NotificationRepository;
+import peps.peps_back.items.ModuleSound;
+import peps.peps_back.items.Sound;
+import peps.peps_back.repositories.ModuleSoundRepository;
+import peps.peps_back.repositories.SoundRepository;
 import peps.peps_back.services.AuditService;
 import javax.persistence.OptimisticLockException;
 
@@ -46,6 +49,12 @@ public class ModuleController {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private ModuleSoundRepository moduleSoundRepository;
+
+    @Autowired
+    private SoundRepository soundRepository;
 
     /**
      * Lists modules filtered by role.
@@ -338,6 +347,100 @@ public class ModuleController {
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Module supprimé avec succès");
+        return ResponseEntity.ok(response);
+    }
+
+    // ========== Sound Assignment Endpoints ==========
+
+    /**
+     * Lists all sounds assigned to a module.
+     */
+    @GetMapping("/{id}/sounds")
+    public ResponseEntity<?> getModuleSounds(@PathVariable Integer id) {
+        Module module = moduleRepository.findById(id).orElse(null);
+        if (module == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<ModuleSound> assignments = moduleSoundRepository.findByModuleId(id);
+        List<SoundDTO> sounds = assignments.stream()
+                .map(ms -> soundRepository.findById(ms.getSoundId()).orElse(null))
+                .filter(s -> s != null)
+                .map(s -> new SoundDTO(s.getIdsound(), s.getNom(), s.getTypeSon(), s.getExtension()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(sounds);
+    }
+
+    /**
+     * Assigns a sound to a module (editor+ only).
+     */
+    @PostMapping("/{moduleId}/sounds/{soundId}")
+    public ResponseEntity<?> assignSound(@PathVariable Integer moduleId,
+            @PathVariable Integer soundId,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Access denied: viewer permission only.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
+        Module module = moduleRepository.findById(moduleId).orElse(null);
+        if (module == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Sound sound = soundRepository.findById(soundId).orElse(null);
+        if (sound == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Check if already assigned
+        if (moduleSoundRepository.findByModuleIdAndSoundId(moduleId, soundId).isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Sound already assigned to this module.");
+            return ResponseEntity.status(409).body(error);
+        }
+
+        ModuleSound ms = new ModuleSound(moduleId, soundId);
+        moduleSoundRepository.save(ms);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Sound assigned successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Unassigns a sound from a module (editor+ only).
+     */
+    @DeleteMapping("/{moduleId}/sounds/{soundId}")
+    public ResponseEntity<?> unassignSound(@PathVariable Integer moduleId,
+            @PathVariable Integer soundId,
+            @RequestHeader(value = "X-User-Login", required = false) String login) {
+
+        // Permission check
+        if (login != null) {
+            User user = userRepository.findByLogin(login).orElse(null);
+            if (user != null && !"admin".equals(user.getRole()) && "viewer".equals(user.getPermission())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Access denied: viewer permission only.");
+                return ResponseEntity.status(403).body(error);
+            }
+        }
+
+        if (moduleSoundRepository.findByModuleIdAndSoundId(moduleId, soundId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        moduleSoundRepository.deleteByModuleIdAndSoundId(moduleId, soundId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Sound unassigned successfully");
         return ResponseEntity.ok(response);
     }
 }

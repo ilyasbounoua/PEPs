@@ -57,4 +57,53 @@
       </form>
     </mat-card-content>
   </mat-card>
+
+  <!-- Sound Assignment Section -->
+  <mat-card class="config-card sound-assignment-card">
+    <mat-card-header>
+      <mat-card-title>{{ i18n.t('modules.assignedSounds') }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <!-- List of assigned sounds -->
+      @if (assignedSounds().length === 0) {
+      <p class="no-data">{{ i18n.t('modules.noAssignedSounds') }}</p>
+      } @else {
+      <div class="assigned-sounds-list">
+        @for (sound of assignedSounds(); track sound.id) {
+        <div class="assigned-sound-chip">
+          <mat-icon>audiotrack</mat-icon>
+          <span>{{ sound.name }}</span>
+          <span class="sound-type-badge">{{ sound.type }}</span>
+          @if (canEdit()) {
+          <button mat-icon-button color="warn" (click)="unassignSound(sound.id)"
+            [matTooltip]="i18n.t('modules.unassignSound')">
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Assign new sound (editor only) -->
+      @if (canEdit() && availableSounds().length > 0) {
+      <div class="assign-sound-row">
+        <mat-form-field appearance="outline" class="sound-select">
+          <mat-label>{{ i18n.t('modules.selectSound') }}</mat-label>
+          <mat-select [value]="selectedSoundId()" (selectionChange)="selectedSoundId.set($event.value)">
+            @for (sound of availableSounds(); track sound.id) {
+            <mat-option [value]="sound.id">{{ sound.name }} ({{ sound.type }})</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="assignSound()" [disabled]="!selectedSoundId()">
+          <mat-icon>link</mat-icon>
+          {{ i18n.t('modules.assignSound') }}
+        </button>
+      </div>
+      }
+
+    </mat-card-content>
+  </mat-card>
 </div>

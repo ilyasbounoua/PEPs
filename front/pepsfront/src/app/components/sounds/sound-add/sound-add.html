@@ -51,6 +51,20 @@
           </div>
         </div>
 
+        <!-- Optional: assign to module -->
+        @if (availableModules().length > 0) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ i18n.t('sounds.assignToModule') }}</mat-label>
+          <mat-select [value]="selectedModuleId()" (selectionChange)="selectedModuleId.set($event.value)"
+            name="assignModule">
+            <mat-option [value]="null">—</mat-option>
+            @for (mod of availableModules(); track mod.id) {
+            <mat-option [value]="mod.id">{{ mod.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        }
+
         @if (uploadError()) {
         <mat-error class="upload-error">{{ uploadError() }}</mat-error>
         }

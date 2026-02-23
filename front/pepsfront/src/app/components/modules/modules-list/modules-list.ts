@@ -40,6 +40,7 @@ export class ModulesList implements OnInit {
   profiles: { role: string; name: string }[] = [];
 
   modules = signal<Module[]>([]);
+  moduleSoundCounts = signal<Record<number, number>>({});
   selectModule = output<Module>();
   addModule = output<string | undefined>();
 
@@ -61,7 +62,14 @@ export class ModulesList implements OnInit {
     const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
 
     this.api.getModules(filterRole).subscribe({
-      next: (data) => this.modules.set(data),
+      next: (data) => {
+        this.modules.set(data);
+        data.forEach(m => {
+          this.api.getModuleSounds(m.id).subscribe(sounds => {
+            this.moduleSoundCounts.update(counts => ({ ...counts, [m.id]: sounds.length }));
+          });
+        });
+      },
       error: (err) => console.error('Error loading modules:', err)
     });
   }

@@ -1,0 +1,96 @@
+/* Sound-Module Assignment Styles */
+
+.sound-modules-section {
+    margin: 16px 0;
+    padding: 12px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.sound-modules-section h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.no-modules {
+    color: #999;
+    font-style: italic;
+    font-size: 0.85em;
+    margin: 0;
+}
+
+.module-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.module-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 16px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Fixed chip remove button — small × instead of oversized mat-icon-button */
+.chip-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0 2px;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.chip-remove-btn:hover {
+    background: #c62828;
+    color: white;
+}
+
+/* Assign-to-module dropdown row in edit form */
+.assign-module-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.module-select {
+    flex: 1;
+}
+
+/* Module count badge on sound card */
+.module-count-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border-radius: 16px;
+    font-size: 0.85em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.module-count-badge mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}

@@ -11,6 +11,7 @@
     <class>peps.peps_back.items.Module</class>
     <class>peps.peps_back.items.User</class>
     <class>peps.peps_back.items.AuditLog</class>
+    <class>peps.peps_back.items.ModuleSound</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
 

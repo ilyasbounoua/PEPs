@@ -37,6 +37,12 @@
             {{ module.status }}
           </span>
         </p>
+        @if (moduleSoundCounts()[module.id] > 0) {
+        <div class="sound-count-badge">
+          <mat-icon>audiotrack</mat-icon>
+          <span>{{ moduleSoundCounts()[module.id] }}</span>
+        </div>
+        }
       </mat-card-content>
     </mat-card>
     }

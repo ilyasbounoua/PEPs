@@ -40,9 +40,12 @@ export class SoundAddComponent implements OnInit {
 
   selectedRole = '';
   profiles: { role: string; name: string }[] = [];
+  availableModules = signal<{ id: number, name: string }[]>([]);
+  selectedModuleId = signal<number | null>(null);
 
   ngOnInit() {
     if (this.isAdmin()) this.loadRoles();
+    this.loadModules();
   }
 
   loadRoles() {
@@ -54,6 +57,14 @@ export class SoundAddComponent implements OnInit {
     });
   }
 
+  loadModules() {
+    const role = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
+    this.api.getModules(role).subscribe({
+      next: (modules) => this.availableModules.set(modules.map(m => ({ id: m.id, name: m.name }))),
+      error: (err) => console.error('Error loading modules:', err)
+    });
+  }
+
   updateSoundName(name: string) { this.newSound.update(s => ({ ...s, name })); }
   updateSoundType(type: string) { this.newSound.update(s => ({ ...s, type })); }
 
@@ -61,9 +72,19 @@ export class SoundAddComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
       const file = input.files[0];
-      // Validation simple de l'extension
+      // Validate extension
       if (!['mp3', 'wav', 'ogg', 'm4a'].includes(file.name.split('.').pop()?.toLowerCase() || '')) {
         this.uploadError.set(this.i18n.t('sounds.formatError'));
+        return;
+      }
+      // Validate file size
+      if (file.size === 0) {
+        this.uploadError.set(this.i18n.t('sounds.fileEmpty'));
+        return;
+      }
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        this.uploadError.set(this.i18n.t('sounds.fileTooLarge'));
         return;
       }
       this.newSound.update(c => ({ ...c, file }));
@@ -88,9 +109,18 @@ export class SoundAddComponent implements OnInit {
     const overrideRole = this.isAdmin() ? this.selectedRole : undefined;
 
     this.api.uploadSound(formData, overrideRole).subscribe({
-      next: () => {
-        this.isUploading.set(false);
-        this.soundAdded.emit(); // Succès !
+      next: (created: any) => {
+        const moduleId = this.selectedModuleId();
+        if (moduleId && created?.id) {
+          // Chain: assign to module after upload
+          this.api.assignSoundToModule(moduleId, created.id).subscribe({
+            next: () => { this.isUploading.set(false); this.soundAdded.emit(); },
+            error: () => { this.isUploading.set(false); this.soundAdded.emit(); } // sound was created, emit anyway
+          });
+        } else {
+          this.isUploading.set(false);
+          this.soundAdded.emit();
+        }
       },
       error: (err) => {
         this.isUploading.set(false);

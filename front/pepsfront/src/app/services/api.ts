@@ -163,6 +163,23 @@ export class ApiService {
     return `${this.BASE_URL}/sounds/${id}/file`;
   }
 
+  // Sound-Module Assignment
+  getModuleSounds(moduleId: number): Observable<Sound[]> {
+    return this.http.get<Sound[]>(`${this.BASE_URL}/modules/${moduleId}/sounds`);
+  }
+
+  assignSoundToModule(moduleId: number, soundId: number): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, {}, { headers: this.getHeaders() });
+  }
+
+  unassignSoundFromModule(moduleId: number, soundId: number): Observable<any> {
+    return this.http.delete(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, { headers: this.getHeaders() });
+  }
+
+  getSoundModules(soundId: number): Observable<{ id: number, name: string }[]> {
+    return this.http.get<{ id: number, name: string }[]>(`${this.BASE_URL}/sounds/${soundId}/modules`);
+  }
+
   /* ===================== */
   /* Gestion Utilisateurs (Admin uniquement) */
   /* ===================== */

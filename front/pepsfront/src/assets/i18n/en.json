@@ -129,7 +129,12 @@
         "addError": "Error adding the module",
         "deleteConfirm": "Are you sure you want to delete the module",
         "deleteError": "Error deleting the module",
-        "selectProfileFirst": "Please select a specific profile before creating a module."
+        "selectProfileFirst": "Please select a specific profile before creating a module.",
+        "assignedSounds": "Assigned Sounds",
+        "noAssignedSounds": "No sounds assigned to this module.",
+        "assignSound": "Assign",
+        "unassignSound": "Unassign",
+        "selectSound": "Select a sound to assign"
     },
     "sounds": {
         "title": "Sound Library",
@@ -160,7 +165,14 @@
         "fileRequired": "File is required",
         "profileRequired": "Target profile is required",
         "formatError": "Unsupported format (mp3, wav, ogg, m4a)",
-        "uploadError": "Upload error"
+        "fileTooLarge": "File too large (5 MB max)",
+        "fileEmpty": "File is empty",
+        "uploadError": "Upload error",
+        "assignedModules": "Assigned to modules",
+        "noAssignedModules": "Not assigned to any module.",
+        "assignToModule": "Assign to module",
+        "unassignFromModule": "Unassign",
+        "selectModule": "Select a module"
     },
     "users": {
         "title": "User Management",

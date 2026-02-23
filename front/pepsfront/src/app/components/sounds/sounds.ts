@@ -12,7 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
 import { AudioService } from '../../services/audio';
-import { Sound, SoundFilter } from '../../models/interfaces';
+import { Sound, SoundFilter, Module } from '../../models/interfaces';
 // IMPORT DU COMPOSANT ENFANT
 import { SoundAddComponent } from './sound-add/sound-add';
 import { I18nService } from '../../services/i18n';
@@ -53,6 +53,12 @@ export class Sounds implements OnInit {
   editSoundError = signal('');
   currentlyPlayingId = this.audioService.currentlyPlayingId;
 
+  // Sound-module assignment
+  soundModules = signal<{ id: number, name: string }[]>([]);
+  soundModuleCounts = signal<Record<number, number>>({});
+  allModules = signal<{ id: number, name: string }[]>([]);
+  assignToModuleId = signal<number | null>(null);
+
   filteredSounds = computed(() => {
     const filter = this.soundFilter();
     const allSounds = this.sounds();
@@ -71,7 +77,19 @@ export class Sounds implements OnInit {
 
   loadData() {
     const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
-    this.api.getSounds(filterRole).subscribe(data => this.sounds.set(data));
+    this.api.getSounds(filterRole).subscribe(data => {
+      this.sounds.set(data);
+      // Load module count for each sound
+      data.forEach(s => {
+        this.api.getSoundModules(s.id).subscribe(modules => {
+          this.soundModuleCounts.update(counts => ({ ...counts, [s.id]: modules.length }));
+        });
+      });
+    });
+    // Load all modules for the assign dropdown
+    this.api.getModules(filterRole).subscribe(modules => {
+      this.allModules.set(modules.map(m => ({ id: m.id, name: m.name })));
+    });
   }
 
   // --- ACTIONS DE NAVIGATION ---
@@ -92,8 +110,14 @@ export class Sounds implements OnInit {
   playSound(sound: Sound) { this.audioService.playSound(this.api.getSoundFileUrl(sound.id), sound.id); }
 
   // ... (Gardez tout le bloc Edit et Delete du code précédent) ...
-  startEditSound(sound: Sound) { this.editingSoundId.set(sound.id); this.editSoundData.set({ name: sound.name, type: sound.type }); }
-  cancelEditSound() { this.editingSoundId.set(null); }
+  startEditSound(sound: Sound) {
+    this.editingSoundId.set(sound.id);
+    this.editSoundData.set({ name: sound.name, type: sound.type });
+    this.assignToModuleId.set(null);
+    // Load modules this sound is assigned to
+    this.api.getSoundModules(sound.id).subscribe(modules => this.soundModules.set(modules));
+  }
+  cancelEditSound() { this.editingSoundId.set(null); this.soundModules.set([]); }
   updateEditSoundName(name: string) { this.editSoundData.update(d => ({ ...d, name })); }
   updateEditSoundType(type: string) { this.editSoundData.update(d => ({ ...d, type })); }
   saveEditSound(id: number) { /* Code update... */
@@ -116,5 +140,27 @@ export class Sounds implements OnInit {
       'Autre': this.i18n.t('sounds.filterOther')
     };
     return typeMap[type] || type;
+  }
+
+  unassignFromModule(soundId: number, moduleId: number) {
+    this.api.unassignSoundFromModule(moduleId, soundId).subscribe(() => {
+      this.soundModules.update(list => list.filter(m => m.id !== moduleId));
+      this.soundModuleCounts.update(counts => ({ ...counts, [soundId]: (counts[soundId] || 1) - 1 }));
+    });
+  }
+
+  assignToModule(soundId: number) {
+    const moduleId = this.assignToModuleId();
+    if (!moduleId) return;
+    this.api.assignSoundToModule(moduleId, soundId).subscribe(() => {
+      this.assignToModuleId.set(null);
+      this.api.getSoundModules(soundId).subscribe(modules => this.soundModules.set(modules));
+      this.soundModuleCounts.update(counts => ({ ...counts, [soundId]: (counts[soundId] || 0) + 1 }));
+    });
+  }
+
+  getAvailableModulesForSound(): { id: number, name: string }[] {
+    const assigned = this.soundModules();
+    return this.allModules().filter(m => !assigned.some(a => a.id === m.id));
   }
 }
