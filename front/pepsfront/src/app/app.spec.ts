@@ -1,19 +1,29 @@
+/**
+ * @author Santiago Alexander RODRIGUEZ TRIANA
+ * @description Unit tests for the App root component after Angular Router migration.
+ *
+ * Migration notes:
+ * - App no longer controls which view to show via a `currentPage` signal.
+ * - The shell (sidenav + toolbar) renders only when authenticated.
+ * - Route navigation is managed by Angular Router — tests use provideRouter + RouterTestingHarness.
+ */
 import { TestBed } from '@angular/core/testing';
-import { App } from './app';
-import { AuthService } from './services/auth';
+import { provideRouter } from '@angular/router';
+import { provideLocationMocks } from '@angular/common/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { signal, computed } from '@angular/core';
-import { ApiService } from './services/api';
-import { of } from 'rxjs';
+import { App } from './app';
+import { AuthService } from './services/auth';
+import { routes } from './app.routes';
 
 class MockAuthService {
   private readonly _isLoggedIn = signal(false);
   private readonly _userId = signal<number | null>(null);
   private readonly _userLogin = signal('');
   private readonly _userRole = signal('');
-  private readonly _isInitialized = signal(true); // Mock initialized by default
+  private readonly _isInitialized = signal(true);
 
   isAuthenticated = this._isLoggedIn.asReadonly();
   currentUserId = this._userId.asReadonly();
@@ -21,8 +31,9 @@ class MockAuthService {
   currentRole = this._userRole.asReadonly();
   isInitialized = this._isInitialized.asReadonly();
   isAdmin = computed(() => this._userRole() === 'admin');
+  canEdit = computed(() => this._userRole() === 'admin');
 
-  login(user: string, pass: string) {
+  login(_user: string, _pass: string) {
     this._isLoggedIn.set(true);
     this._userId.set(1);
     this._userLogin.set('testuser');
@@ -36,67 +47,91 @@ class MockAuthService {
     this._userLogin.set('');
     this._userRole.set('');
   }
-}
 
-class MockApiService {
-  getDashboardStats() {
-    return of({ totalInteractions: 0, totalModules: 0, totalUsedModules: 0 });
-  }
-  getDailyStats() {
-    return of([]);
-  }
-  getRoles() {
-    return of(['admin', 'user']);
+  setLoggedIn(role = 'admin') {
+    this._isLoggedIn.set(true);
+    this._userId.set(1);
+    this._userLogin.set('testuser');
+    this._userRole.set(role);
   }
 }
-
 
 describe('App', () => {
+  let mockAuth: MockAuthService;
+
   beforeEach(async () => {
-    // Clear storage to prevent interference from other tests
     sessionStorage.clear();
+    mockAuth = new MockAuthService();
 
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        { provide: AuthService, useClass: MockAuthService },
-        { provide: ApiService, useClass: MockApiService },
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter(routes),
+        provideLocationMocks(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideNoopAnimations()
-      ]
+        provideNoopAnimations(),
+      ],
     }).compileComponents();
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render login page on initial load', () => {
+  it('should render router-outlet (not login page directly) on initial load', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-login')).toBeTruthy();
-    expect(compiled.querySelector('app-dashboard')).toBeFalsy();
+    // Shell is not rendered when not logged in — only a bare router-outlet
+    expect(compiled.querySelector('mat-sidenav-container')).toBeFalsy();
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 
-  it('should render dashboard when logged in', () => {
+  it('should render sidenav shell when logged in', () => {
+    // Simulate authenticated session
+    mockAuth.setLoggedIn('admin');
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('mat-sidenav-container')).toBeTruthy();
+  });
+
+  it('should show admin menu items only when user is admin', () => {
+    mockAuth.setLoggedIn('admin');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    // Admin-only nav items should be present
+    const navText = compiled.querySelector('mat-nav-list')?.textContent ?? '';
+    expect(navText).toContain('Utilisateurs');
+    expect(navText).toContain("Journal d'Audit");
+    expect(navText).toContain('Archive');
+  });
+
+  it('should hide admin menu items for non-admin users', () => {
+    mockAuth.setLoggedIn('dauphin');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const navText = compiled.querySelector('mat-nav-list')?.textContent ?? '';
+    expect(navText).not.toContain('Utilisateurs');
+    expect(navText).not.toContain("Journal d'Audit");
+    expect(navText).not.toContain('Archive');
+  });
+
+  it('should call authService.logout() and remove sidenav on logout', () => {
+    mockAuth.setLoggedIn('admin');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
     const app = fixture.componentInstance;
-
-    // Inject the mock service to manipulate state
-    const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
-
-    // Simulate successful login directly on the service (signals are reactive)
-    authService.login('test', 'pass');
-
-    // Trigger change detection to update the view based on new signal state
+    app.logout();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-dashboard')).toBeTruthy();
-    expect(compiled.querySelector('app-login')).toBeFalsy();
+    expect(compiled.querySelector('mat-sidenav-container')).toBeFalsy();
   });
 });

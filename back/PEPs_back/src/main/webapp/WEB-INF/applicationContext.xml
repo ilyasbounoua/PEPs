@@ -43,5 +43,4 @@
     <property name="entityManagerFactory" ref="entityManagerFactoryBean" />
     </bean>
 
-    <security:http pattern="/modules/**" security="none"/>
 </beans>

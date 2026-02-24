@@ -109,8 +109,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Permission</mat-label>
-          <mat-select [(ngModel)]="formPermission" name="permission" [disabled]="formRole?.toLowerCase() === 'admin'"
-            required>
+          <mat-select [(ngModel)]="formPermission" name="permission" [disabled]="isAdminRole" required>
             <mat-option value="viewer">Lecteur (lecture seule)</mat-option>
             <mat-option value="editor">Éditeur (lecture + écriture)</mat-option>
           </mat-select>
