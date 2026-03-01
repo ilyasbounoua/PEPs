@@ -17,6 +17,11 @@ public class AuditService {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
+    public AuditService(AuditLogRepository auditLogRepository)
+    {
+        this.auditLogRepository = auditLogRepository;
+    }
+    
     /**
      * Enregistre une action dans le journal d'audit.
      *
