@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
+    public User() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_user")
@@ -55,6 +58,20 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    //Constructors
+            
+    public User(Integer idUser, String login, String password, Boolean enabled,String role, String permission, LocalDateTime createdAt, LocalDateTime updatedAt)
+    {
+        this.idUser=idUser;
+        this.login=login;
+        this.passwordHash=password;
+        this.enabled=enabled;
+        this.role = role;
+        this.permission = permission; 
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+    
     /* ===================== */
     /* Getters & Setters */
     /* ===================== */
