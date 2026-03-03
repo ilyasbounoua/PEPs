@@ -89,4 +89,40 @@ describe('Login', () => {
     expect(authService.login).toHaveBeenCalledWith(login, password);
     expect(component.loginError()).toBe(error);
   });
+
+  it('should toggle hidePassword', () => {
+    expect(component.hidePassword).toBe(true);
+    component.hidePassword = !component.hidePassword;
+    expect(component.hidePassword).toBe(false);
+  });
+
+  it('should call preloadBackground on init', () => {
+    spyOn(component, 'preloadBackground');
+    component.ngOnInit();
+    expect(component.preloadBackground).toHaveBeenCalledWith('/backgroundlogin.jpg');
+  });
+
+  it('should clear loginError on submit', async () => {
+    component.loginError.set('Previous error');
+    const login = 'admin';
+    const password = 'PEPS';
+    spyOn(authService, 'login').and.callThrough();
+
+    const mockEvent = {
+      target: {
+        elements: {
+          namedItem: (name: string) => {
+            if (name === 'login') return { value: login };
+            if (name === 'password') return { value: password };
+            return null;
+          },
+        },
+      },
+      preventDefault: () => {},
+    } as any;
+
+    await component.onSubmit(mockEvent);
+
+    expect(component.loginError()).toBe('');
+  });
 });
