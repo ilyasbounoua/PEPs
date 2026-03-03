@@ -12,7 +12,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface InteractionRepository extends JpaRepository<Interaction, Integer> {
+public interface InteractionRepository extends JpaRepository<Interaction, Integer>, InteractionRepositoryCustom {
 
     /**
      * Retrieves all interactions belonging to a specific role.

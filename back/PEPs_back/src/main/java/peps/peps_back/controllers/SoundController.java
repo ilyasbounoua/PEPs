@@ -21,11 +21,8 @@ import peps.peps_back.items.Sound;
 import peps.peps_back.repositories.SoundRepository;
 import peps.peps_back.repositories.UserRepository;
 import peps.peps_back.items.User;
-import peps.peps_back.items.ModuleSound;
-import peps.peps_back.items.Module;
-import peps.peps_back.repositories.ModuleSoundRepository;
-import peps.peps_back.repositories.ModuleRepository;
 import peps.peps_back.services.AuditService;
+import javax.persistence.OptimisticLockException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,12 +50,6 @@ public class SoundController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ModuleSoundRepository moduleSoundRepository;
-
-    @Autowired
-    private ModuleRepository moduleRepository;
 
     public SoundController(SoundRepository soundRepository) {
         this.soundRepository = soundRepository;
@@ -358,32 +349,5 @@ public class SoundController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Son supprimé avec succès");
         return ResponseEntity.ok(response);
-    }
-
-    // ========== Sound-Module Assignment Query ==========
-
-    /**
-     * Returns the list of modules a sound is assigned to.
-     */
-    @GetMapping("/{id}/modules")
-    public ResponseEntity<?> getSoundModules(@PathVariable Integer id) {
-        Sound sound = soundRepository.findById(id).orElse(null);
-        if (sound == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<ModuleSound> assignments = moduleSoundRepository.findBySoundId(id);
-        List<Map<String, Object>> modules = assignments.stream()
-                .map(ms -> moduleRepository.findById(ms.getModuleId()).orElse(null))
-                .filter(m -> m != null)
-                .map(m -> {
-                    Map<String, Object> info = new HashMap<>();
-                    info.put("id", m.getIdmodule());
-                    info.put("name", m.getNom());
-                    return info;
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(modules);
     }
 }

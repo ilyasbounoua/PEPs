@@ -2,7 +2,7 @@
  * @author BOUNOUA Ilyas and VAZEILLE Clément
  * @description This file contains the logic for the module detail component, which allows viewing, editing, and deleting a module's configuration.
  */
-import { Component, input, output, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, input, output, inject } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,12 +13,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
-import { Module, Sound } from '../../../models/interfaces';
-import { I18nService } from '../../../services/i18n';
+import { Module } from '../../../models/interfaces';
 
 @Component({
   selector: 'app-module-detail',
@@ -31,19 +28,16 @@ import { I18nService } from '../../../services/i18n';
     MatSlideToggleModule,
     MatSliderModule,
     MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule
+    MatButtonModule
   ],
   templateUrl: './module-detail.html',
   styleUrl: './module-detail.css',
 })
-export class ModuleDetail implements OnInit {
+export class ModuleDetail {
   private api = inject(ApiService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private document = inject(DOCUMENT);
-  readonly i18n = inject(I18nService);
 
   readonly canEdit = this.authService.canEdit;
 
@@ -54,47 +48,6 @@ export class ModuleDetail implements OnInit {
 
   formatVolumeLabel(value: number): string {
     return `${value}%`;
-  }
-
-  // Sound assignment
-  assignedSounds = signal<Sound[]>([]);
-  allProfileSounds = signal<Sound[]>([]);
-  selectedSoundId = signal<number | null>(null);
-
-  availableSounds = computed(() => {
-    const assigned = this.assignedSounds();
-    const all = this.allProfileSounds();
-    return all.filter(s => !assigned.some(a => a.id === s.id));
-  });
-
-  ngOnInit() {
-    this.loadSoundAssignments();
-  }
-
-  loadSoundAssignments() {
-    const mod = this.module();
-    if (!mod.id) return;
-    this.api.getModuleSounds(mod.id).subscribe(sounds => this.assignedSounds.set(sounds));
-    // Load all sounds for the same profile to populate the dropdown
-    this.api.getSounds().subscribe(sounds => this.allProfileSounds.set(sounds));
-  }
-
-  assignSound() {
-    const soundId = this.selectedSoundId();
-    const moduleId = this.module().id;
-    if (!soundId || !moduleId) return;
-    this.api.assignSoundToModule(moduleId, soundId).subscribe(() => {
-      this.selectedSoundId.set(null);
-      this.loadSoundAssignments();
-    });
-  }
-
-  unassignSound(soundId: number) {
-    const moduleId = this.module().id;
-    if (!moduleId) return;
-    this.api.unassignSoundFromModule(moduleId, soundId).subscribe(() => {
-      this.loadSoundAssignments();
-    });
   }
 
   private navigateToModules() {
@@ -121,22 +74,22 @@ export class ModuleDetail implements OnInit {
     const moduleToSave = this.module();
 
     if (!moduleToSave.name || moduleToSave.name.trim() === '') {
-      alert(this.i18n.t('modules.nameRequiredFull'));
+      alert('Le nom du module est obligatoire');
       return;
     }
 
     if (!moduleToSave.ip || moduleToSave.ip.trim() === '') {
-      alert(this.i18n.t('modules.ipRequiredFull'));
+      alert('L\'adresse IP est obligatoire');
       return;
     }
 
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(moduleToSave.ip)) {
-      alert(this.i18n.t('modules.ipInvalid'));
+      alert('Format d\'adresse IP invalide');
       return;
     }
 
     if (moduleToSave.config.volume < 0 || moduleToSave.config.volume > 100) {
-      alert(this.i18n.t('modules.volumeRange'));
+      alert('Le volume doit être entre 0 et 100');
       return;
     }
 
@@ -152,9 +105,9 @@ export class ModuleDetail implements OnInit {
       error: (err) => {
         console.error('Error saving module:', err);
         if (err.error && err.error.error) {
-          alert(this.i18n.t('common.error') + ': ' + err.error.error);
+          alert('Erreur: ' + err.error.error);
         } else {
-          alert(this.i18n.t('modules.saveError'));
+          alert('Erreur lors de la sauvegarde du module');
         }
       }
     });
@@ -168,7 +121,7 @@ export class ModuleDetail implements OnInit {
   onDelete() {
     const moduleToDelete = this.module();
 
-    if (!confirm(`${this.i18n.t('modules.deleteConfirm')} "${moduleToDelete.name}" ?`)) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer le module "${moduleToDelete.name}" ?`)) {
       return;
     }
 
@@ -180,9 +133,9 @@ export class ModuleDetail implements OnInit {
       error: (err) => {
         console.error('Error deleting module:', err);
         if (err.error && err.error.error) {
-          alert(this.i18n.t('common.error') + ': ' + err.error.error);
+          alert('Erreur: ' + err.error.error);
         } else {
-          alert(this.i18n.t('modules.deleteError'));
+          alert('Erreur lors de la suppression du module');
         }
       }
     });

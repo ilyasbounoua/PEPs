@@ -46,44 +46,8 @@ public class AuthController {
         response.put("login", user.getLogin());
         response.put("role", user.getRole());
         response.put("permission", user.getPermission());
-        response.put("preferredLang", user.getPreferredLang());
 
         return ResponseEntity.ok(response);
-    }
-
-    /* ===================== */
-    /* Password Reset */
-    /* ===================== */
-
-    /**
-     * Self-service password reset.
-     * User provides their login and a new password.
-     * No authentication required.
-     * 
-     * @author Anas EL HOUDI
-     */
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        if (request.getLogin() == null || request.getLogin().isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(java.util.Collections.singletonMap("error", "Login is required"));
-        }
-        if (request.getNewPassword() == null || request.getNewPassword().length() < 4) {
-            return ResponseEntity.badRequest()
-                    .body(java.util.Collections.singletonMap("error",
-                            "New password must be at least 4 characters"));
-        }
-
-        User user = userRepository.findByLogin(request.getLogin()).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(java.util.Collections.singletonMap("error", "Login not found"));
-        }
-
-        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-
-        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Password reset successfully"));
     }
 
     /* ===================== */
@@ -107,27 +71,6 @@ public class AuthController {
 
         public void setPassword(String password) {
             this.password = password;
-        }
-    }
-
-    public static class ResetPasswordRequest {
-        private String login;
-        private String newPassword;
-
-        public String getLogin() {
-            return login;
-        }
-
-        public void setLogin(String login) {
-            this.login = login;
-        }
-
-        public String getNewPassword() {
-            return newPassword;
-        }
-
-        public void setNewPassword(String newPassword) {
-            this.newPassword = newPassword;
         }
     }
 }

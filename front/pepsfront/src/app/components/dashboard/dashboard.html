@@ -5,7 +5,7 @@
     @if (isAdmin()) {
     <div class="dashboard-filter">
       <mat-form-field appearance="outline" class="profile-select">
-        <mat-label>{{ i18n.t('common.filterByProfile') }}</mat-label>
+        <mat-label>Filtrer par profil</mat-label>
         <mat-select [ngModel]="selectedRole" (ngModelChange)="onProfileChange($event)">
           @for (profile of profiles; track $index) {
           <mat-option [value]="profile.role">{{profile.name}}</mat-option>
@@ -18,10 +18,10 @@
     <!-- Date Period Filter -->
     <div class="dashboard-filter">
       <mat-form-field appearance="outline" class="period-select">
-        <mat-label>{{ i18n.t('dashboard.period') }}</mat-label>
+        <mat-label>Période</mat-label>
         <mat-select [ngModel]="selectedPeriod" (ngModelChange)="onPeriodChange($event)">
           @for (period of periods; track $index) {
-          <mat-option [value]="period.value">{{i18n.t(period.labelKey)}}</mat-option>
+          <mat-option [value]="period.value">{{period.label}}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -33,7 +33,7 @@
       <mat-card-header>
         <mat-icon mat-card-avatar>touch_app</mat-icon>
         <mat-card-title>{{ stats().totalInteractions }}</mat-card-title>
-        <mat-card-subtitle>{{ i18n.t(interactionLabelKey) }}</mat-card-subtitle>
+        <mat-card-subtitle>{{ interactionLabel }}</mat-card-subtitle>
       </mat-card-header>
     </mat-card>
 
@@ -41,26 +41,29 @@
       <mat-card-header>
         <mat-icon mat-card-avatar class="icon-active">sensors</mat-icon>
         <mat-card-title>{{ stats().activeModules }}</mat-card-title>
-        <mat-card-subtitle>{{ i18n.t('dashboard.activeModules') }}</mat-card-subtitle>
+        <mat-card-subtitle>Modules actifs</mat-card-subtitle>
       </mat-card-header>
     </mat-card>
 
     <mat-card class="stat-card">
       <mat-card-header>
         <mat-icon mat-card-avatar>schedule</mat-icon>
-        <mat-card-title>{{ stats().lastInteraction === "Pas d'interactions" ? i18n.t('dashboard.noInteractions') :
-          stats().lastInteraction }}</mat-card-title>
-        <mat-card-subtitle>{{ i18n.t('dashboard.lastInteraction') }}</mat-card-subtitle>
+        <mat-card-title>{{ stats().lastInteraction }}</mat-card-title>
+        <mat-card-subtitle>Dernière interaction</mat-card-subtitle>
       </mat-card-header>
     </mat-card>
   </div>
 
   <mat-card class="chart-card">
     <mat-card-header>
-      <mat-card-title>{{ i18n.t(chartLabelKey) }}</mat-card-title>
+      <mat-card-title>{{ chartLabel }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="chart-navigation">
+        <!-- Prev Button: Only show if we can paginate back OR forward (meaning pagination is active) 
+             Actually user wants buttons only if > 8 items.
+             We can check if dailyChartData().length > pageSize.
+        -->
         <button mat-icon-button (click)="previousPage()" [disabled]="!hasPreviousPage()"
           [style.visibility]="(dailyChartData().length > pageSize && selectedPeriod !== 'week') ? 'visible' : 'hidden'">
           <mat-icon>navigate_before</mat-icon>
@@ -71,6 +74,7 @@
           <div class="chart-bars">
             @for(item of paginatedChartData; track item.time) {
             <div class="bar-wrapper">
+              <!-- Tooltip on the bar -->
               <div class="bar" [style.height.%]="(item.count / 30) * 100"
                 [matTooltip]="item.time + ': ' + item.count + ' interactions'">
               </div>

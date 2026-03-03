@@ -1,47 +1,16 @@
 <mat-card class="account-card">
     <mat-card-header>
-        <mat-card-title>{{ i18n.t('profile.title') }}</mat-card-title>
+        <mat-card-title>Mon Compte</mat-card-title>
         <mat-card-subtitle>{{ userLogin() }} - {{ userRole() }}</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
-
-        <!-- Login Change Section -->
-        <h3>{{ i18n.t('profile.changeLogin') }}</h3>
-
-        <form class="login-change-form" (ngSubmit)="submitLoginChange()">
-            <mat-form-field appearance="outline">
-                <mat-label>{{ i18n.t('profile.newLogin') }}</mat-label>
-                <input matInput [ngModel]="newLogin()" (ngModelChange)="newLogin.set($event)" name="newLogin"
-                    [placeholder]="i18n.t('profile.newLoginPlaceholder')" autocomplete="username">
-                <mat-icon matSuffix>person</mat-icon>
-                <mat-hint>{{ i18n.t('profile.loginLabel') }}: {{ userLogin() }}</mat-hint>
-            </mat-form-field>
-
-            @if (loginError()) {
-            <mat-error class="error-message">{{ loginError() }}</mat-error>
-            }
-
-            <div class="form-actions">
-                <button mat-raised-button color="accent" type="submit" [disabled]="isChangingLogin()">
-                    @if (isChangingLogin()) {
-                    {{ i18n.t('profile.changingLogin') }}
-                    } @else {
-                    {{ i18n.t('profile.loginChangeBtn') }}
-                    }
-                </button>
-            </div>
-        </form>
-
-        <mat-divider class="section-divider"></mat-divider>
-
-        <!-- Password Change Section -->
-        <h3>{{ i18n.t('profile.changePassword') }}</h3>
+        <h3>Changer le mot de passe</h3>
 
         <form class="password-form" (ngSubmit)="submitPasswordChange()">
-            <!-- Current password -->
+            <!-- Mot de passe actuel -->
             <mat-form-field appearance="outline">
-                <mat-label>{{ i18n.t('profile.currentPassword') }}</mat-label>
+                <mat-label>Mot de passe actuel</mat-label>
                 <input matInput [type]="showCurrentPassword() ? 'text' : 'password'" [ngModel]="currentPassword()"
                     (ngModelChange)="currentPassword.set($event)" name="currentPassword"
                     autocomplete="current-password">
@@ -50,20 +19,20 @@
                 </button>
             </mat-form-field>
 
-            <!-- New password -->
+            <!-- Nouveau mot de passe -->
             <mat-form-field appearance="outline">
-                <mat-label>{{ i18n.t('profile.newPassword') }}</mat-label>
+                <mat-label>Nouveau mot de passe</mat-label>
                 <input matInput [type]="showNewPassword() ? 'text' : 'password'" [ngModel]="newPassword()"
                     (ngModelChange)="newPassword.set($event)" name="newPassword" autocomplete="new-password">
                 <button mat-icon-button matSuffix type="button" (click)="toggleShowNewPassword()">
                     <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
-                <mat-hint>{{ i18n.t('profile.minChars') }}</mat-hint>
+                <mat-hint>Au moins 4 caractères</mat-hint>
             </mat-form-field>
 
-            <!-- Confirm new password -->
+            <!-- Confirmation du nouveau mot de passe -->
             <mat-form-field appearance="outline">
-                <mat-label>{{ i18n.t('profile.confirmPassword') }}</mat-label>
+                <mat-label>Confirmer le nouveau mot de passe</mat-label>
                 <input matInput [type]="showConfirmPassword() ? 'text' : 'password'" [ngModel]="confirmPassword()"
                     (ngModelChange)="confirmPassword.set($event)" name="confirmPassword" autocomplete="new-password">
                 <button mat-icon-button matSuffix type="button" (click)="toggleShowConfirmPassword()">
@@ -78,9 +47,9 @@
             <div class="form-actions">
                 <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
                     @if (isLoading()) {
-                    {{ i18n.t('profile.changing') }}
+                    Modification en cours...
                     } @else {
-                    {{ i18n.t('profile.changeBtn') }}
+                    Modifier le mot de passe
                     }
                 </button>
             </div>

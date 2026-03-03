@@ -11,7 +11,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api';
 import { AuditLog } from '../../models/interfaces';
-import { I18nService } from '../../services/i18n';
 
 /**
  * Composant pour afficher le journal d'audit (admin only).
@@ -39,7 +38,6 @@ import { I18nService } from '../../services/i18n';
 })
 export class AuditLogsComponent implements OnInit {
     private api = inject(ApiService);
-    readonly i18n = inject(I18nService);
 
     logs = signal<AuditLog[]>([]);
     loading = signal(false);
@@ -69,7 +67,7 @@ export class AuditLogsComponent implements OnInit {
             },
             error: (err) => {
                 console.error('[AuditLogs] Error loading logs:', err);
-                this.error.set(this.i18n.t('auditLogs.loadError'));
+                this.error.set('Erreur lors du chargement des logs');
                 this.loading.set(false);
             }
         });
@@ -128,7 +126,7 @@ export class AuditLogsComponent implements OnInit {
 
         if (isNaN(date.getTime())) {
             console.warn('Invalid date received:', timestamp);
-            return this.i18n.t('auditLogs.invalidDate');
+            return 'Date invalide';
         }
 
         return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });

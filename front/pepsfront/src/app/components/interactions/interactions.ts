@@ -19,7 +19,6 @@ import { AuthService } from '../../services/auth';
 import { Interaction } from '../../models/interfaces';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { I18nService } from '../../services/i18n';
 
 @Component({
   selector: 'app-interactions',
@@ -30,7 +29,6 @@ import { I18nService } from '../../services/i18n';
 export class Interactions implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
-  readonly i18n = inject(I18nService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -38,7 +36,9 @@ export class Interactions implements OnInit {
   selectedRole = '';
 
   // Profiles for dropdown - loaded from DB (regular array for template iteration)
-  profiles: { role: string; name: string }[] = [];
+  profiles: { role: string; name: string }[] = [
+    { role: '', name: 'Tous les profils' }
+  ];
 
   filter = signal('all');
   interactions = signal<Interaction[]>([]);
@@ -75,7 +75,7 @@ export class Interactions implements OnInit {
     if (this.isAdmin()) {
       this.api.getRoles().subscribe({
         next: (roles) => {
-          this.profiles = [{ role: '', name: this.i18n.t('common.allProfiles') }];
+          this.profiles = [{ role: '', name: 'Tous les profils' }];
           roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
         },
         error: (err) => console.error('Error loading roles:', err)

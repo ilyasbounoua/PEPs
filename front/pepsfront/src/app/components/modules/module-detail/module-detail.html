@@ -1,7 +1,7 @@
 <div class="page-content">
   <mat-card class="config-card">
     <mat-card-header style="margin-bottom: 20px">
-      <mat-card-title>{{ i18n.t('modules.configuration') }}: {{ module().name }}</mat-card-title>
+      <mat-card-title>Configuration: {{ module().name }}</mat-card-title>
       <mat-card-subtitle>{{ module().location }}</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
@@ -9,101 +9,51 @@
 
         <!-- Name -->
         <mat-form-field appearance="outline">
-          <mat-label>{{ i18n.t('modules.moduleName') }}</mat-label>
+          <mat-label>Nom du module</mat-label>
           <input matInput [(ngModel)]="module().name" name="name" required [disabled]="!canEdit()">
         </mat-form-field>
 
         <!-- IP -->
         <mat-form-field appearance="outline">
-          <mat-label>{{ i18n.t('modules.ipAddress') }}</mat-label>
+          <mat-label>Adresse IP</mat-label>
           <input matInput [(ngModel)]="module().ip" name="ip" required [disabled]="!canEdit()">
         </mat-form-field>
 
         <!-- Active -->
         <mat-slide-toggle [(ngModel)]="module().config.actif" name="actif" color="primary" [disabled]="!canEdit()">
-          {{ i18n.t('modules.moduleActive') }}
+          Module Actif
         </mat-slide-toggle>
 
         <!-- Volume -->
-        <mat-label>{{ i18n.t('modules.volume') }}</mat-label>
+        <mat-label>Volume</mat-label>
         <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel" [disabled]="!canEdit()">
           <input matSliderThumb [(ngModel)]="module().config.volume" name="volume" [disabled]="!canEdit()">
         </mat-slider>
 
         <!-- Mode -->
         <mat-form-field>
-          <mat-label>{{ i18n.t('modules.operatingMode') }}</mat-label>
+          <mat-label>Mode de fonctionnement</mat-label>
           <mat-select [(ngModel)]="module().config.mode" name="mode" [disabled]="!canEdit()">
-            <mat-option value="Manuel">{{ i18n.t('modules.manual') }}</mat-option>
-            <mat-option value="Automatique">{{ i18n.t('modules.automatic') }}</mat-option>
+            <mat-option value="Manuel">Manuel</mat-option>
+            <mat-option value="Automatique">Automatique</mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Sound -->
         <mat-slide-toggle [(ngModel)]="module().config.son" name="son" color="primary" [disabled]="!canEdit()">
-          {{ i18n.t('modules.soundEnabled') }}
+          Son activé
         </mat-slide-toggle>
 
         <mat-card-actions>
           @if (canEdit()) {
-          <button mat-flat-button color="primary" type="submit">{{ i18n.t('common.save') }}</button>
+          <button mat-flat-button color="primary" type="submit">Sauvegarder</button>
           }
-          <button mat-button type="button" (click)="onCancel()">{{ canEdit() ? i18n.t('common.cancel') :
-            i18n.t('common.back') }}</button>
+          <button mat-button type="button" (click)="onCancel()">{{ canEdit() ? 'Annuler' : 'Retour' }}</button>
           @if (canEdit()) {
-          <button mat-button color="warn" type="button" (click)="onDelete()">{{ i18n.t('common.delete') }}</button>
+          <button mat-button color="warn" type="button" (click)="onDelete()">Supprimer</button>
           }
         </mat-card-actions>
       </form>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Sound Assignment Section -->
-  <mat-card class="config-card sound-assignment-card">
-    <mat-card-header>
-      <mat-card-title>{{ i18n.t('modules.assignedSounds') }}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-
-      <!-- List of assigned sounds -->
-      @if (assignedSounds().length === 0) {
-      <p class="no-data">{{ i18n.t('modules.noAssignedSounds') }}</p>
-      } @else {
-      <div class="assigned-sounds-list">
-        @for (sound of assignedSounds(); track sound.id) {
-        <div class="assigned-sound-chip">
-          <mat-icon>audiotrack</mat-icon>
-          <span>{{ sound.name }}</span>
-          <span class="sound-type-badge">{{ sound.type }}</span>
-          @if (canEdit()) {
-          <button mat-icon-button color="warn" (click)="unassignSound(sound.id)"
-            [matTooltip]="i18n.t('modules.unassignSound')">
-            <mat-icon>close</mat-icon>
-          </button>
-          }
-        </div>
-        }
-      </div>
-      }
-
-      <!-- Assign new sound (editor only) -->
-      @if (canEdit() && availableSounds().length > 0) {
-      <div class="assign-sound-row">
-        <mat-form-field appearance="outline" class="sound-select">
-          <mat-label>{{ i18n.t('modules.selectSound') }}</mat-label>
-          <mat-select [value]="selectedSoundId()" (selectionChange)="selectedSoundId.set($event.value)">
-            @for (sound of availableSounds(); track sound.id) {
-            <mat-option [value]="sound.id">{{ sound.name }} ({{ sound.type }})</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="assignSound()" [disabled]="!selectedSoundId()">
-          <mat-icon>link</mat-icon>
-          {{ i18n.t('modules.assignSound') }}
-        </button>
-      </div>
-      }
-
     </mat-card-content>
   </mat-card>
 </div>

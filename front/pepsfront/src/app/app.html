@@ -12,80 +12,72 @@
       <mat-list-item (click)="setCurrentPage('dashboard')" (keydown.enter)="setCurrentPage('dashboard')"
         [class.active]="currentPage() === 'dashboard'">
         <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.dashboard') }}</span>
+        <span matListItemTitle>Tableau de Bord</span>
       </mat-list-item>
 
       <mat-list-item (click)="setCurrentPage('interactions')" (keydown.enter)="setCurrentPage('interactions')"
         [class.active]="currentPage() === 'interactions'">
         <mat-icon matListItemIcon>history</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.interactions') }}</span>
+        <span matListItemTitle>Interactions</span>
       </mat-list-item>
 
       <mat-list-item (click)="setCurrentPage('modules')" (keydown.enter)="setCurrentPage('modules')"
         [class.active]="currentPage() === 'modules'">
         <mat-icon matListItemIcon>developer_board</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.modules') }}</span>
+        <span matListItemTitle>Modules</span>
       </mat-list-item>
 
       <mat-list-item (click)="setCurrentPage('sounds')" (keydown.enter)="setCurrentPage('sounds')"
         [class.active]="currentPage() === 'sounds'">
         <mat-icon matListItemIcon>music_note</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.sounds') }}</span>
+        <span matListItemTitle>Sons</span>
       </mat-list-item>
 
-      <!-- Admin-only sections -->
+      <!-- Rubrique Utilisateurs - visible uniquement pour les admins -->
       @if (isAdmin()) {
       <mat-list-item (click)="setCurrentPage('users')" (keydown.enter)="setCurrentPage('users')"
         [class.active]="currentPage() === 'users'">
         <mat-icon matListItemIcon>people</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.users') }}</span>
+        <span matListItemTitle>Utilisateurs</span>
       </mat-list-item>
 
+      <!-- Journal d'Audit - visible uniquement pour les admins -->
       <mat-list-item (click)="setCurrentPage('audit-logs')" (keydown.enter)="setCurrentPage('audit-logs')"
         [class.active]="currentPage() === 'audit-logs'">
         <mat-icon matListItemIcon>history</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.auditLogs') }}</span>
+        <span matListItemTitle>Journal d'Audit</span>
       </mat-list-item>
 
+      <!-- Archive - visible uniquement pour les admins -->
       <mat-list-item (click)="setCurrentPage('archive')" (keydown.enter)="setCurrentPage('archive')"
         [class.active]="currentPage() === 'archive'">
         <mat-icon matListItemIcon>archive</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.archive') }}</span>
-      </mat-list-item>
-      <mat-list-item (click)="setCurrentPage('notifications')" (keydown.enter)="setCurrentPage('notifications')"
-        [class.active]="currentPage() === 'notifications'">
-        <mat-icon matListItemIcon>notifications</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.notifications') }}</span>
+        <span matListItemTitle>Archive</span>
       </mat-list-item>
       }
 
+      <!-- Mon Compte - visible pour tous les utilisateurs connectés -->
       <mat-list-item (click)="setCurrentPage('account')" (keydown.enter)="setCurrentPage('account')"
         [class.active]="currentPage() === 'account'">
         <mat-icon matListItemIcon>account_circle</mat-icon>
-        <span matListItemTitle>{{ i18n.t('app.account') }}</span>
+        <span matListItemTitle>Mon Compte</span>
       </mat-list-item>
     </mat-nav-list>
   </mat-sidenav>
 
   <mat-sidenav-content class="main-content">
     <mat-toolbar class="toolbar">
-      <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="i18n.t('app.menu')">
+      <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menu">
         <mat-icon>menu</mat-icon>
       </button>
       <span>{{ pageTitle() }}</span>
 
-      <!-- Spacer -->
+      <!-- Spacer pour pousser le bouton de déconnexion à droite -->
       <span class="toolbar-spacer"></span>
 
-      <!-- Language toggle button -->
-      <button mat-icon-button (click)="toggleLang()" [matTooltip]="i18n.t('lang.switchTo')" class="lang-toggle-btn">
-        <mat-icon>language</mat-icon>
-        <span class="lang-label">{{ i18n.t('lang.current') }}</span>
-      </button>
-
-      <!-- User info and logout -->
+      <!-- Affichage du login et bouton de déconnexion -->
       <span class="user-info">{{ currentLogin() }}</span>
-      <button mat-icon-button (click)="logout()" [matTooltip]="i18n.t('app.logout')">
+      <button mat-icon-button (click)="logout()" matTooltip="Déconnexion">
         <mat-icon>logout</mat-icon>
       </button>
     </mat-toolbar>
@@ -113,8 +105,6 @@
       <app-audit-logs />
       } @case ('archive') {
       <app-archive />
-      } @case ('notifications') {
-      <app-notifications />
       } }
     </div>
   </mat-sidenav-content>
@@ -122,5 +112,3 @@
 } @else {
 <app-login (loginSuccess)="onLoginSuccess()" />
 }
-
-<app-toast-overlay />

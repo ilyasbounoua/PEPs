@@ -24,10 +24,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
 import { UserDTO, CreateUserDTO, PermissionType } from '../../models/interfaces';
-import { I18nService } from '../../services/i18n';
 
 @Component({
     selector: 'app-users',
@@ -43,8 +41,7 @@ import { I18nService } from '../../services/i18n';
         MatInputModule,
         MatSelectModule,
         MatDialogModule,
-        MatSnackBarModule,
-        MatTooltipModule
+        MatSnackBarModule
     ],
     templateUrl: './users.html',
     styleUrl: './users.css'
@@ -53,7 +50,6 @@ export class Users implements OnInit {
 
     private api = inject(ApiService);
     private snackBar = inject(MatSnackBar);
-    readonly i18n = inject(I18nService);
 
     // Liste des utilisateurs
     users = signal<UserDTO[]>([]);
@@ -183,7 +179,7 @@ export class Users implements OnInit {
      */
     validateRole(): boolean {
         if (!this.formRole || this.formRole.trim() === '') {
-            this.roleError = this.i18n.t('users.roleRequired');
+            this.roleError = 'Le rôle est obligatoire';
             return false;
         }
 
@@ -198,7 +194,7 @@ export class Users implements OnInit {
         });
 
         if (isRoleUsed) {
-            this.roleError = `${this.i18n.t('users.roleAlreadyUsed')}: "${this.formRole}"`;
+            this.roleError = `Le rôle "${this.formRole}" est déjà utilisé par un autre utilisateur`;
             return false;
         }
 
@@ -242,8 +238,8 @@ export class Users implements OnInit {
     getPermissionLabel(permission: string): string {
         if (!permission) return '';
         const p = permission.toLowerCase();
-        if (p === 'viewer') return this.i18n.t('users.viewer');
-        if (p === 'editor') return this.i18n.t('users.editor');
+        if (p === 'viewer') return 'Lecteur';
+        if (p === 'editor') return 'Éditeur';
         return permission;
     }
 
@@ -263,14 +259,14 @@ export class Users implements OnInit {
 
         this.api.createUser(data).subscribe({
             next: () => {
-                this.snackBar.open(this.i18n.t('users.createdSuccess'), this.i18n.t('common.close'), { duration: 3000 });
+                this.snackBar.open('Utilisateur créé avec succès', 'Fermer', { duration: 3000 });
                 this.closeForm();
                 this.loadUsers();
             },
             error: (err) => {
                 console.error('Erreur création utilisateur:', err);
-                const message = err.status === 409 ? this.i18n.t('users.loginExists') : this.i18n.t('users.createError');
-                this.snackBar.open(message, this.i18n.t('common.close'), { duration: 3000 });
+                const message = err.status === 409 ? 'Ce login existe déjà' : 'Erreur lors de la création';
+                this.snackBar.open(message, 'Fermer', { duration: 3000 });
             }
         });
     }
@@ -293,14 +289,14 @@ export class Users implements OnInit {
 
         this.api.updateUser(id, data).subscribe({
             next: () => {
-                this.snackBar.open(this.i18n.t('users.updatedSuccess'), this.i18n.t('common.close'), { duration: 3000 });
+                this.snackBar.open('Utilisateur modifié avec succès', 'Fermer', { duration: 3000 });
                 this.closeForm();
                 this.loadUsers();
                 this.loadExistingRoles(); // Refresh roles list after update
             },
             error: (err) => {
                 console.error('Erreur modification utilisateur:', err);
-                this.snackBar.open(this.i18n.t('users.updateError'), this.i18n.t('common.close'), { duration: 3000 });
+                this.snackBar.open('Erreur lors de la modification', 'Fermer', { duration: 3000 });
             }
         });
     }
@@ -309,19 +305,19 @@ export class Users implements OnInit {
      * Supprime un utilisateur après confirmation
      */
     deleteUser(user: UserDTO): void {
-        if (!confirm(`${this.i18n.t('users.deleteConfirm')} "${user.login}" ?`)) {
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.login}" ?`)) {
             return;
         }
 
         this.api.deleteUser(user.id).subscribe({
             next: () => {
-                this.snackBar.open(this.i18n.t('users.deletedSuccess'), this.i18n.t('common.close'), { duration: 3000 });
+                this.snackBar.open('Utilisateur supprimé', 'Fermer', { duration: 3000 });
                 this.loadUsers();
                 this.loadExistingRoles(); // Refresh roles list after deletion
             },
             error: (err) => {
                 console.error('Erreur suppression utilisateur:', err);
-                this.snackBar.open(this.i18n.t('users.deleteError'), this.i18n.t('common.close'), { duration: 3000 });
+                this.snackBar.open('Erreur lors de la suppression', 'Fermer', { duration: 3000 });
             }
         });
     }

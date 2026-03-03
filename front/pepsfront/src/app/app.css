@@ -44,7 +44,6 @@
   0% {
     transform: translate(0, 0);
   }
-
   100% {
     transform: translate(50px, 50px);
   }
@@ -129,8 +128,7 @@
 
   color: #2c3e50;
 
-  background: rgba(0, 137, 196, 0.12);
-  /* bleu transparent */
+  background: rgba(0, 137, 196, 0.12); /* bleu transparent */
   border: 1px solid rgba(0, 137, 196, 0.25);
 
   border-radius: 999px;
@@ -138,30 +136,10 @@
   backdrop-filter: blur(6px);
 }
 
-/* Language toggle button */
-.lang-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 4px;
-  position: relative;
-}
-
-.lang-toggle-btn .lang-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--secondary-color);
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  line-height: 1;
-}
-
-
 
 .main-content {
   background-color: var(--background-color);
-  background-image:
+  background-image: 
     radial-gradient(circle at 20% 50%, rgba(0, 137, 196, 0.03) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.03) 0%, transparent 50%);
 }
@@ -181,7 +159,6 @@
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -261,7 +238,7 @@
   bottom: 0;
   width: 4px;
   background: var(--secondary-color);
-
+  
   transition: transform 0.3s ease;
 }
 
@@ -320,7 +297,6 @@
     opacity: 0;
     transform: translateX(-30px);
   }
-
   to {
     opacity: 1;
     transform: translateX(0);
@@ -395,7 +371,7 @@
 }
 
 .stat-card:hover {
-
+  
   box-shadow: var(--shadow-xl);
 }
 
@@ -913,12 +889,9 @@ button[mat-icon-button] {
 
 /* --- Animations globales --- */
 @keyframes pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
-
   50% {
     opacity: 0.8;
   }
@@ -933,24 +906,22 @@ button[mat-icon-button] {
   .page-area {
     padding: 16px;
   }
-
+  
   .stats-grid,
   .modules-grid,
   .sounds-grid {
     grid-template-columns: 1fr;
   }
-
+  
   .sidenav {
     width: 240px;
   }
 }
-
 button[mat-icon-button] {
   width: 55px;
   height: 45px;
   padding: 0;
 }
-
 button[mat-icon-button] mat-icon {
   display: flex;
   align-items: center;
@@ -964,25 +935,4 @@ button[mat-icon-button] mat-icon {
 
   /* correction optique du glyphe */
   transform: translateX(23px);
-}
-
-/* --- Language Toggle --- */
-.lang-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 8px;
-  cursor: pointer;
-  opacity: 0.85;
-  transition: opacity 0.2s;
-}
-
-.lang-toggle:hover {
-  opacity: 1;
-}
-
-.lang-label {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
 }

@@ -15,7 +15,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../../../services/api';
 import { Module } from '../../../models/interfaces';
-import { I18nService } from '../../../services/i18n';
 
 @Component({
   selector: 'app-module-form',
@@ -37,7 +36,6 @@ export class ModuleForm {
   private api = inject(ApiService);
   private router = inject(Router);
   private document = inject(DOCUMENT);
-  readonly i18n = inject(I18nService);
 
   // Input: target role for the new module (passed by parent when admin selects a filter)
   targetRole = input<string | undefined>(undefined);
@@ -97,17 +95,17 @@ export class ModuleForm {
     }
 
     if (!module.name || module.name.trim() === '') {
-      this.errorMessage.set(this.i18n.t('modules.nameRequired'));
+      this.errorMessage.set('Le nom est obligatoire');
       return;
     }
 
     if (!module.ip || module.ip.trim() === '') {
-      this.errorMessage.set(this.i18n.t('modules.ipRequired'));
+      this.errorMessage.set('L\'adresse IP est obligatoire');
       return;
     }
 
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(module.ip)) {
-      this.errorMessage.set(this.i18n.t('modules.ipInvalid'));
+      this.errorMessage.set('Format d\'adresse IP invalide');
       return;
     }
 
@@ -121,7 +119,7 @@ export class ModuleForm {
         if (err.error && err.error.error) {
           this.errorMessage.set(err.error.error);
         } else {
-          this.errorMessage.set(this.i18n.t('modules.addError'));
+          this.errorMessage.set('Erreur lors de l\'ajout du module');
         }
       }
     });

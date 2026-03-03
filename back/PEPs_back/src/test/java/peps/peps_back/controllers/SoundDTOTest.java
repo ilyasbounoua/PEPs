@@ -36,7 +36,12 @@ public class SoundDTOTest {
     public void tearDown() {
     }
 
-        @Test
+    /**
+     * Test of  method, of class SoundDTO.
+     * 
+     * We generate a soundDTO, gives him a name and an extension and then look if he have the correct file name combining both
+     */
+    @Test
     public void testgenerateFileName() {
         System.out.println("generateFileName");
         SoundDTO instance = new SoundDTO();
@@ -118,5 +123,6 @@ public class SoundDTOTest {
         String result = instance.getFileName();
         assertEquals(expResult, result);
     }
+
     
 }

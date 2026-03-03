@@ -144,14 +144,3 @@ export interface AuditLog {
 }
 
 
-/* ===================== */
-/* Interfaces Notifications */
-/* ===================== */
-
-export interface Notification {
-  id: number;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  ownerRole: string;
-}

@@ -56,6 +56,7 @@ public class Module implements Serializable {
     @Column(name = "status")
     private String status;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "volume")
     private int volume;
     @Basic(optional = false)
@@ -64,6 +65,7 @@ public class Module implements Serializable {
     @Column(name = "current_mode")
     private String currentMode;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "actif")
     private boolean actif;
     @Basic(optional = false)

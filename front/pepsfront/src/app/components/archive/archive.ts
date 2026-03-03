@@ -21,7 +21,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../services/api';
 import { ArchivePeriod, AuditArchivePeriod } from '../../models/interfaces';
-import { I18nService } from '../../services/i18n';
 
 @Component({
     selector: 'app-archive',
@@ -39,15 +38,12 @@ import { I18nService } from '../../services/i18n';
 })
 export class ArchiveComponent implements OnInit {
     private api = inject(ApiService);
-    readonly i18n = inject(I18nService);
-    private readonly warningKey = 'peps_archive_warning_dismissed';
 
     // Interaction archive
     periods = signal<ArchivePeriod[]>([]);
     isLoading = signal(false);
     isExporting = signal(false);
     displayedColumns: string[] = ['period', 'count', 'actions'];
-    showWarning = signal(true);
 
     // Audit log archive
     auditPeriods = signal<AuditArchivePeriod[]>([]);
@@ -55,7 +51,6 @@ export class ArchiveComponent implements OnInit {
     isExportingAudit = signal(false);
 
     ngOnInit() {
-        this.restoreWarningState();
         this.loadPeriods();
         this.loadAuditPeriods();
     }
@@ -83,8 +78,10 @@ export class ArchiveComponent implements OnInit {
      * Shows confirmation dialog before proceeding.
      */
     exportPeriod(period: ArchivePeriod) {
-        const confirmMessage = this.i18n.t('archive.exportConfirm');
-
+        const confirmMessage = `Êtes-vous sûr de vouloir exporter la période "${period.periodLabel}" ?\n\n` +
+            `⚠️ ATTENTION: Les ${period.interactionCount} interactions de cette période seront ` +
+            `définitivement supprimées de la base de données après l'export.\n\n` +
+            `Cette action est irréversible.`;
 
         if (!confirm(confirmMessage)) {
             return;
@@ -99,7 +96,7 @@ export class ArchiveComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error exporting period:', err);
-                alert(this.i18n.t('archive.exportError'));
+                alert('Erreur lors de l\'export. Veuillez réessayer.');
                 this.isExporting.set(false);
             }
         });
@@ -111,8 +108,10 @@ export class ArchiveComponent implements OnInit {
      */
     exportAll() {
         const totalCount = this.periods().reduce((sum, p) => sum + p.interactionCount, 0);
-        const confirmMessage = this.i18n.t('archive.exportAllConfirm');
-
+        const confirmMessage = `Êtes-vous sûr de vouloir exporter TOUTES les périodes d'interactions archivées ?\n\n` +
+            `⚠️ ATTENTION: ${totalCount} interactions au total seront ` +
+            `définitivement supprimées de la base de données après l'export.\n\n` +
+            `Cette action est irréversible.`;
 
         if (!confirm(confirmMessage)) {
             return;
@@ -128,7 +127,7 @@ export class ArchiveComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error exporting all periods:', err);
-                alert(this.i18n.t('archive.exportError'));
+                alert('Erreur lors de l\'export. Veuillez réessayer.');
                 this.isExporting.set(false);
             }
         });
@@ -156,8 +155,10 @@ export class ArchiveComponent implements OnInit {
      * Export audit logs for a single period as JSON and delete from database.
      */
     exportAuditPeriod(period: AuditArchivePeriod) {
-        const confirmMessage = this.i18n.t('archive.exportConfirm');
-
+        const confirmMessage = `Êtes-vous sûr de vouloir exporter la période "${period.periodLabel}" du journal d'audit ?\n\n` +
+            `⚠️ ATTENTION: Les ${period.interactionCount} entrées d'audit de cette période seront ` +
+            `définitivement supprimées de la base de données après l'export.\n\n` +
+            `Cette action est irréversible.`;
 
         if (!confirm(confirmMessage)) {
             return;
@@ -172,7 +173,7 @@ export class ArchiveComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error exporting audit period:', err);
-                alert(this.i18n.t('archive.exportError'));
+                alert('Erreur lors de l\'export. Veuillez réessayer.');
                 this.isExportingAudit.set(false);
             }
         });
@@ -183,8 +184,10 @@ export class ArchiveComponent implements OnInit {
      */
     exportAllAudit() {
         const totalCount = this.auditPeriods().reduce((sum, p) => sum + p.interactionCount, 0);
-        const confirmMessage = this.i18n.t('archive.exportAllConfirm');
-
+        const confirmMessage = `Êtes-vous sûr de vouloir exporter TOUTES les périodes d'audit archivées ?\n\n` +
+            `⚠️ ATTENTION: ${totalCount} entrées d'audit au total seront ` +
+            `définitivement supprimées de la base de données après l'export.\n\n` +
+            `Cette action est irréversible.`;
 
         if (!confirm(confirmMessage)) {
             return;
@@ -200,7 +203,7 @@ export class ArchiveComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error exporting all audit periods:', err);
-                alert(this.i18n.t('archive.exportError'));
+                alert('Erreur lors de l\'export. Veuillez réessayer.');
                 this.isExportingAudit.set(false);
             }
         });
@@ -222,27 +225,5 @@ export class ArchiveComponent implements OnInit {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-    }
-
-    dismissWarning() {
-        this.showWarning.set(false);
-        if (typeof sessionStorage === 'undefined') return;
-        try {
-            sessionStorage.setItem(this.warningKey, 'true');
-        } catch {
-            // Ignore storage errors (SSR or privacy mode)
-        }
-    }
-
-    private restoreWarningState() {
-        if (typeof sessionStorage === 'undefined') return;
-        try {
-            const stored = sessionStorage.getItem(this.warningKey);
-            if (stored === 'true') {
-                this.showWarning.set(false);
-            }
-        } catch {
-            // Ignore storage errors (SSR or privacy mode)
-        }
     }
 }

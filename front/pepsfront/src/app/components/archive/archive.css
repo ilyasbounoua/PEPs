@@ -135,7 +135,6 @@ mat-card-content {
     background: #fff8e1;
     border-left: 4px solid #ffc107;
     margin-bottom: 24px;
-    position: relative;
 }
 
 .warning-card mat-card-content {
@@ -157,29 +156,6 @@ mat-card-content {
 
 .warning-text strong {
     color: #bf360c;
-}
-
-.warning-close {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 1;
-    color: #ddd7d4;
-    opacity: 0.5;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    transition: opacity 0.2s ease;
-}
-
-.warning-close mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-}
-
-.warning-close:hover {
-    opacity: 1;
 }
 
 /* Dark mode support */

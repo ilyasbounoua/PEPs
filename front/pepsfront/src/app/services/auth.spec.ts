@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -41,14 +40,12 @@ describe('AuthService', () => {
       message: 'Login successful',
       userId: 1,
       login: 'testuser',
-      role: 'admin',
-      permission: 'admin'
+      role: 'admin'
     };
 
     const promise = service.login(login, password);
 
-    const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
-    const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+    const req = httpMock.expectOne('http://localhost:8080/PEPs_back/auth/login');
     expect(req.request.method).toBe('POST');
     req.flush(mockResponse);
 
@@ -67,8 +64,7 @@ describe('AuthService', () => {
 
     const promise = service.login(login, password);
 
-    const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
-    const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+    const req = httpMock.expectOne('http://localhost:8080/PEPs_back/auth/login');
     expect(req.request.method).toBe('POST');
     req.flush(null, { status: 401, statusText: 'Unauthorized' });
 
@@ -87,12 +83,10 @@ describe('AuthService', () => {
       message: 'Login successful',
       userId: 1,
       login: 'testuser',
-      role: 'admin',
-      permission: 'admin'
+      role: 'admin'
     };
     const promise = service.login(login, password);
-    const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
-    const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+    const req = httpMock.expectOne('http://localhost:8080/PEPs_back/auth/login');
     req.flush(mockResponse);
 
     // then, logout

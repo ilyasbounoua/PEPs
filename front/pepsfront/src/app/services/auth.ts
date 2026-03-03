@@ -1,21 +1,19 @@
 /**
  * AuthService
  * Authentification via backend Spring uniquement.
- *
+ * 
  * Système multi-profils :
  * - Stocke userId pour filtrer les données propres à l'utilisateur
  * - Stocke userRole pour contrôler l'accès aux fonctionnalités (ex: gestion users pour admin)
  * - Rôles possibles : "admin", "dauphin", "aras"
  * - Persiste la session dans sessionStorage pour survivre aux refresh
- *
+ * 
  * @author Anas EL HOUDI
  */
 import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { I18nService } from './i18n';
 
 /** Interface pour la réponse du backend lors du login */
 interface LoginResponse {
@@ -24,7 +22,6 @@ interface LoginResponse {
   login: string;
   role: string;
   permission: string;
-  preferredLang: string;
 }
 
 /** Clé pour sessionStorage */
@@ -37,7 +34,6 @@ export class AuthService {
 
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  private i18n = inject(I18nService);
 
   // Signaux pour l'état d'authentification
   private readonly isLoggedIn = signal(false);
@@ -140,10 +136,9 @@ export class AuthService {
 
     try {
       // Récupérer la réponse du backend avec userId et role
-      const baseUrl = (environment as any).apiUrl;
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(
-          `${baseUrl}/auth/login`,
+          'http://localhost:8080/PEPs_back/auth/login',
           { login, password }
         )
       );
@@ -155,9 +150,6 @@ export class AuthService {
       this.userPermission.set(response.permission);
       this.isLoggedIn.set(true);
 
-      // Apply user's preferred language from database
-      this.i18n.loadFromUser(response.preferredLang);
-
       // Persist to sessionStorage
       this.saveSession(response.userId, response.login, response.role, response.permission);
 
@@ -168,27 +160,6 @@ export class AuthService {
         success: false,
         error: 'Login ou mot de passe incorrect'
       };
-    }
-  }
-
-  /**
-   * Updates the current user's login in memory and sessionStorage.
-   * Called after a successful login change from the profile page.
-   */
-  updateLogin(newLogin: string): void {
-    this.userLogin.set(newLogin);
-    // Update sessionStorage
-    if (this.isBrowser()) {
-      try {
-        const stored = sessionStorage.getItem(SESSION_KEY);
-        if (stored) {
-          const session = JSON.parse(stored);
-          session.login = newLogin;
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        }
-      } catch (e) {
-        console.error('[AuthService] Failed to update login in session:', e);
-      }
     }
   }
 

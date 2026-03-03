@@ -1,7 +1,7 @@
 /**
  * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
  * @description This file contains the ApiService, which handles all HTTP requests to the backend.
- *
+ * 
  * Multi-profile system:
  * - Uses AuthService to get the logged-in user's role
  * - Passes role to endpoints to filter data by profile
@@ -10,9 +10,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod, Notification } from '../models/interfaces';
+import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod } from '../models/interfaces';
 import { AuthService } from './auth';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +22,7 @@ export class ApiService {
   // private readonly BASE_URL = 'https://peps-backend.onrender.com';
   // Fix for local development (NetBeans/Tomcat)
   // Fix for local development (NetBeans/Tomcat)
-  private readonly BASE_URL = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+  private readonly BASE_URL = 'http://localhost:8080/PEPs_back';
 
   /**
    * Helper to get headers with user login for audit logging.
@@ -163,23 +162,6 @@ export class ApiService {
     return `${this.BASE_URL}/sounds/${id}/file`;
   }
 
-  // Sound-Module Assignment
-  getModuleSounds(moduleId: number): Observable<Sound[]> {
-    return this.http.get<Sound[]>(`${this.BASE_URL}/modules/${moduleId}/sounds`);
-  }
-
-  assignSoundToModule(moduleId: number, soundId: number): Observable<any> {
-    return this.http.post(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, {}, { headers: this.getHeaders() });
-  }
-
-  unassignSoundFromModule(moduleId: number, soundId: number): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, { headers: this.getHeaders() });
-  }
-
-  getSoundModules(soundId: number): Observable<{ id: number, name: string }[]> {
-    return this.http.get<{ id: number, name: string }[]>(`${this.BASE_URL}/sounds/${soundId}/modules`);
-  }
-
   /* ===================== */
   /* Gestion Utilisateurs (Admin uniquement) */
   /* ===================== */
@@ -243,10 +225,10 @@ export class ApiService {
   /* ===================== */
 
   /**
- * Allows the user to change their own password.
- * Requires current password for validation.
- * @author Anas EL HOUDI
- */
+   * Allows the user to change their own password.
+   * Requires current password for validation.
+   * @author Anas EL HOUDI
+   */
   changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
     return this.http.put<any>(`${this.BASE_URL}/users/${userId}/password`, {
       currentPassword,
@@ -254,27 +236,6 @@ export class ApiService {
     }, { headers: this.getHeaders() });
   }
 
-  /**
-   * Allows the user to change their own login (username).
-   * @author Anas EL HOUDI
-   */
-  changeLogin(userId: number, newLogin: string): Observable<any> {
-    return this.http.put<any>(`${this.BASE_URL}/users/${userId}`, {
-      login: newLogin
-    }, { headers: this.getHeaders() });
-  }
-
-  /**
-   * Resets a user's password using their login (self-service from login page).
-   * No authentication required.
-   * @author Anas EL HOUDI
-   */
-  resetPassword(login: string, newPassword: string): Observable<any> {
-    return this.http.post<any>(`${this.BASE_URL}/auth/reset-password`, {
-      login,
-      newPassword
-    });
-  }
   /* ===================== */
   /* Audit Logs */
   /* ===================== */
@@ -369,37 +330,4 @@ export class ApiService {
       responseType: 'blob'
     });
   }
-
-  // ==========================================
-  // NOTIFICATIONS
-  // ==========================================
-
-  getNotifications(): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications`, { headers: this.getHeaders() });
-  }
-
-  getUnreadNotifications(): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/unread`, { headers: this.getHeaders() });
-  }
-
-  pollNewNotifications(lastId: number): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/poll?lastId=${lastId}`, { headers: this.getHeaders() });
-  }
-
-  getUnreadNotificationCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.BASE_URL}/notifications/unread/count`, { headers: this.getHeaders() });
-  }
-
-  markNotificationAsRead(id: number): Observable<any> {
-    return this.http.put(`${this.BASE_URL}/notifications/${id}/read`, {}, { headers: this.getHeaders() });
-  }
-
-  deleteNotification(id: number): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/notifications/${id}`, { headers: this.getHeaders() });
-  }
-
-  deleteAllNotifications(): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/notifications/all`, { headers: this.getHeaders() });
-  }
-
 }
