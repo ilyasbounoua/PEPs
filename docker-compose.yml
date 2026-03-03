@@ -18,26 +18,85 @@ services:
       - peps-network
     restart: unless-stopped
 
-  # Backend Service (Java/Spring)
-  backend:
+  # Redis Queue
+  redis:
+    image: redis:7-alpine
+    container_name: peps-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - peps-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service (Java/Spring) - Web
+  backend-web:
     build:
       context: ./back/PEPs_back
       dockerfile: Dockerfile
-    container_name: peps-backend
+    container_name: peps-backend-web
     environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - JAVA_OPTS=-Dspring.profiles.active=web
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
       - database
+      - redis
     networks:
       - peps-network
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8080/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend Service (Java/Spring) - Audio Worker
+  backend-audio:
+    build:
+      context: ./back/PEPs_back
+      dockerfile: Dockerfile
+    container_name: peps-backend-audio
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=audio-worker
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8081:8080"
+    depends_on:
+      - database
+      - redis
+    networks:
+      - peps-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8080/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Frontend Service (Angular)
   frontend:
@@ -63,8 +122,12 @@ services:
       - "${PROXY_PORT}:80"
       - "${PROXY_SSL_PORT}:443"
     depends_on:
-      - backend
-      - frontend
+      backend-web:
+        condition: service_healthy
+      backend-audio:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     networks:
       - peps-network
     restart: unless-stopped
@@ -75,3 +138,4 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:

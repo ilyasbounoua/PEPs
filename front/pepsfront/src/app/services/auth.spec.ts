@@ -97,6 +97,11 @@ describe('AuthService', () => {
 
     // then, logout
     service.logout();
+
+    const logoutReq = httpMock.expectOne(`${baseUrl}/auth/logout`);
+    expect(logoutReq.request.method).toBe('POST');
+    logoutReq.flush({});
+
     expect(service.isAuthenticated()).toBe(false);
     expect(service.currentUserId()).toBe(null);
     expect(service.currentLogin()).toBe('');

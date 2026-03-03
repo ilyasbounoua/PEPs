@@ -35,6 +35,12 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built Angular app from builder stage
 COPY --from=builder /app/dist/pepsfront/browser /usr/share/nginx/html
 
+# Angular SSR with RenderMode.Prerender does not generate a root index.html
+# when the '/' route redirects to '/dashboard' (unknown at build time).
+# We copy the pre-rendered login page as the SPA shell fallback so that
+# nginx's 'try_files $uri /index.html' has a file to fall back to.
+RUN cp /usr/share/nginx/html/login/index.html /usr/share/nginx/html/index.html
+
 # Set proper permissions for existing nginx user
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /var/cache/nginx && \

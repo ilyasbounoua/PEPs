@@ -1,10 +1,20 @@
+/**
+ * @author Santiago Alexander RODRIGUEZ TRIANA
+ * @description Unit tests for the Login component after Angular Router migration.
+ *
+ * Migration notes:
+ * - The `loginSuccess` @Output no longer exists — on success, the component
+ *   calls `this.router.navigate(['/dashboard'])` instead.
+ * - Tests now spy on Router.navigate to verify successful login navigation.
+ */
 import { TestBed } from '@angular/core/testing';
 import { Login } from './login';
 import { AuthService } from '../../services/auth';
+import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
 
 class MockAuthService {
   login(user: string, pass: string): Promise<{ success: boolean; error?: string }> {
@@ -19,75 +29,73 @@ class MockAuthService {
 describe('Login', () => {
   let component: Login;
   let authService: AuthService;
+  let router: Router;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [Login],
       providers: [
         { provide: AuthService, useClass: MockAuthService },
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        provideRouter([]),
       ],
-    });
+    }).compileComponents();
 
     const fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
+    router = TestBed.inject(Router);
   });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit loginSuccess on successful login', async () => {
-    const login = 'admin';
-    const password = 'PEPS';
+  it('should navigate to /dashboard on successful login', async () => {
+    const navigateSpy = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     spyOn(authService, 'login').and.callThrough();
-    spyOn(component.loginSuccess, 'emit');
 
     const mockEvent = {
       target: {
         elements: {
           namedItem: (name: string) => {
-            if (name === 'login') return { value: login };
-            if (name === 'password') return { value: password };
+            if (name === 'login') return { value: 'admin' };
+            if (name === 'password') return { value: 'PEPS' };
             return null;
           },
         },
       },
-      preventDefault: () => {},
+      preventDefault: () => { },
     } as any;
 
     await component.onSubmit(mockEvent);
 
-    expect(authService.login).toHaveBeenCalledWith(login, password);
-    expect(component.loginSuccess.emit).toHaveBeenCalled();
+    expect(authService.login).toHaveBeenCalledWith('admin', 'PEPS');
+    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
   });
 
   it('should set loginError on failed login', async () => {
-    const login = 'admin';
-    const password = 'wrongpassword';
-    const error = 'Mot de passe incorrect.';
     spyOn(authService, 'login').and.callThrough();
 
     const mockEvent = {
       target: {
         elements: {
-          namedItem: (name:string) => {
-            if (name === 'login') return { value: login };
-            if (name === 'password') return { value: password };
+          namedItem: (name: string) => {
+            if (name === 'login') return { value: 'admin' };
+            if (name === 'password') return { value: 'wrongpassword' };
             return null;
           },
         },
       },
-      preventDefault: () => {},
+      preventDefault: () => { },
     } as any;
 
     await component.onSubmit(mockEvent);
 
-    expect(authService.login).toHaveBeenCalledWith(login, password);
-    expect(component.loginError()).toBe(error);
+    expect(authService.login).toHaveBeenCalledWith('admin', 'wrongpassword');
+    expect(component.loginError()).toBe('Mot de passe incorrect.');
   });
 
   it('should toggle hidePassword', () => {
