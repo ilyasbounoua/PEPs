@@ -25,6 +25,11 @@ public class DailyStatsController {
 
     @Autowired
     private InteractionRepository interactionRepository;
+    
+    public DailyStatsController(InteractionRepository interactionRepository)
+    {
+        this.interactionRepository = interactionRepository;
+    }
 
     /**
      * Returns daily stats.

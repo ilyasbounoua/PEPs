@@ -48,6 +48,15 @@ class MockApiService {
   getRoles() {
     return of(['admin', 'user']);
   }
+  getUnreadNotificationCount() {
+    return of({ count: 0 });
+  }
+  getUnreadNotifications() {
+    return of([]);
+  }
+  pollNewNotifications(_lastId: number) {
+    return of([]);
+  }
 }
 
 

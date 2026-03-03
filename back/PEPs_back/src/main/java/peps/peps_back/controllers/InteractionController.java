@@ -35,6 +35,11 @@ public class InteractionController {
     @Autowired
     private InteractionRepository interactionRepository;
 
+    public InteractionController(InteractionRepository interactionRepository)
+    {
+        this.interactionRepository=interactionRepository;
+    }
+    
     /**
      * Lists interactions filtered by role.
      * Only returns interactions from the last 3 months.

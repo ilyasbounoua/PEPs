@@ -17,6 +17,7 @@ import { Module } from '../../../models/interfaces';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { I18nService } from '../../../services/i18n';
 
 @Component({
   selector: 'app-modules-list',
@@ -27,6 +28,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class ModulesList implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
+  readonly i18n = inject(I18nService);
 
   readonly isAdmin = this.authService.isAdmin;
   readonly canEdit = this.authService.canEdit;
@@ -35,11 +37,10 @@ export class ModulesList implements OnInit {
   selectedRole = '';
 
   // Profiles for dropdown - loaded from DB (regular array for template iteration)
-  profiles: { role: string; name: string }[] = [
-    { role: '', name: 'Tous les profils' }
-  ];
+  profiles: { role: string; name: string }[] = [];
 
   modules = signal<Module[]>([]);
+  moduleSoundCounts = signal<Record<number, number>>({});
   selectModule = output<Module>();
   addModule = output<string | undefined>();
 
@@ -48,7 +49,7 @@ export class ModulesList implements OnInit {
     if (this.isAdmin()) {
       this.api.getRoles().subscribe({
         next: (roles) => {
-          this.profiles = [{ role: '', name: 'Tous les profils' }];
+          this.profiles = [{ role: '', name: this.i18n.t('common.allProfiles') }];
           roles.forEach(r => this.profiles.push({ role: r, name: r.charAt(0).toUpperCase() + r.slice(1) }));
         },
         error: (err) => console.error('Error loading roles:', err)
@@ -61,7 +62,14 @@ export class ModulesList implements OnInit {
     const filterRole = this.isAdmin() ? (this.selectedRole || undefined) : undefined;
 
     this.api.getModules(filterRole).subscribe({
-      next: (data) => this.modules.set(data),
+      next: (data) => {
+        this.modules.set(data);
+        data.forEach(m => {
+          this.api.getModuleSounds(m.id).subscribe(sounds => {
+            this.moduleSoundCounts.update(counts => ({ ...counts, [m.id]: sounds.length }));
+          });
+        });
+      },
       error: (err) => console.error('Error loading modules:', err)
     });
   }

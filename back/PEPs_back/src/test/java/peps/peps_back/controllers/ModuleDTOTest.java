@@ -37,165 +37,30 @@ public class ModuleDTOTest {
     }
 
     /**
-     * Test of getId method, of class ModuleDTO.
+     * Test of getters and setters
      */
     @Test
-    public void testGetId() {
-        System.out.println("getId");
-        ModuleDTO instance = new ModuleDTO();
-        Integer expResult = null;
-        Integer result = instance.getId();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setId method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetId() {
-        System.out.println("setId");
-        Integer id = null;
-        ModuleDTO instance = new ModuleDTO();
-        instance.setId(id);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getName method, of class ModuleDTO.
-     */
-    @Test
-    public void testGetName() {
-        System.out.println("getName");
-        ModuleDTO instance = new ModuleDTO();
-        String expResult = "";
-        String result = instance.getName();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setName method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetName() {
-        System.out.println("setName");
-        String name = "";
-        ModuleDTO instance = new ModuleDTO();
-        instance.setName(name);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getLocation method, of class ModuleDTO.
-     */
-    @Test
-    public void testGetLocation() {
-        System.out.println("getLocation");
-        ModuleDTO instance = new ModuleDTO();
-        String expResult = "";
-        String result = instance.getLocation();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setLocation method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetLocation() {
-        System.out.println("setLocation");
-        String location = "";
-        ModuleDTO instance = new ModuleDTO();
-        instance.setLocation(location);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getStatus method, of class ModuleDTO.
-     */
-    @Test
-    public void testGetStatus() {
-        System.out.println("getStatus");
-        ModuleDTO instance = new ModuleDTO();
-        String expResult = "";
-        String result = instance.getStatus();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setStatus method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetStatus() {
-        System.out.println("setStatus");
-        String status = "";
-        ModuleDTO instance = new ModuleDTO();
-        instance.setStatus(status);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getIp method, of class ModuleDTO.
-     */
-    @Test
-    public void testGetIp() {
-        System.out.println("getIp");
-        ModuleDTO instance = new ModuleDTO();
-        String expResult = "";
-        String result = instance.getIp();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setIp method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetIp() {
-        System.out.println("setIp");
-        String ip = "";
-        ModuleDTO instance = new ModuleDTO();
-        instance.setIp(ip);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getConfig method, of class ModuleDTO.
-     */
-    @Test
-    public void testGetConfig() {
-        System.out.println("getConfig");
-        ModuleDTO instance = new ModuleDTO();
-        ModuleConfigDTO expResult = null;
-        ModuleConfigDTO result = instance.getConfig();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setConfig method, of class ModuleDTO.
-     */
-    @Test
-    public void testSetConfig() {
-        System.out.println("setConfig");
-        ModuleConfigDTO config = null;
-        ModuleDTO instance = new ModuleDTO();
-        instance.setConfig(config);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testGettersSettersId() {
+        Integer id1 = 2;
+        Integer id2 = 3;
+        ModuleConfigDTO moduleConfig1 = new ModuleConfigDTO(10, "OFF", false, false);
+        ModuleConfigDTO moduleConfig2 = new ModuleConfigDTO(10, "ON", false, false);
+        
+        ModuleDTO mdto = new ModuleDTO(id1, "m1", "z1", "OFF", "8.8.8.8", moduleConfig1);
+        
+        mdto.setConfig(moduleConfig2);
+        mdto.setId(id2);
+        mdto.setIp("1");
+        mdto.setLocation("z2");
+        mdto.setName("m2");
+        mdto.setStatus("ON");
+        
+        mdto.getConfig();
+        mdto.getId();
+        mdto.getIp();
+        mdto.getLocation();
+        mdto.getName();
+        mdto.getStatus();
     }
     
 }

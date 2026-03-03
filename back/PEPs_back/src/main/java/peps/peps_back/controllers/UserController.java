@@ -232,6 +232,36 @@ public class UserController {
         }
 
         /* ===================== */
+        /* User Language Preference */
+        /* ===================== */
+
+        /**
+         * Updates the user's preferred display language.
+         * 
+         * @param id   User ID
+         * @param body JSON with "lang" key ("fr" or "en")
+         * @author Anas EL HOUDI
+         */
+        @PutMapping("/{id}/language")
+        public ResponseEntity<?> changeLanguage(@PathVariable Integer id,
+                        @RequestBody java.util.Map<String, String> body) {
+                String lang = body.get("lang");
+                if (lang == null || (!lang.equals("fr") && !lang.equals("en"))) {
+                        return ResponseEntity.badRequest()
+                                        .body(java.util.Collections.singletonMap("error",
+                                                        "Language must be 'fr' or 'en'"));
+                }
+                return userRepository.findById(id)
+                                .map(user -> {
+                                        user.setPreferredLang(lang);
+                                        userRepository.save(user);
+                                        return ResponseEntity.ok(java.util.Collections.singletonMap("message",
+                                                        "Language updated to " + lang));
+                                })
+                                .orElse(ResponseEntity.notFound().build());
+        }
+
+        /* ===================== */
         /* Migration Utility */
         /* ===================== */
 

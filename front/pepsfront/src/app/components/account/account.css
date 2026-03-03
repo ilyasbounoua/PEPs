@@ -44,3 +44,17 @@
 .form-actions button {
     min-width: 200px;
 }
+
+.login-change-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-change-form mat-form-field {
+    width: 100%;
+}
+
+.section-divider {
+    margin: 24px 0 !important;
+}

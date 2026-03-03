@@ -8,6 +8,7 @@ CREATE TABLE peps.Module (
     current_mode varchar(50) NOT NULL,
     actif boolean NOT NULL,
     last_seen timestamp NOT NULL,
+    version integer NOT NULL DEFAULT 0,
     owner_id integer
 );
 
@@ -18,6 +19,7 @@ CREATE TABLE peps.Sound (
     type_son varchar(50) NOT NULL,
     extension varchar(10) NOT NULL,
     chemin varchar(500),
+    version integer NOT NULL DEFAULT 0,
     owner_id integer
 );
 
@@ -51,3 +53,20 @@ CREATE TABLE peps.users (
     updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     role varchar(50)
 );
+
+-- TODO: [Ticket Pending] This table was missing in main. Created manually to unblock Archive feature.
+-- Please verify column types matches AuditLog.java exactly.
+CREATE TABLE peps.audit_logs (
+    id SERIAL PRIMARY KEY,
+    action varchar(20) NOT NULL,
+    entity_type varchar(50) NOT NULL,
+    entity_id integer,
+    entity_name varchar(255),
+    entity_role varchar(50),
+    user_login varchar(100) NOT NULL,
+    "timestamp" timestamp NOT NULL DEFAULT NOW(),
+    old_value TEXT,
+    new_value TEXT,
+    details TEXT
+);
+

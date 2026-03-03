@@ -1,0 +1,54 @@
+<div class="notifications-container page-transition glass-panel">
+    <div class="header-actions">
+        <h1 class="page-title">{{ i18n.t('notifications.title') }}</h1>
+        @if (notifications().length > 0) {
+        <button mat-stroked-button color="warn" class="delete-all-btn" (click)="deleteAll()">
+            <mat-icon>delete_sweep</mat-icon>
+            {{ i18n.t('notifications.deleteAllBtn') }}
+        </button>
+        }
+    </div>
+
+    <mat-divider class="title-divider"></mat-divider>
+
+    @if (isLoading()) {
+    <div class="loading-state">
+        <mat-icon class="spinner">sync</mat-icon>
+        <p>{{ i18n.t('common.loading') }}</p>
+    </div>
+    } @else if (notifications().length === 0) {
+    <div class="empty-state">
+        <mat-icon>notifications_off</mat-icon>
+        <p>{{ i18n.t('notifications.empty') }}</p>
+    </div>
+    } @else {
+    <div class="notifications-list">
+        @for (notif of notifications(); track notif.id) {
+        <mat-card class="notification-card" [class.unread]="!notif.isRead">
+            <mat-card-header>
+                <div mat-card-avatar class="notif-avatar">
+                    <mat-icon [color]="notif.isRead ? '' : 'warn'">
+                        {{ notif.isRead ? 'notifications' : 'notification_important' }}
+                    </mat-icon>
+                </div>
+                <mat-card-title class="notif-message">{{ translateMessage(notif.message) }}</mat-card-title>
+                <mat-card-subtitle class="notif-date">
+                    {{ notif.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}
+                    @if (extractProfile(notif.message); as profile) {
+                    <span class="notif-profile-badge">
+                        <mat-icon class="profile-icon">person</mat-icon>
+                        {{ i18n.t('notifications.profileLabel') }}: {{ profile }}
+                    </span>
+                    }
+                </mat-card-subtitle>
+
+                <button mat-icon-button class="delete-notif-btn" color="warn" (click)="delete(notif.id)"
+                    [title]="i18n.t('notifications.deleteBtn')">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-card-header>
+        </mat-card>
+        }
+    </div>
+    }
+</div>

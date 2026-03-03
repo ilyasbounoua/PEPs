@@ -8,9 +8,6 @@
             <goals>
                 <goal>install</goal>
             </goals>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
         </action>
         <action>
             <actionName>run</actionName>
@@ -24,7 +21,7 @@
             </goals>
             <properties>
                 <netbeans.deploy>true</netbeans.deploy>
-                <skipTests>true</skipTests>
+                
             </properties>
         </action>
     </actions>
