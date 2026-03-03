@@ -46,6 +46,12 @@ public class ArchiveController {
             "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
     };
 
+    public ArchiveController(InteractionRepository interactionRepository, AuditLogRepository auditLogRepository)
+    {
+        this.interactionRepository = interactionRepository;
+        this.auditLogRepository = auditLogRepository;
+    }
+    
     /* ===================== */
     /* INTERACTION ARCHIVE */
     /* ===================== */
