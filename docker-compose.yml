@@ -31,10 +31,15 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
     ports:
       - "8080:8080"
     depends_on:
       - database
+      - minio
     networks:
       - peps-network
     restart: unless-stopped
@@ -49,6 +54,23 @@ services:
       - API_URL=${API_URL}
     ports:
       - "4200:80"
+    networks:
+      - peps-network
+    restart: unless-stopped
+
+  # MinIO Object Storage (S3-compatible)
+  minio:
+    image: minio/minio:latest
+    container_name: peps-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
     networks:
       - peps-network
     restart: unless-stopped
@@ -75,3 +97,4 @@ networks:
 
 volumes:
   postgres_data:
+  minio_data:

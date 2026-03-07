@@ -156,6 +156,16 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
          <dependency>
              <groupId>org.mockito</groupId>
              <artifactId>mockito-core</artifactId>
