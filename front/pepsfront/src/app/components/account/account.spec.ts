@@ -19,13 +19,11 @@ class MockAuthService {
   currentRole = () => 'admin';
 }
 
-class MockSnackBar {
-  open(message: string, action: string, config: any) {}
-}
 
 describe('Account', () => {
   let component: Account;
   let fixture: ComponentFixture<Account>;
+  // we'll grab the service instance from the same injector used by the component
   let apiService: any;
   let snackBar: MatSnackBar;
 
@@ -35,15 +33,16 @@ describe('Account', () => {
       providers: [
         { provide: ApiService, useClass: MockApiService },
         { provide: AuthService, useClass: MockAuthService },
-        { provide: MatSnackBar, useClass: MockSnackBar },
         provideNoopAnimations(),
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Account);
     component = fixture.componentInstance;
-    apiService = TestBed.inject(ApiService);
-    snackBar = TestBed.inject(MatSnackBar);
+    // obtain the service from the component's injector rather than the root injector
+    apiService = fixture.debugElement.injector.get(ApiService) as any;
+    // grab the same snackbar instance used by the component itself
+    snackBar = (fixture.componentInstance as any).snackBar;
     fixture.detectChanges();
   });
 
@@ -51,17 +50,27 @@ describe('Account', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should change password and show snackbar', () => {
+  it('should change password and show snackbar', fakeAsync(() => {
     spyOn(snackBar, 'open');
+    spyOn(apiService, 'changePassword').and.callThrough();
+
     component.currentPassword.set('password');
     component.newPassword.set('newpassword');
     component.confirmPassword.set('newpassword');
     component.submitPasswordChange();
-    
-    apiService.changePassword$.next();
 
+    expect(apiService.changePassword).toHaveBeenCalled();
+    // service call has started loading
+    expect(component.isLoading()).toBe(true);
+
+    // trigger the same subject instance that the component subscribed to
+    apiService.changePassword$.next();
+    tick();
+
+    // loading should be turned off after response
+    expect(component.isLoading()).toBe(false);
     expect(snackBar.open).toHaveBeenCalledWith('Password changed successfully!', 'OK', { duration: 3000 });
-  });
+  }));
 
   it('should show error if fields are empty', () => {
     component.submitPasswordChange();

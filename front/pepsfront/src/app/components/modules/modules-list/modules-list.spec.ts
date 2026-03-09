@@ -5,6 +5,7 @@ import { ApiService } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Module } from '../../../models/interfaces';
+import { Router } from '@angular/router';
 
 class MockApiService {
   getModules(role?: string) {
@@ -23,6 +24,7 @@ describe('ModulesList as a regular user', () => {
   let component: ModulesList;
   let fixture: ComponentFixture<ModulesList>;
   let apiService: ApiService;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -37,6 +39,9 @@ describe('ModulesList as a regular user', () => {
     fixture = TestBed.createComponent(ModulesList);
     component = fixture.componentInstance;
     apiService = TestBed.inject(ApiService);
+    router = TestBed.inject(Router);
+    // Jasmine spy for router navigation
+    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     fixture.detectChanges();
   });
 
@@ -57,11 +62,10 @@ describe('ModulesList as a regular user', () => {
     expect(apiService.getRoles).not.toHaveBeenCalled();
   });
 
-  it('should emit module on click', () => {
-    spyOn(component.selectModule, 'emit');
+  it('should navigate on module click', () => {
     const module = component.modules()[0];
     component.onModuleClick(module);
-    expect(component.selectModule.emit).toHaveBeenCalledWith(module);
+    expect(router.navigate).toHaveBeenCalledWith(['/modules', module.id]);
   });
 });
 
@@ -69,6 +73,7 @@ describe('ModulesList as an admin', () => {
     let component: ModulesList;
     let fixture: ComponentFixture<ModulesList>;
     let apiService: ApiService;
+    let router: Router;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -83,6 +88,9 @@ describe('ModulesList as an admin', () => {
         fixture = TestBed.createComponent(ModulesList);
         component = fixture.componentInstance;
         apiService = TestBed.inject(ApiService);
+        router = TestBed.inject(Router);
+        // Jasmine spy for router navigation
+        spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
         fixture.detectChanges();
     });
 
@@ -100,9 +108,14 @@ describe('ModulesList as an admin', () => {
         expect(component.loadData).toHaveBeenCalled();
     });
 
-    it('should emit add module event on add click', () => {
-        spyOn(component.addModule, 'emit');
+    it('should navigate on add click', () => {
         component.onAddClick();
-        expect(component.addModule.emit).toHaveBeenCalled();
+        expect(router.navigate).toHaveBeenCalledWith(['/modules/new'], {});
+    });
+
+    it('should navigate on add click with role', () => {
+        component.selectedRole = 'aras';
+        component.onAddClick();
+        expect(router.navigate).toHaveBeenCalledWith(['/modules/new'], { queryParams: { role: 'aras' } });
     });
 });

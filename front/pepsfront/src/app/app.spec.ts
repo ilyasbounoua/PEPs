@@ -7,7 +7,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { signal, computed } from '@angular/core';
 import { ApiService } from './services/api';
 import { of } from 'rxjs';
-import { Module } from './models/interfaces';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 class MockAuthService {
   private readonly _isLoggedIn = signal(false);
@@ -53,12 +54,13 @@ class MockApiService {
 
 
 describe('App', () => {
+  let router: Router;
   beforeEach(async () => {
     // Clear storage to prevent interference from other tests
     sessionStorage.clear();
 
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, RouterTestingModule],
       providers: [
         { provide: AuthService, useClass: MockAuthService },
         { provide: ApiService, useClass: MockApiService },
@@ -67,6 +69,9 @@ describe('App', () => {
         provideNoopAnimations()
       ]
     }).compileComponents();
+    router = TestBed.inject(Router);
+    // use Jasmine spy instead of Jest
+    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
   });
 
   it('should create the app', () => {
@@ -75,18 +80,8 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render login page on initial load', () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-login')).toBeTruthy();
-    expect(compiled.querySelector('app-dashboard')).toBeFalsy();
-  });
-
   it('should render dashboard when logged in', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-
     // Inject the mock service to manipulate state
     const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
 
@@ -97,44 +92,7 @@ describe('App', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-dashboard')).toBeTruthy();
-    expect(compiled.querySelector('app-login')).toBeFalsy();
-  });
-
-  describe('Page Navigation', () => {
-    let app: App;
-    let fixture: any;
-
-    beforeEach(() => {
-      fixture = TestBed.createComponent(App);
-      app = fixture.componentInstance;
-      const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
-      authService.login('test', 'pass');
-      fixture.detectChanges();
-    });
-
-    it('should change current page', () => {
-      app.setCurrentPage('sounds');
-      expect(app.currentPage()).toBe('sounds');
-    });
-
-    it('should show module detail page on module selection', () => {
-      const module: Module = { id: 1, name: 'Test Module', location: 'Test Location', status: 'Actif', ip: '127.0.0.1', config: { volume: 50, mode: 'Manuel', actif: true, son: true } };
-      app.onSelectModule(module);
-      expect(app.currentPage()).toBe('module-detail');
-      expect(app.selectedModule()).toEqual(module);
-    });
-
-    it('should show add module page on add module', () => {
-      app.onAddModule('dauphin');
-      expect(app.currentPage()).toBe('add-module');
-    });
-
-    it('should go back to modules page after module saved', () => {
-      app.currentPage.set('add-module');
-      app.onModuleSaved();
-      expect(app.currentPage()).toBe('modules');
-    });
+    expect(compiled.querySelector('mat-sidenav-container')).toBeTruthy();
   });
 
   describe('Sidenav', () => {
@@ -148,7 +106,7 @@ describe('App', () => {
   });
 
   describe('Logout', () => {
-    it('should log out the user', () => {
+    it('should log out the user and navigate to login', () => {
       const fixture = TestBed.createComponent(App);
       const app = fixture.componentInstance;
       const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
@@ -161,53 +119,7 @@ describe('App', () => {
 
       expect(authService.logout).toHaveBeenCalled();
       expect(app.isLoggedIn()).toBe(false);
-      expect(app.currentPage()).toBe('dashboard');
-    });
-  });
-
-  describe('Computed Signals', () => {
-    it('should have correct page titles', () => {
-      const fixture = TestBed.createComponent(App);
-      const app = fixture.componentInstance;
-
-      app.setCurrentPage('dashboard');
-      expect(app.pageTitle()).toBe('Tableau de Bord');
-
-      app.setCurrentPage('interactions');
-      expect(app.pageTitle()).toBe('Historique des Interactions');
-
-      app.setCurrentPage('modules');
-      expect(app.pageTitle()).toBe('Gestion des Modules');
-
-      app.setCurrentPage('sounds');
-      expect(app.pageTitle()).toBe('Bibliothèque de Sons');
-    });
-  });
-
-  describe('Session Storage', () => {
-    it('should save and restore current page', () => {
-      const fixture = TestBed.createComponent(App);
-      const app = fixture.componentInstance;
-
-      app.setCurrentPage('sounds');
-      // Manually call the private method for testing
-      (app as any).saveCurrentPage('sounds');
-
-      // Create a new component to simulate a page refresh
-      const newFixture = TestBed.createComponent(App);
-      const newApp = newFixture.componentInstance;
-
-      expect(newApp.currentPage()).toBe('sounds');
-    });
-
-    it('should clear current page on logout', () => {
-      const fixture = TestBed.createComponent(App);
-      const app = fixture.componentInstance;
-      spyOn(sessionStorage, 'removeItem');
-
-      app.logout();
-
-      expect(sessionStorage.removeItem).toHaveBeenCalledWith('peps_current_page');
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
 });

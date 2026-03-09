@@ -4,6 +4,7 @@ import { ModuleForm } from './module-form';
 import { ApiService } from '../../../services/api';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Module } from '../../../models/interfaces';
+import { Router, ActivatedRoute } from '@angular/router';
 
 class MockApiService {
   createModule(module: Omit<Module, 'id'>, role?: string) {
@@ -15,12 +16,23 @@ describe('ModuleForm', () => {
   let component: ModuleForm;
   let fixture: ComponentFixture<ModuleForm>;
   let apiService: ApiService;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ModuleForm],
       providers: [
         { provide: ApiService, useClass: MockApiService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParamMap: {
+                get: (key: string) => null,
+              },
+            },
+          },
+        },
         provideNoopAnimations(),
       ],
     }).compileComponents();
@@ -28,6 +40,9 @@ describe('ModuleForm', () => {
     fixture = TestBed.createComponent(ModuleForm);
     component = fixture.componentInstance;
     apiService = TestBed.inject(ApiService);
+    router = TestBed.inject(Router);
+    // Jasmine spy for router navigation
+    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     fixture.detectChanges();
   });
 
@@ -35,14 +50,13 @@ describe('ModuleForm', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should create a module and emit success', () => {
+  it('should create a module and navigate', () => {
     spyOn(apiService, 'createModule').and.callThrough();
-    spyOn(component.createSuccess, 'emit');
     component.updateName('Test Module');
     component.updateIp('1.2.3.4');
     component.onCreate();
     expect(apiService.createModule).toHaveBeenCalled();
-    expect(component.createSuccess.emit).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/modules']);
   });
 
   it('should show error on create with invalid name', () => {
@@ -57,10 +71,9 @@ describe('ModuleForm', () => {
     expect(component.errorMessage()).toBe("L'adresse IP est obligatoire");
   });
 
-  it('should emit cancel event on cancel', () => {
-    spyOn(component.cancel, 'emit');
+  it('should navigate on cancel', () => {
     component.onCancel();
-    expect(component.cancel.emit).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/modules']);
   });
 
   it('should update module properties', () => {
