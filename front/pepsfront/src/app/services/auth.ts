@@ -144,7 +144,8 @@ export class AuthService {
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(
           `${baseUrl}/auth/login`,
-          { login, password }
+          { login, password },
+          { withCredentials: true }   // needed to receive the HttpOnly jwt cookie
         )
       );
 
@@ -193,12 +194,17 @@ export class AuthService {
   }
 
   logout(): void {
+    // Ask the server to issue an expired token + Max-Age=0 cookie (double invalidation)
+    // Fire-and-forget — we clear local state immediately regardless of network result
+    const baseUrl = (environment as any).apiUrl;
+    this.http.post(`${baseUrl}/auth/logout`, {}, { withCredentials: true })
+      .subscribe({ error: () => { /* ignore — local state is cleared anyway */ } });
+
     this.isLoggedIn.set(false);
     this.userId.set(null);
     this.userLogin.set('');
     this.userRole.set('');
     this.userPermission.set('');
-    // Clear persisted session
     this.clearSession();
   }
 }

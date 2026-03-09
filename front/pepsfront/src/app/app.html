@@ -1,5 +1,5 @@
 @if (!isInitialized()) {
-<!-- Prevent flash: show nothing until session check is complete -->
+<!-- Prevent flash: show nothing until session check is complete (SSR hydration) -->
 } @else if (isLoggedIn()) {
 <mat-sidenav-container class="app-container">
   <mat-sidenav [opened]="isSidenavOpen()" mode="side" class="sidenav">
@@ -9,58 +9,50 @@
     </div>
 
     <mat-nav-list>
-      <mat-list-item (click)="setCurrentPage('dashboard')" (keydown.enter)="setCurrentPage('dashboard')"
-        [class.active]="currentPage() === 'dashboard'">
+      <mat-list-item routerLink="/dashboard" routerLinkActive="active">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.dashboard') }}</span>
       </mat-list-item>
 
-      <mat-list-item (click)="setCurrentPage('interactions')" (keydown.enter)="setCurrentPage('interactions')"
-        [class.active]="currentPage() === 'interactions'">
+      <mat-list-item routerLink="/interactions" routerLinkActive="active">
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.interactions') }}</span>
       </mat-list-item>
 
-      <mat-list-item (click)="setCurrentPage('modules')" (keydown.enter)="setCurrentPage('modules')"
-        [class.active]="currentPage() === 'modules'">
+      <mat-list-item routerLink="/modules" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
         <mat-icon matListItemIcon>developer_board</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.modules') }}</span>
       </mat-list-item>
 
-      <mat-list-item (click)="setCurrentPage('sounds')" (keydown.enter)="setCurrentPage('sounds')"
-        [class.active]="currentPage() === 'sounds'">
+      <mat-list-item routerLink="/sounds" routerLinkActive="active">
         <mat-icon matListItemIcon>music_note</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.sounds') }}</span>
       </mat-list-item>
 
-      <!-- Admin-only sections -->
+      <!-- Admin-only items — guard also enforces this at URL level -->
       @if (isAdmin()) {
-      <mat-list-item (click)="setCurrentPage('users')" (keydown.enter)="setCurrentPage('users')"
-        [class.active]="currentPage() === 'users'">
+      <mat-list-item routerLink="/users" routerLinkActive="active">
         <mat-icon matListItemIcon>people</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.users') }}</span>
       </mat-list-item>
 
-      <mat-list-item (click)="setCurrentPage('audit-logs')" (keydown.enter)="setCurrentPage('audit-logs')"
-        [class.active]="currentPage() === 'audit-logs'">
-        <mat-icon matListItemIcon>history</mat-icon>
+      <mat-list-item routerLink="/audit-logs" routerLinkActive="active">
+        <mat-icon matListItemIcon>fact_check</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.auditLogs') }}</span>
       </mat-list-item>
 
-      <mat-list-item (click)="setCurrentPage('archive')" (keydown.enter)="setCurrentPage('archive')"
-        [class.active]="currentPage() === 'archive'">
+      <mat-list-item routerLink="/archive" routerLinkActive="active">
         <mat-icon matListItemIcon>archive</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.archive') }}</span>
       </mat-list-item>
-      <mat-list-item (click)="setCurrentPage('notifications')" (keydown.enter)="setCurrentPage('notifications')"
-        [class.active]="currentPage() === 'notifications'">
+      <mat-list-item routerLink="/notifications" routerLinkActive="active">
         <mat-icon matListItemIcon>notifications</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.notifications') }}</span>
       </mat-list-item>
       }
 
-      <mat-list-item (click)="setCurrentPage('account')" (keydown.enter)="setCurrentPage('account')"
-        [class.active]="currentPage() === 'account'">
+      <!-- All authenticated users -->
+      <mat-list-item routerLink="/account" routerLinkActive="active">
         <mat-icon matListItemIcon>account_circle</mat-icon>
         <span matListItemTitle>{{ i18n.t('app.account') }}</span>
       </mat-list-item>
@@ -72,7 +64,6 @@
       <button mat-icon-button (click)="toggleSidenav()" [matTooltip]="i18n.t('app.menu')">
         <mat-icon>menu</mat-icon>
       </button>
-      <span>{{ pageTitle() }}</span>
 
       <!-- Spacer -->
       <span class="toolbar-spacer"></span>
@@ -91,36 +82,10 @@
     </mat-toolbar>
 
     <div class="page-area">
-      @switch (currentPage()) { @case ('dashboard') {
-      <app-dashboard />
-      } @case ('interactions') {
-      <app-interactions />
-      } @case ('modules') {
-      <app-modules-list (selectModule)="onSelectModule($event)" (addModule)="onAddModule($event)" />
-      } @case ('module-detail') {
-      @if(selectedModule(); as module) {
-      <app-module-detail [module]="module" (moduleSaved)="onModuleSaved()" />
-      }
-      } @case ('add-module') {
-      <app-module-form [targetRole]="targetRoleForNewModule()" (moduleSaved)="onModuleSaved()" />
-      } @case ('sounds') {
-      <app-sounds />
-      } @case ('users') {
-      <app-users />
-      } @case ('account') {
-      <app-account />
-      } @case ('audit-logs') {
-      <app-audit-logs />
-      } @case ('archive') {
-      <app-archive />
-      } @case ('notifications') {
-      <app-notifications />
-      } }
+      <router-outlet />
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
 } @else {
-<app-login (loginSuccess)="onLoginSuccess()" />
+  <router-outlet />
 }
-
-<app-toast-overlay />

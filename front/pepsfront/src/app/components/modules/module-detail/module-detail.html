@@ -1,8 +1,18 @@
+@if (isLoading()) {
+<div class="page-content" style="display:flex; justify-content:center; padding:40px;">
+  <mat-spinner diameter="48" />
+</div>
+} @else if (loadError()) {
+<div class="page-content" style="padding:24px; color:var(--mat-warn-color, red);">
+  <p>{{ loadError() }}</p>
+  <button mat-button (click)="onCancel()">Retour aux modules</button>
+</div>
+} @else if (module(); as mod) {
 <div class="page-content">
   <mat-card class="config-card">
     <mat-card-header style="margin-bottom: 20px">
-      <mat-card-title>{{ i18n.t('modules.configuration') }}: {{ module().name }}</mat-card-title>
-      <mat-card-subtitle>{{ module().location }}</mat-card-subtitle>
+      <mat-card-title>{{ i18n.t('modules.configuration') }}: {{ module()?.name }}</mat-card-title>
+      <mat-card-subtitle>{{ module()?.location }}</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <form class="config-form" #configForm="ngForm" (ngSubmit)="onSave()">
@@ -10,37 +20,37 @@
         <!-- Name -->
         <mat-form-field appearance="outline">
           <mat-label>{{ i18n.t('modules.moduleName') }}</mat-label>
-          <input matInput [(ngModel)]="module().name" name="name" required [disabled]="!canEdit()">
+          <input matInput [(ngModel)]="module()!.name" name="name" required [disabled]="!canEdit()">
         </mat-form-field>
 
         <!-- IP -->
         <mat-form-field appearance="outline">
           <mat-label>{{ i18n.t('modules.ipAddress') }}</mat-label>
-          <input matInput [(ngModel)]="module().ip" name="ip" required [disabled]="!canEdit()">
+          <input matInput [(ngModel)]="module()!.ip" name="ip" required [disabled]="!canEdit()">
         </mat-form-field>
 
         <!-- Active -->
-        <mat-slide-toggle [(ngModel)]="module().config.actif" name="actif" color="primary" [disabled]="!canEdit()">
+        <mat-slide-toggle [(ngModel)]="module()!.config.actif" name="actif" color="primary" [disabled]="!canEdit()">
           {{ i18n.t('modules.moduleActive') }}
         </mat-slide-toggle>
 
         <!-- Volume -->
         <mat-label>{{ i18n.t('modules.volume') }}</mat-label>
         <mat-slider min="0" max="100" step="1" discrete [displayWith]="formatVolumeLabel" [disabled]="!canEdit()">
-          <input matSliderThumb [(ngModel)]="module().config.volume" name="volume" [disabled]="!canEdit()">
+          <input matSliderThumb [(ngModel)]="mod.config.volume" name="volume" [disabled]="!canEdit()">
         </mat-slider>
 
         <!-- Mode -->
         <mat-form-field>
           <mat-label>{{ i18n.t('modules.operatingMode') }}</mat-label>
-          <mat-select [(ngModel)]="module().config.mode" name="mode" [disabled]="!canEdit()">
+          <mat-select [(ngModel)]="module()!.config.mode" name="mode" [disabled]="!canEdit()">
             <mat-option value="Manuel">{{ i18n.t('modules.manual') }}</mat-option>
             <mat-option value="Automatique">{{ i18n.t('modules.automatic') }}</mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Sound -->
-        <mat-slide-toggle [(ngModel)]="module().config.son" name="son" color="primary" [disabled]="!canEdit()">
+        <mat-slide-toggle [(ngModel)]="module()!.config.son" name="son" color="primary" [disabled]="!canEdit()">
           {{ i18n.t('modules.soundEnabled') }}
         </mat-slide-toggle>
 
@@ -107,3 +117,4 @@
     </mat-card-content>
   </mat-card>
 </div>
+}

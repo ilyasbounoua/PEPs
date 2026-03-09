@@ -1,21 +1,27 @@
 /**
- * @author BOUNOUA Ilyas and VAZEILLE Clément
- * @description This file contains the main application configuration, including providers for routing, HTTP client, and client hydration.
+ * @author BOUNOUA Ilyas and VAZEILLE Clément, Santiago Alexander RODRIGUEZ TRIANA
+ * @description Main application configuration.
+ * - provideRouter with withComponentInputBinding: allows route params (:id) to be
+ *   bound directly as @Input() on components (used by ModuleDetail).
+ * - withRouterConfig paramsInheritanceStrategy: child routes inherit parent params.
  */
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-
-import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
+import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(routes), 
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withRouterConfig({ paramsInheritanceStrategy: 'always' })
+    ),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch())
-  ]
+    provideHttpClient(withFetch()),
+  ],
 };

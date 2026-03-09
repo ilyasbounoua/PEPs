@@ -1,4 +1,4 @@
-import { Component, output, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth';
 import { ApiService } from '../../services/api';
 import { I18nService } from '../../services/i18n';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -30,13 +31,12 @@ export class Login implements OnInit {
   private api = inject(ApiService);
   private platformId = inject(PLATFORM_ID);
   readonly i18n = inject(I18nService);
+  private router = inject(Router);
 
   hidePassword = true;
   hideNewPassword = true;
   hideConfirmPassword = true;
-  loginSuccess = output<void>();
   loginError = signal('');
-
   isReady = signal(false);
 
   // Reset password mode
@@ -78,7 +78,7 @@ export class Login implements OnInit {
     const result = await this.authService.login(loginInput.value, passwordInput.value);
 
     if (result.success) {
-      this.loginSuccess.emit();
+      this.router.navigate(['/dashboard']);
     } else {
       this.loginError.set(result.error ?? this.i18n.t('login.error'));
     }

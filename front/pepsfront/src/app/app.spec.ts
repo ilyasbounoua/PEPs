@@ -7,6 +7,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { signal, computed } from '@angular/core';
 import { ApiService } from './services/api';
 import { of } from 'rxjs';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 class MockAuthService {
   private readonly _isLoggedIn = signal(false);
@@ -61,12 +63,13 @@ class MockApiService {
 
 
 describe('App', () => {
+  let router: Router;
   beforeEach(async () => {
     // Clear storage to prevent interference from other tests
     sessionStorage.clear();
 
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, RouterTestingModule],
       providers: [
         { provide: AuthService, useClass: MockAuthService },
         { provide: ApiService, useClass: MockApiService },
@@ -75,6 +78,9 @@ describe('App', () => {
         provideNoopAnimations()
       ]
     }).compileComponents();
+    router = TestBed.inject(Router);
+    // use Jasmine spy instead of Jest
+    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
   });
 
   it('should create the app', () => {
@@ -83,18 +89,8 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render login page on initial load', () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-login')).toBeTruthy();
-    expect(compiled.querySelector('app-dashboard')).toBeFalsy();
-  });
-
   it('should render dashboard when logged in', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-
     // Inject the mock service to manipulate state
     const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
 
@@ -105,7 +101,34 @@ describe('App', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-dashboard')).toBeTruthy();
-    expect(compiled.querySelector('app-login')).toBeFalsy();
+    expect(compiled.querySelector('mat-sidenav-container')).toBeTruthy();
+  });
+
+  describe('Sidenav', () => {
+    it('should toggle sidenav', () => {
+      const fixture = TestBed.createComponent(App);
+      const app = fixture.componentInstance;
+      expect(app.isSidenavOpen()).toBe(true);
+      app.toggleSidenav();
+      expect(app.isSidenavOpen()).toBe(false);
+    });
+  });
+
+  describe('Logout', () => {
+    it('should log out the user and navigate to login', () => {
+      const fixture = TestBed.createComponent(App);
+      const app = fixture.componentInstance;
+      const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
+      authService.login('test', 'pass');
+      fixture.detectChanges();
+
+      spyOn(authService, 'logout').and.callThrough();
+      app.logout();
+      fixture.detectChanges();
+
+      expect(authService.logout).toHaveBeenCalled();
+      expect(app.isLoggedIn()).toBe(false);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    });
   });
 });

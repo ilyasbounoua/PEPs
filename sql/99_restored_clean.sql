@@ -89,9 +89,9 @@ INSERT INTO peps.interaction (idinteraction, idsound, idmodule, typeinteraction,
 INSERT INTO peps.interaction (idinteraction, idsound, idmodule, typeinteraction, time_lancement, owner_role) VALUES (44, NULL, 4, 'Patte', '2025-05-08 09:30:00', 'aras');
 INSERT INTO peps.interaction (idinteraction, idsound, idmodule, typeinteraction, time_lancement, owner_role) VALUES (45, NULL, 4, 'Bec', '2025-06-25 11:45:00', 'aras');
 INSERT INTO peps.interaction (idinteraction, idsound, idmodule, typeinteraction, time_lancement, owner_role) VALUES (46, NULL, 4, 'Patte', '2025-07-30 14:15:00', 'aras');
-INSERT INTO peps.users (id, login, roles, password, email) VALUES (8, 'Haytam', '[]', '$2y$13$scNBACUxkGfjhUWs8hEX7uVNB42Ek3d8ZaEqc2Xw89syOg7OiLFlq', 'haytam.bensribit@gmail.com');
-INSERT INTO peps.users (id, login, roles, password, email) VALUES (9, 'admin', '[]', '$2y$13$OKlzoqquC9Qui1V/NoLszO.QceJr70LaR8DdKgqZIG2Taqm2KaiPm', 'haytam.bensribit@gmail.com');
-INSERT INTO peps.users (id, login, roles, password, email) VALUES (10, 'admind', '[]', '$2y$13$Wmld0i8t3asztgTSAROUwOIY.6nz/HDX.skHdTNtwgL/5Fcm5Q7Wu', 'haytam.bensribit@gmail.com');
+INSERT INTO peps.users (id, login, roles, password, email) VALUES (8, 'Haytam BEN SRIBIT', '[]', '$2y$13$scNBACUxkGfjhUWs8hEX7uVNB42Ek3d8ZaEqc2Xw89syOg7OiLFlq', 'Haytam BEN SRIBIT.bensribit@gmail.com');
+INSERT INTO peps.users (id, login, roles, password, email) VALUES (9, 'admin', '[]', '$2y$13$OKlzoqquC9Qui1V/NoLszO.QceJr70LaR8DdKgqZIG2Taqm2KaiPm', 'Haytam BEN SRIBIT.bensribit@gmail.com');
+INSERT INTO peps.users (id, login, roles, password, email) VALUES (10, 'admind', '[]', '$2y$13$Wmld0i8t3asztgTSAROUwOIY.6nz/HDX.skHdTNtwgL/5Fcm5Q7Wu', 'Haytam BEN SRIBIT.bensribit@gmail.com');
 SELECT pg_catalog.setval('peps.audit_logs_id_seq', 30, true);
 SELECT pg_catalog.setval('peps.interaction_idinteraction_seq', 58, true);
 SELECT pg_catalog.setval('peps.module_idmodule_seq', 27, true);
