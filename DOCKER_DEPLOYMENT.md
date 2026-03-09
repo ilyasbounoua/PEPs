@@ -42,6 +42,7 @@ The PEPs application uses a modern microservices architecture with Docker contai
 2. **Backend (Java/Spring)**: REST API running on Tomcat
 3. **Frontend (Angular)**: SPA served by Nginx
 4. **Database (PostgreSQL)**: External database (not containerized by default)
+5. **Object Storage (MinIO)**: S3-compatible storage for sound files
 
 ## Prerequisites
 
@@ -118,9 +119,31 @@ DB_PORT=
 DB_NAME=
 DB_USER=
 DB_PASSWORD=
+MINIO_ENDPOINT=
+MINIO_ACCESS_KEY=
+MINIO_SECRET_KEY=
+MINIO_BUCKET=
 
 # Frontend Configuration
 API_URL=
+```
+
+### MinIO Configuration
+
+The backend stores sound files in MinIO (S3-compatible object storage). Set in `.env`:
+
+```bash
+MINIO_ENDPOINT=http://minio:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=peps-sounds
+```
+
+Bucket setup (one-time):
+```bash
+docker compose up -d minio
+mc alias set local http://localhost:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+mc anonymous set private local/$MINIO_BUCKET
 ```
 
 ### Database Configuration
