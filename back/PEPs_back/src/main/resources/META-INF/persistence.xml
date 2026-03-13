@@ -14,19 +14,8 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
 
-    	<!-- PostgreSQL JDBC -->
-    	<property name="javax.persistence.jdbc.driver"
-             	 value="org.postgresql.Driver"/>
-
-    	<property name="javax.persistence.jdbc.url"
-      	        value="jdbc:postgresql://appli-pfe.ec-nantes.fr:5432/infosi_21?currentSchema=peps"/>
-
-    	<property name="javax.persistence.jdbc.user"
-         	     value="infosi_21"/>
-
-    	<property name="javax.persistence.jdbc.password"
-            	  value="frieren"/>
-
+    	<!-- PostgreSQL JDBC (Managed by Spring) -->
+    	
     	<!-- Forcer le schéma PostgreSQL -->
     	<property name="eclipselink.default-schema"
          	     value="peps"/>
