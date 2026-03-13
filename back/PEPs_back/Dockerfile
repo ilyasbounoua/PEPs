@@ -21,7 +21,7 @@ RUN mvn clean package -DskipTests -B
 # ============================================
 # Stage 2: Runtime Stage
 # ============================================
-FROM tomcat:9.0-jdk17-openjdk-slim
+FROM tomcat:9.0-jre17-temurin
 
 # Install curl for health checks
 RUN apt-get update && \
@@ -45,8 +45,12 @@ COPY --chown=tomcat-user:tomcat-user healthcheck.sh /usr/local/bin/healthcheck.s
 RUN chmod +x /usr/local/bin/healthcheck.sh
 
 # Set environment variables
-ENV CATALINA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
-ENV JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom -Dorg.apache.catalina.startup.TldConfig.jarsToSkip=*.jar -Dorg.apache.catalina.startup.ContextConfig.jarsToSkip=*.jar"
+# Optimization: Skip TLD and JAR scanning to speed up startup
+# Fix: Use Temurin base to avoid Cgroup v2 NPE bug
+ENV CATALINA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dorg.apache.catalina.startup.TldConfig.jarsToSkip=*.jar \
+    -Dorg.apache.catalina.startup.ContextConfig.jarsToSkip=*.jar"
 
 # Expose port
 EXPOSE 8080
