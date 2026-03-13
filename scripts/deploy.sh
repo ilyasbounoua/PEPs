@@ -90,7 +90,7 @@ wait_for_health() {
     log_info "Waiting for $service to be healthy..."
     
     while [ $retries -gt 0 ]; do
-        if curl -f -s $url > /dev/null 2>&1; then
+        if curl -f -s -X OPTIONS $url > /dev/null 2>&1; then
             log_info "$service is healthy"
             return 0
         fi
