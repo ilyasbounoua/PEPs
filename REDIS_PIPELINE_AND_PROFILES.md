@@ -28,3 +28,4 @@ We have implemented two fundamental pipelines relying on Redis Streams for resil
 1. **Source**: An ESP32 hits `/api/audio/download/{id}`. The controller pushes a request to `retrieval-request-stream`.
 2. **Worker 3 (`StorageReadWorker`)**: Picks up from `storage-readers`, downloads raw audio from MinIO, forwards bytes to `device-delivery-stream`, and sends `XACK`.
 3. **Worker 4 (`DevicePrepWorker`)**: Picks up from `device-formatters`, transcodes audio natively for the ESP32 DAC limitations, caches it in a standard Redis Key (e.g. `String` or `Hash`), and replies with an `XACK`. The HTTP request is then fulfilled using this cached blob.
+4. **Nginx Optimization**: The final binary response is further cached by the Nginx Proxy for 60 minutes to minimize overhead.

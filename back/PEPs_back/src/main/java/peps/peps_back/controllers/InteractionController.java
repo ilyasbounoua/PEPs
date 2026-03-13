@@ -51,6 +51,9 @@ public class InteractionController {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private peps.peps_back.services.AudioJobPublisher audioJobPublisher;
+
     public InteractionController(InteractionRepository interactionRepository) {
         this.interactionRepository = interactionRepository;
     }
@@ -163,6 +166,22 @@ public class InteractionController {
             auditService.log("CREATE", "interaction", interaction.getIdinteraction(), 
                 "Interaction " + interaction.getTypeinteraction(),
                 interaction.getOwnerRole(), userLogin, null, newValue, "Création d'une interaction");
+        }
+
+        // 4.5. Trigger Pipeline 2 (Retrieval) if a sound is associated
+        // This ensures the audio is pre-processed and ready in Redis for the ESP32.
+        if (sound != null && audioJobPublisher != null) {
+            Map<String, String> retrievalPayload = new HashMap<>();
+            String retrievalJobId = java.util.UUID.randomUUID().toString();
+            retrievalPayload.put("jobId", retrievalJobId);
+            retrievalPayload.put("soundId", sound.getIdsound().toString());
+            
+            try {
+                audioJobPublisher.publishRetrievalJob(retrievalPayload);
+                System.out.println("Triggered retrieval job " + retrievalJobId + " for interaction " + interaction.getIdinteraction());
+            } catch (Exception e) {
+                System.err.println("Failed to trigger retrieval job: " + e.getMessage());
+            }
         }
 
         // 5. Retour du DTO

@@ -16,10 +16,10 @@ This project uses environment variables to manage sensitive configurations. **NE
    - Only variable names
    - Use as reference to create `.env` in production
 
-3. **`.env.dev`** - Safe values for local development
-   - ✅ SAFE to commit
+3. **`.env.dev`** - Safe values for local development (IGNORED)
+   - 🚫 Now ignored by .gitignore
+   - Use as reference to create your local `.env`
    - Contains development values that are NOT secrets
-   - Local database, standard ports
 
 ### 🚫 Files BLOCKED by .gitignore
 
@@ -123,22 +123,17 @@ PROXY_CPU_LIMIT=
 PEPs/
 ├── .env.example          # ✅ Empty template (committed)
 ├── .env.prod.example     # ✅ Empty production template (committed)
-├── .env.dev              # ✅ Safe development values (committed)
+├── .env.dev              # 🚫 Now IGNORED (template for local dev)
 ├── .env                  # 🚫 YOUR real configuration (DO NOT commit)
-├── .gitignore            # ✅ Blocks .env (committed)
+├── .gitignore            # ✅ Blocks .env and .env.dev (committed)
 └── docker-compose.yml    # ✅ No credentials (committed)
 ```
 
 ## Frequently Asked Questions
 
-### Why is .env.dev in the repository?
+### Why is .env.dev ignored?
 
-`.env.dev` contains development values that are NOT secrets:
-- Local database (not production)
-- Generic development passwords
-- Standard local configuration
-
-It's safe to share because it's **never** used in production.
+Although it contains safe development values, it is now ignored to prevent local configuration changes from being accidentally committed, keeping the repository clean. Use it as a template to create your own `.env`.
 
 ### What if I accidentally commit .env?
 
