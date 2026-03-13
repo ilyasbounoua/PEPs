@@ -62,7 +62,8 @@ public class SoundController {
     /**
      * Lists sounds filtered by role.
      *
-     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns all.
+     * @param role Role to filter by (e.g., 'dauphin', 'aras'). If null, returns
+     *             all.
      */
     @GetMapping
     public ResponseEntity<List<SoundDTO>> getAllSounds(@RequestParam(required = false) String role) {
@@ -76,10 +77,10 @@ public class SoundController {
 
         List<SoundDTO> dtos = sounds.stream()
                 .map(s -> new SoundDTO(
-                s.getIdsound(),
-                s.getNom(),
-                s.getTypeSon(),
-                s.getExtension()))
+                        s.getIdsound(),
+                        s.getNom(),
+                        s.getTypeSon(),
+                        s.getExtension()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
@@ -132,7 +133,8 @@ public class SoundController {
      * Resolves an audio MIME type from a file extension.
      *
      * @param extension file extension with or without leading dot
-     * @return MIME type corresponding to the extension, or {@code application/octet-stream}
+     * @return MIME type corresponding to the extension, or
+     *         {@code application/octet-stream}
      */
     private String getContentType(String extension) {
         String normalizedExtension = extension.replace(".", "").toLowerCase();
@@ -150,15 +152,29 @@ public class SoundController {
         }
     }
 
+    @Autowired
+    private peps.peps_back.services.AudioJobPublisher audioJobPublisher;
+
     /**
-     * Uploads a sound file to object storage and persists its metadata.
+     * NOTE: Additional Redis streams and workers can be added to this controller if needed for
+     * other asynchronous tasks. However, currently, only the sound upload process is implemented
+     * with this worker-based pattern because it's significantly heavier (I/O and binary processing)
+     * than other metadata operations.
+     */
+
+    /**
+     * Uploads a sound file.
+     * <p>
+     * This version uses the asynchronous Redis pipeline (Pipeline 1).
+     * The file metadata is saved to the database immediately, and a job is queued
+     * in Redis for workers to handle the binary storage (MinIO) and path update.
      *
-     * @param name logical sound name
-     * @param type sound category/type
-     * @param file binary multipart file
-     * @param role optional owner role used for profile isolation
+     * @param name  logical sound name
+     * @param type  sound category/type
+     * @param file  binary multipart file
+     * @param role  optional owner role used for profile isolation
      * @param login optional user login for permission checks and auditing
-     * @return created sound DTO or an error payload
+     * @return 202 Accepted with Sound metadata
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadSound(
@@ -176,13 +192,6 @@ public class SoundController {
                 return ResponseEntity.status(403).body(error);
             }
         }
-
-        System.out.println("=== Upload Sound Request ===");
-        System.out.println("Name: " + name);
-        System.out.println("Type: " + type);
-        System.out.println("Role: " + role);
-        System.out.println("File: " + (file != null ? file.getOriginalFilename() : "null"));
-        System.out.println("File size: " + (file != null ? file.getSize() : 0));
 
         if (file == null || file.isEmpty()) {
             Map<String, String> error = new HashMap<>();
@@ -211,55 +220,59 @@ public class SoundController {
             }
 
             String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1).toLowerCase();
-
             if (!extension.matches("mp3|wav|ogg|m4a")) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Unsupported file format. Use mp3, wav, ogg or m4a");
                 return ResponseEntity.badRequest().body(error);
             }
 
-            String contentType = getContentType(extension);
-            String objectKey = minioStorageService.uploadSound(
-                    name,
-                    type,
-                    extension,
-                    contentType,
-                    file.getInputStream(),
-                    file.getSize());
-
+            // 1. Create and persist Sound entity (without path yet)
             Sound sound = new Sound();
             sound.setNom(name);
             sound.setTypeSon(type);
             sound.setExtension(extension);
-            sound.setChemin(objectKey);
+            sound.setChemin(null); // Will be updated by StorageWorker
 
             if (role != null && !role.isEmpty()) {
                 sound.setOwnerRole(role.toLowerCase());
             }
 
             sound = soundRepository.save(sound);
+            Integer soundId = sound.getIdsound();
 
-            System.out.println("Sound saved to MinIO object: " + objectKey + ", ID: " + sound.getIdsound());
+            // 2. Prepare and publish Redis Job (Pipeline 1)
+            String jobId = java.util.UUID.randomUUID().toString();
+            String audioBase64 = java.util.Base64.getEncoder().encodeToString(file.getBytes());
+            String contentType = getContentType(extension);
 
+            Map<String, String> payload = new HashMap<>();
+            payload.put("jobId", jobId);
+            payload.put("soundId", soundId.toString());
+            payload.put("audioBase64", audioBase64);
+            payload.put("contentType", contentType);
+
+            audioJobPublisher.publishUploadJob(payload);
+
+            System.out.println("Sound upload job queued. ID: " + soundId + ", JobID: " + jobId);
+
+            // 3. Audit Log
             String newValue = String.format(
-                    "{\"name\":\"%s\",\"type\":\"%s\",\"extension\":\"%s\",\"path\":\"%s\"}",
-                    sound.getNom(), sound.getTypeSon(), sound.getExtension(), sound.getChemin());
+                    "{\"name\":\"%s\",\"type\":\"%s\",\"extension\":\"%s\",\"jobId\":\"%s\"}",
+                    sound.getNom(), sound.getTypeSon(), sound.getExtension(), jobId);
             String userLogin = (login != null) ? login : "unknown";
-            auditService.log("CREATE", "sound", sound.getIdsound(), sound.getNom(),
+            auditService.log("CREATE_ASYNC", "sound", soundId, sound.getNom(),
                     sound.getOwnerRole(), userLogin, null, newValue, "Upload de fichier son");
 
-            SoundDTO dto = new SoundDTO(sound.getIdsound(), sound.getNom(), sound.getTypeSon(), sound.getExtension());
-            return ResponseEntity.ok(dto);
+            SoundDTO dto = new SoundDTO(soundId, sound.getNom(), sound.getTypeSon(), sound.getExtension());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
 
         } catch (IOException e) {
-            System.err.println("IOException during upload: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("IOException during async upload trigger: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Error while saving file: " + e.getMessage());
+            error.put("error", "Error reading file content: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         } catch (Exception e) {
-            System.err.println("Exception during upload: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Exception during async upload trigger: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Unexpected error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -269,9 +282,9 @@ public class SoundController {
     /**
      * Updates sound metadata for an existing sound.
      *
-     * @param id sound identifier
+     * @param id       sound identifier
      * @param soundDTO payload carrying updated metadata
-     * @param login optional user login for permission checks and auditing
+     * @param login    optional user login for permission checks and auditing
      * @return updated sound DTO or an error payload
      */
     @PutMapping("/{id}")
@@ -335,9 +348,10 @@ public class SoundController {
     }
 
     /**
-     * Deletes a sound metadata record and its backing object storage file when available.
+     * Deletes a sound metadata record and its backing object storage file when
+     * available.
      *
-     * @param id sound identifier
+     * @param id    sound identifier
      * @param login optional user login for permission checks and auditing
      * @return confirmation payload or an error response
      */

@@ -191,6 +191,8 @@ Features:
 - Health checks
 - Restart policies
 - Security hardening
+- **Nginx Proxy Caching**: Disk-based cache for audio files
+- **Gzip/Buffer Optimizations**: Tuned for binary streaming and large requests
 
 ### Using Deployment Scripts
 
@@ -446,6 +448,9 @@ docker-compose down
 
 # Remove volumes (WARNING: deletes data)
 docker-compose down -v
+
+# Clean Nginx cache manually
+rm -rf /var/cache/nginx/audio_cache/*
 
 # Clean unused images
 docker image prune -a
