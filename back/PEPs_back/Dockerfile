@@ -46,7 +46,7 @@ RUN chmod +x /usr/local/bin/healthcheck.sh
 
 # Set environment variables
 ENV CATALINA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
-ENV JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom -Dorg.apache.catalina.startup.TldConfig.jarsToSkip=*.jar -Dorg.apache.catalina.startup.ContextConfig.jarsToSkip=*.jar"
 
 # Expose port
 EXPOSE 8080

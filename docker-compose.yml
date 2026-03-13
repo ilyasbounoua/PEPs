@@ -55,6 +55,7 @@ services:
 
   # Backend Service (Java/Spring) - Web
   backend-web:
+    image: peps-backend:latest
     build:
       context: ./back/PEPs_back
       dockerfile: Dockerfile
@@ -91,6 +92,7 @@ services:
 
   # Backend Service (Java/Spring) - Audio Worker
   backend-audio:
+    image: peps-backend:latest
     build:
       context: ./back/PEPs_back
       dockerfile: Dockerfile

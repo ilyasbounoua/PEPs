@@ -64,8 +64,8 @@ check_env_file() {
 build_services() {
     log_info "Building Docker images..."
     
-    log_info "Building backend..."
-    docker-compose -f $COMPOSE_FILE -f $COMPOSE_PROD_FILE build backend
+    log_info "Building backend images (shared)..."
+    docker-compose -f $COMPOSE_FILE -f $COMPOSE_PROD_FILE build backend-web
     
     log_info "Building frontend..."
     docker-compose -f $COMPOSE_FILE -f $COMPOSE_PROD_FILE build frontend
@@ -107,9 +107,16 @@ wait_for_health() {
 health_checks() {
     log_info "Running health checks..."
     
-    # Wait for backend
-    if ! wait_for_health "Backend" "http://localhost:8080"; then
-        log_error "Backend health check failed"
+    # Wait for backend-web
+    if ! wait_for_health "Backend Web" "http://localhost:8080"; then
+        log_error "Backend Web health check failed"
+        rollback
+        exit 1
+    fi
+    
+    # Wait for backend-audio
+    if ! wait_for_health "Backend Audio" "http://localhost:8081"; then
+        log_error "Backend Audio health check failed"
         rollback
         exit 1
     fi
