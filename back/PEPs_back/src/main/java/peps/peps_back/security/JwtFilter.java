@@ -90,8 +90,9 @@ public class JwtFilter implements Filter {
     // -------------------------------------------------------------------------
 
     private boolean isPublic(String path, String method) {
-        return (path.equals(LOGIN_PATH) && "POST".equalsIgnoreCase(method))
-                || (path.equals(LOGOUT_PATH) && "POST".equalsIgnoreCase(method));
+        if (path == null) return false;
+        return (path.contains(LOGIN_PATH) && "POST".equalsIgnoreCase(method))
+                || (path.contains(LOGOUT_PATH) && "POST".equalsIgnoreCase(method));
     }
 
     private String extractJwtCookie(HttpServletRequest req) {
