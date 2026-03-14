@@ -8,6 +8,8 @@
  */
 package peps.peps_back.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/modules")
 @CrossOrigin(origins = {"http://localhost:4200", "http://51.75.126.85"})
 public class ModuleController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleController.class);
 
     @Autowired
     private ModuleRepository moduleRepository;

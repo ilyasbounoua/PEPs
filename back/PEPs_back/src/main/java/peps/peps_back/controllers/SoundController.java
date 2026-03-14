@@ -123,12 +123,10 @@ public class SoundController {
             if (e.errorResponse() != null && "NoSuchKey".equalsIgnoreCase(e.errorResponse().code())) {
                 return ResponseEntity.notFound().build();
             }
-            System.err.println("MinIO error loading file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("MinIO error loading file: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            System.err.println("Error loading file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error loading file: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -260,8 +258,6 @@ public class SoundController {
             
             LOGGER.info("Sound upload job published to Redis for sound '{}' (ID: {}, JobID: {})", name, soundId, jobId);
 
-            System.out.println("Sound upload job queued. ID: " + soundId + ", JobID: " + jobId);
-
             // 3. Audit Log
             String newValue = String.format(
                     "{\"name\":\"%s\",\"type\":\"%s\",\"extension\":\"%s\",\"jobId\":\"%s\"}",
@@ -274,12 +270,12 @@ public class SoundController {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
 
         } catch (IOException e) {
-            System.err.println("IOException during async upload trigger: " + e.getMessage());
+            LOGGER.error("IOException during async upload trigger: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error reading file content: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         } catch (Exception e) {
-            System.err.println("Exception during async upload trigger: " + e.getMessage());
+            LOGGER.error("Exception during async upload trigger: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Unexpected error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -392,10 +388,9 @@ public class SoundController {
         if (sound.getChemin() != null && !sound.getChemin().isEmpty()) {
             try {
                 minioStorageService.deleteSound(sound.getChemin());
-                System.out.println("Deleted object: " + sound.getChemin());
+                LOGGER.info("Deleted MinIO object: {}", sound.getChemin());
             } catch (Exception e) {
-                System.err.println("Error deleting object: " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.error("Error deleting MinIO object {}: {}", sound.getChemin(), e.getMessage());
             }
         }
 

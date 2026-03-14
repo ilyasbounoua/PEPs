@@ -478,7 +478,20 @@ For issues or questions:
 3. Consult the project README
 4. Open an issue on GitHub
 
+## VPS & IoT Specifics
+
+### 1. IoT Security Model
+The system uses a hybrid security model to accommodate both web users and IoT devices:
+- **Web UI**: Strictly protected via JWT in HttpOnly cookies.
+- **IoT Endpoints**: `/api/modules` and `/api/interactions` allow public `POST` requests. This enables ESP32 devices and simulators to register and send interaction data without maintaining a session.
+
+### 2. VPS-Specific Fixes
+If deploying to a VPS (e.g., OVH/Oracle), the following optimizations are applied:
+- **Base Image**: Uses `eclipse-temurin:17-jre-alpine` to ensure compatibility with various Linux kernels (Fixes Cgroup NPE).
+- **Redis Link**: All Redis communication must use `StringRedisSerializer` to prevent binary corruption on high-latency links.
+- **Nginx Headers**: Ensure `X-Forwarded-For` and `X-Real-IP` are correctly passed to handle CORS properly on the VPS IP.
+
 ---
 
-**Last Updated**: 2026-02-01
-**Version**: 1.0.0
+**Last Updated**: 2026-03-14
+**Version**: 1.1.0
