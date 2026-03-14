@@ -60,7 +60,8 @@ public class AuthController {
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            LOGGER.error("Login failed: Password mismatch for user '{}'.", request.getLogin());
+            LOGGER.error("Login failed: Password mismatch for user '{}'. Received password length: {}", 
+                         request.getLogin(), (request.getPassword() != null ? request.getPassword().length() : 0));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Mot de passe incorrect"));
         }
 
