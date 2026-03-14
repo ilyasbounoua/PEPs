@@ -55,10 +55,11 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
 
-        // Use StringRedisSerializer so that keys are readable as plain text in the
-        // Redis DB
+        // Use StringRedisSerializer so that keys and values are readable as plain text in the Redis DB
         template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
 
         return template;
     }
