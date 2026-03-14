@@ -73,6 +73,13 @@ public class AuthController {
             // Debug check against a static known hash
             boolean staticMatch = passwordEncoder.matches("admin", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
             LOGGER.info("Internal sanity check: Does 'admin' match the target hash? {}", staticMatch);
+            
+            // GENERATE A VALID HASH FOR THE USER TO COPY
+            String validHash = passwordEncoder.encode("admin");
+            LOGGER.error("--- EMERGENCY FIX ---");
+            LOGGER.error("To fix this, run this SQL in your database:");
+            LOGGER.error("UPDATE peps.users SET password_hash = '{}' WHERE login = 'admin';", validHash);
+            LOGGER.error("---------------------");
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Mot de passe incorrect"));
         }
