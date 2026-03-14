@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer.StreamMessageListenerContainerOptions;
 
@@ -32,14 +33,20 @@ public class RedisWorkerConfig {
      * @return The configured StreamMessageListenerContainer
      */
     @Bean(initMethod = "start", destroyMethod = "stop")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamMessageListenerContainer(
             RedisConnectionFactory connectionFactory) {
 
         // Configure the container to check for new messages every 1 second (Poll
         // Timeout)
-        StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options = StreamMessageListenerContainerOptions
+        // Use raw types to bypass generic type erasure issues in Spring Data Redis 2.7.x 
+        // when chaining serializers with MapRecord.
+        StreamMessageListenerContainerOptions options = StreamMessageListenerContainerOptions
                 .builder()
                 .pollTimeout(Duration.ofSeconds(1))
+                .keySerializer(new StringRedisSerializer())
+                .hashKeySerializer(new StringRedisSerializer())
+                .hashValueSerializer(new StringRedisSerializer())
                 .build();
 
         return StreamMessageListenerContainer.create(connectionFactory, options);
