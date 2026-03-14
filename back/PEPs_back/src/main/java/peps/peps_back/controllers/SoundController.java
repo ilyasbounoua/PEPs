@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.minio.errors.ErrorResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -44,6 +46,8 @@ import peps.peps_back.services.MinioStorageService;
 @RequestMapping("/sounds")
 @CrossOrigin(origins = {"http://localhost:4200", "http://51.75.126.85"})
 public class SoundController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundController.class);
 
     private final SoundRepository soundRepository;
     private final MinioStorageService minioStorageService;
