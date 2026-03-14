@@ -100,7 +100,8 @@ public class StorageWorker implements StreamListener<String, MapRecord<String, S
      */
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
-        LOGGER.info("StorageWorker received job: {}", message.getId());
+        String soundName = message.getValue().getOrDefault("soundName", "unknown");
+        LOGGER.info("StorageWorker received job: {} for sound '{}'", message.getId(), soundName);
         Map<String, String> fields = message.getValue();
 
         try {
@@ -110,7 +111,8 @@ public class StorageWorker implements StreamListener<String, MapRecord<String, S
             String contentType = fields.getOrDefault("contentType", "audio/mpeg");
 
             if (soundIdStr == null || audioBase64 == null) {
-                LOGGER.error("StorageWorker: missing required fields in message {}. Skipping.", message.getId());
+                LOGGER.error("StorageWorker: missing required fields in message {} for sound '{}'. Skipping.", 
+                             message.getId(), soundName);
                 redisTemplate.opsForStream().acknowledge(streamKey, consumerGroup, message.getId());
                 return;
             }
@@ -120,7 +122,7 @@ public class StorageWorker implements StreamListener<String, MapRecord<String, S
             // --- 2. Look up the Sound entity in the DB ---
             Optional<Sound> optSound = soundRepository.findById(soundId);
             if (optSound.isEmpty()) {
-                LOGGER.error("StorageWorker: Sound ID {} not found in DB. Skipping.", soundId);
+                LOGGER.error("StorageWorker: Sound ID {} ('{}') not found in DB. Skipping.", soundId, soundName);
                 redisTemplate.opsForStream().acknowledge(streamKey, consumerGroup, message.getId());
                 return;
             }
@@ -144,12 +146,13 @@ public class StorageWorker implements StreamListener<String, MapRecord<String, S
             // --- 5. Persist the MinIO object key into Sound.chemin ---
             sound.setChemin(objectKey);
             soundRepository.save(sound);
-            LOGGER.info("StorageWorker: updated Sound {} chemin = '{}'", soundId, objectKey);
+            LOGGER.info("StorageWorker: updated Sound {} ('{}') chemin = '{}'", soundId, sound.getNom(), objectKey);
 
         } catch (Exception e) {
-            LOGGER.error("StorageWorker: failed to process message {}: {}", message.getId(), e.getMessage(), e);
+            LOGGER.error("StorageWorker: failed to process sound '{}' (message {}): {}", 
+                         soundName, message.getId(), e.getMessage(), e);
         } finally {
-            // ACK always — avoid infinite retry loops on permanent failures.
+            // ACK always
             redisTemplate.opsForStream().acknowledge(streamKey, consumerGroup, message.getId());
         }
     }

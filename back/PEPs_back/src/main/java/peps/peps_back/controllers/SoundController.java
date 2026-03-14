@@ -42,7 +42,7 @@ import peps.peps_back.services.MinioStorageService;
 
 @RestController
 @RequestMapping("/sounds")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://51.75.126.85"})
 public class SoundController {
 
     private final SoundRepository soundRepository;
@@ -248,10 +248,13 @@ public class SoundController {
             Map<String, String> payload = new HashMap<>();
             payload.put("jobId", jobId);
             payload.put("soundId", soundId.toString());
+            payload.put("soundName", name);
             payload.put("audioBase64", audioBase64);
             payload.put("contentType", contentType);
 
             audioJobPublisher.publishUploadJob(payload);
+            
+            LOGGER.info("Sound upload job published to Redis for sound '{}' (ID: {}, JobID: {})", name, soundId, jobId);
 
             System.out.println("Sound upload job queued. ID: " + soundId + ", JobID: " + jobId);
 
