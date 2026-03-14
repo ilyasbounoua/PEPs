@@ -14,11 +14,11 @@
 INSERT INTO peps.users (login, password_hash, enabled, role, permission, created_at, updated_at)
 VALUES (
     'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '$2a$10$addEtMm/UEHiwBiVDQ9N8OT0OLfsGAwhnu03mUz.oJ1wMvlGhlS5C',
     true,
     'admin',
     'admin',
     NOW(),
     NOW()
 )
-ON CONFLICT (login) DO NOTHING;
+ON CONFLICT (login) DO UPDATE SET password_hash = EXCLUDED.password_hash;
