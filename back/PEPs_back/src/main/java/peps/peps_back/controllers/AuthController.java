@@ -60,8 +60,20 @@ public class AuthController {
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            LOGGER.error("Login failed: Password mismatch for user '{}'. Received length: {}. Hash in DB: [{}]", 
-                         request.getLogin(), (request.getPassword() != null ? request.getPassword().length() : 0), user.getPasswordHash());
+            StringBuilder chars = new StringBuilder();
+            String pwd = request.getPassword();
+            if (pwd != null) {
+                for (int i = 0; i < pwd.length(); i++) {
+                    chars.append((int)pwd.charAt(i)).append(" ");
+                }
+            }
+            LOGGER.error("Login failed: Password mismatch for user '{}'. Received length: {}. ASCII Chars: {}. Hash in DB: [{}]", 
+                         request.getLogin(), (pwd != null ? pwd.length() : 0), chars.toString().trim(), user.getPasswordHash());
+            
+            // Debug check against a static known hash
+            boolean staticMatch = passwordEncoder.matches("admin", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
+            LOGGER.info("Internal sanity check: Does 'admin' match the target hash? {}", staticMatch);
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Mot de passe incorrect"));
         }
 
