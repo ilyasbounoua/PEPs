@@ -25,6 +25,10 @@
     	<property name="eclipselink.ddl-generation"
              	 value="none"/>
         <property name="eclipselink.weaving" value="false"/>
+        
+        <!-- Désactiver le cache pour voir les changements SQL immédiatement -->
+        <property name="eclipselink.cache.shared.default" value="false"/>
+        <property name="eclipselink.query.results-cache" value="false"/>
 
     </properties>
 	
