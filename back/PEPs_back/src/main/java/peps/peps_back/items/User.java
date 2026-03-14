@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @author Équipe PEP'S, Anas EL HOUDI
  */
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "peps")
 public class User {
 
     @Id

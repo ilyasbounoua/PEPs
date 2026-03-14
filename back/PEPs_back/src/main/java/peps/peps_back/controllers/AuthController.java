@@ -51,17 +51,17 @@ public class AuthController {
         
         if (user == null) {
             LOGGER.error("Login failed: User '{}' not found in database.", request.getLogin());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Utilisateur non trouvé"));
         }
         
         if (!user.getEnabled()) {
             LOGGER.error("Login failed: User '{}' is disabled.", request.getLogin());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Compte désactivé"));
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             LOGGER.error("Login failed: Password mismatch for user '{}'.", request.getLogin());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Mot de passe incorrect"));
         }
 
         LOGGER.info("Login successful for user '{}'. Generating token...", request.getLogin());
