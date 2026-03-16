@@ -65,4 +65,11 @@ export class App {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  onMenuKeydown(event: KeyboardEvent, path: string) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.router.navigate([path]);
+    }
+  }
 }

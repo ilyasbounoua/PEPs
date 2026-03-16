@@ -22,7 +22,7 @@
   </div>
   <div class="modules-grid">
     @for (module of modules(); track module.id) {
-    <mat-card class="module-card" (click)="onModuleClick(module)">
+    <mat-card class="module-card" tabindex="0" (click)="onModuleClick(module)" (keydown)="onModuleKeydown($event, module)">
       <mat-card-header>
         <mat-icon mat-card-avatar [class]="module.status === 'Actif' ? 'icon-active' : 'icon-inactive'">
           developer_board

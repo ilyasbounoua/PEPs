@@ -9,46 +9,46 @@
     </div>
 
     <mat-nav-list>
-      <mat-list-item routerLink="/dashboard" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/dashboard" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/dashboard')">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Tableau de Bord</span>
       </mat-list-item>
 
-      <mat-list-item routerLink="/interactions" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/interactions" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/interactions')">
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>Interactions</span>
       </mat-list-item>
 
-      <mat-list-item routerLink="/modules" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+      <mat-list-item tabindex="0" routerLink="/modules" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" (keydown)="onMenuKeydown($event, '/modules')">
         <mat-icon matListItemIcon>developer_board</mat-icon>
         <span matListItemTitle>Modules</span>
       </mat-list-item>
 
-      <mat-list-item routerLink="/sounds" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/sounds" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/sounds')">
         <mat-icon matListItemIcon>music_note</mat-icon>
         <span matListItemTitle>Sons</span>
       </mat-list-item>
 
       <!-- Admin-only items — guard also enforces this at URL level -->
       @if (isAdmin()) {
-      <mat-list-item routerLink="/users" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/users" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/users')">
         <mat-icon matListItemIcon>people</mat-icon>
         <span matListItemTitle>Utilisateurs</span>
       </mat-list-item>
 
-      <mat-list-item routerLink="/audit-logs" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/audit-logs" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/audit-logs')">
         <mat-icon matListItemIcon>fact_check</mat-icon>
         <span matListItemTitle>Journal d'Audit</span>
       </mat-list-item>
 
-      <mat-list-item routerLink="/archive" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/archive" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/archive')">
         <mat-icon matListItemIcon>archive</mat-icon>
         <span matListItemTitle>Archive</span>
       </mat-list-item>
       }
 
       <!-- All authenticated users -->
-      <mat-list-item routerLink="/account" routerLinkActive="active">
+      <mat-list-item tabindex="0" routerLink="/account" routerLinkActive="active" (keydown)="onMenuKeydown($event, '/account')">
         <mat-icon matListItemIcon>account_circle</mat-icon>
         <span matListItemTitle>Mon Compte</span>
       </mat-list-item>
@@ -71,11 +71,13 @@
       </button>
     </mat-toolbar>
 
-    <div class="page-area">
+    <main class="page-area">
       <router-outlet />
-    </div>
+    </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
 } @else {
-<router-outlet />
+<main>
+  <router-outlet />
+</main>
 }

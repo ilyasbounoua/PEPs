@@ -77,6 +77,13 @@ export class ModulesList implements OnInit {
     this.router.navigate(['/modules', module.id]);
   }
 
+  onModuleKeydown(event: KeyboardEvent, module: Module) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onModuleClick(module);
+    }
+  }
+
   onAddClick() {
     // Pass the currently selected role as a query param so ModuleForm knows which role to assign
     const extras = this.selectedRole ? { queryParams: { role: this.selectedRole } } : {};
