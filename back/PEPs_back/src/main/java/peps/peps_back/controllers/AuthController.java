@@ -110,6 +110,30 @@ public class AuthController {
     }
 
     // -------------------------------------------------------------------------
+    // GET /auth/me
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@CookieValue(name = JwtUtil.COOKIE_NAME, required = false) String token) {
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Non authentifié"));
+        }
+
+        var claims = JwtUtil.validateToken(token);
+        if (claims == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Session expirée ou invalide"));
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", claims.get("userId"));
+        body.put("login", claims.getSubject());
+        body.put("role", claims.get("role"));
+        body.put("permission", claims.get("permission"));
+
+        return ResponseEntity.ok(body);
+    }
+
+    // -------------------------------------------------------------------------
     // Cookie helper
     // -------------------------------------------------------------------------
 
