@@ -237,11 +237,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 .status-active {
-  color: var(--accent-color) !important;
+  color: #000000 !important;
   font-weight: bold;
 }
 .status-inactive {
-  color: var(--warn-color) !important;
+  color: #000000 !important;
   font-weight: bold;
 }
 .icon-active { color: var(--accent-color) !important; }
