@@ -20,6 +20,13 @@ describe('AuthService', () => {
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
+
+    // Mock the automatic GET /auth/me call triggered by verifySession() in constructor
+    const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+    const meReq = httpMock.expectOne(`${baseUrl}/auth/me`);
+    expect(meReq.request.method).toBe('GET');
+    // We flush an error by default in beforeEach so it doesn't auto-login unless specified
+    meReq.flush(null, { status: 401, statusText: 'Unauthorized' });
   });
 
   afterEach(() => {
@@ -129,7 +136,7 @@ describe('AuthService', () => {
       sessionStorage.setItem('peps_auth_session', JSON.stringify(session));
 
       // Manually trigger session restoration for the test
-      (service as any).restoreSession();
+      (service as any).restoreFromStorage();
 
       expect(service.isAuthenticated()).toBe(true);
       expect(service.currentUserId()).toBe(1);
@@ -142,6 +149,12 @@ describe('AuthService', () => {
       sessionStorage.clear();
       // Re-create the service to trigger the constructor
       service = TestBed.inject(AuthService);
+      
+      // We must flush the automatic /auth/me call triggered by the new service instance
+      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+      const meReq = httpMock.expectOne(`${baseUrl}/auth/me`);
+      meReq.flush(null, { status: 401, statusText: 'Unauthorized' });
+
       expect(service.isAuthenticated()).toBe(false);
     });
 
