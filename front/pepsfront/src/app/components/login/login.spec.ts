@@ -8,6 +8,7 @@
  * - Tests now spy on Router.navigate to verify successful login navigation.
  */
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { Login } from './login';
 import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
@@ -17,6 +18,16 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
 class MockAuthService {
+  isAuthenticated = signal(false);
+  currentUserId = signal<number | null>(null);
+  currentLogin = signal('');
+  currentRole = signal('');
+  currentUserRole = signal('');
+  currentUserPermission = signal('');
+  isInitialized = signal(true);
+  isAdmin = signal(false);
+  canEdit = signal(false);
+
   login(user: string, pass: string): Promise<{ success: boolean; error?: string }> {
     if (pass === 'PEPS') {
       return Promise.resolve({ success: true });
@@ -54,7 +65,7 @@ describe('Login', () => {
   });
 
   it('should navigate to /dashboard on successful login', async () => {
-    const navigateSpy = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    const navigateSpy = spyOn(router, 'navigateByUrl').and.returnValue(Promise.resolve(true));
     spyOn(authService, 'login').and.callThrough();
 
     const mockEvent = {
@@ -73,7 +84,7 @@ describe('Login', () => {
     await component.onSubmit(mockEvent);
 
     expect(authService.login).toHaveBeenCalledWith('admin', 'PEPS');
-    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+    expect(navigateSpy).toHaveBeenCalledWith('/dashboard');
   });
 
   it('should set loginError on failed login', async () => {

@@ -146,15 +146,8 @@ describe('AuthService', () => {
     });
 
     it('should not restore session if sessionStorage is empty', () => {
-      sessionStorage.clear();
-      // Re-create the service to trigger the constructor
-      service = TestBed.inject(AuthService);
-      
-      // We must flush the automatic /auth/me call triggered by the new service instance
-      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
-      const meReq = httpMock.expectOne(`${baseUrl}/auth/me`);
-      meReq.flush(null, { status: 401, statusText: 'Unauthorized' });
-
+      // The service was already injected in beforeEach, and sessionStorage was empty
+      // so the constructor already tried to restore from empty storage.
       expect(service.isAuthenticated()).toBe(false);
     });
 
