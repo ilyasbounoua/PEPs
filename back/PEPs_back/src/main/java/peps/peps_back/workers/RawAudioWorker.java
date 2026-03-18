@@ -93,13 +93,15 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
      */
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
-        LOGGER.info("RawAudioWorker received message: {}", message.getId());
+        String soundName = message.getValue().getOrDefault("soundName", "unknown");
+        LOGGER.info("RawAudioWorker received message: {} for sound '{}'", message.getId(), soundName);
 
         String audioBase64 = message.getValue().get("audioBase64");
 
         // --- 1. Null / empty guard ---
         if (audioBase64 == null || audioBase64.isBlank()) {
-            LOGGER.error("RawAudioWorker: missing audioBase64 in message {}. Skipping.", message.getId());
+            LOGGER.error("RawAudioWorker: missing audioBase64 in message {} for sound '{}'. Skipping.", 
+                         message.getId(), soundName);
             ack(message);
             return;
         }
@@ -109,33 +111,28 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
         try {
             audioBytes = Base64.getDecoder().decode(audioBase64);
         } catch (IllegalArgumentException e) {
-            LOGGER.error("RawAudioWorker: audioBase64 is not valid Base-64 in message {}. Skipping.",
-                    message.getId());
+            LOGGER.error("RawAudioWorker: audioBase64 for sound '{}' (message {}) is not valid Base-64. Skipping.",
+                    soundName, message.getId());
             ack(message);
             return;
         }
 
         // --- 3. Validate audio format using magic bytes ---
-        // We inspect the first raw bytes of the decoded binary to confirm the actual
-        // format. This is more reliable than trusting the contentType field sent by
-        // the client, which could be spoofed or wrong.
         if (!isValidAudioFormat(audioBytes)) {
-            LOGGER.error("RawAudioWorker: unsupported or corrupt audio format in message {}."
-                    + " Only MP3 and WAV are accepted. Skipping.", message.getId());
+            LOGGER.error("RawAudioWorker: unsupported or corrupt format in sound '{}' (message {}). "
+                    + "Supported: MP3, WAV, OGG, M4A. Skipping.", soundName, message.getId());
             ack(message);
             return;
         }
 
-        LOGGER.info("RawAudioWorker: format OK for message {} — detected {} ({} bytes). Forwarding to storage.",
-                message.getId(), detectFormatName(audioBytes), audioBytes.length);
+        LOGGER.info("RawAudioWorker: format OK for sound '{}' (id: {}) — detected {} ({} bytes). Forwarding to storage.",
+                soundName, message.getId(), detectFormatName(audioBytes), audioBytes.length);
 
-        // --- 4. Forward the validated payload to the next stage of the pipeline:
-        // StorageWorker will upload it to MinIO. ---
+        // --- 4. Forward the validated payload to the next stage
         redisTemplate.opsForStream().add("storage-upload-stream", message.getValue());
-        LOGGER.info("RawAudioWorker: forwarded message {} to storage-upload-stream.", message.getId());
+        LOGGER.info("RawAudioWorker: forwarded sound '{}' to storage-upload-stream.", soundName);
 
-        // --- 5. ACK: inform Redis this job was handled successfully ---
-        // Without ACK, Redis assumes the worker crashed and reassigns the message.
+        // --- 5. ACK ---
         ack(message);
     }
 
@@ -194,12 +191,17 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
      * @return {@code true} if the bytes match a known supported container format
      */
     private boolean isValidAudioFormat(byte[] bytes) {
-        if (bytes == null || bytes.length < 4) {
+        if (bytes == null || bytes.length < 12) {
             return false;
         }
 
         // WAV — RIFF container: "RIFF" (52 49 46 46)
         if (bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46) {
+            return true;
+        }
+
+        // OGG — "OggS" (4F 67 67 53)
+        if (bytes[0] == 0x4F && bytes[1] == 0x67 && bytes[2] == 0x67 && bytes[3] == 0x53) {
             return true;
         }
 
@@ -216,6 +218,11 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
             }
         }
 
+        // M4A / MP4 — Look for "ftyp" at offset 4
+        if (bytes[4] == 0x66 && bytes[5] == 0x74 && bytes[6] == 0x79 && bytes[7] == 0x70) {
+            return true;
+        }
+
         return false;
     }
 
@@ -228,12 +235,16 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
      *         {@code "unknown"}
      */
     private String detectFormatName(byte[] bytes) {
-        if (bytes == null || bytes.length < 3) {
+        if (bytes == null || bytes.length < 8) {
             return "unknown";
         }
         // WAV: "RI" prefix
         if (bytes[0] == 0x52 && bytes[1] == 0x49) {
             return "WAV";
+        }
+        // OGG
+        if (bytes[0] == 0x4F && bytes[1] == 0x67) {
+            return "OGG";
         }
         // MP3 with ID3: "ID" prefix
         if (bytes[0] == 0x49 && bytes[1] == 0x44) {
@@ -242,6 +253,10 @@ public class RawAudioWorker implements StreamListener<String, MapRecord<String, 
         // MP3 bare sync
         if ((bytes[0] & 0xFF) == 0xFF) {
             return "MP3 (sync)";
+        }
+        // M4A
+        if (bytes[4] == 0x66 && bytes[5] == 0x74) {
+            return "M4A/MP4";
         }
         return "unknown";
     }

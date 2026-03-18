@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.minio.errors.ErrorResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -42,8 +44,10 @@ import peps.peps_back.services.MinioStorageService;
 
 @RestController
 @RequestMapping("/sounds")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://51.75.126.85"})
 public class SoundController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundController.class);
 
     private final SoundRepository soundRepository;
     private final MinioStorageService minioStorageService;
@@ -119,12 +123,10 @@ public class SoundController {
             if (e.errorResponse() != null && "NoSuchKey".equalsIgnoreCase(e.errorResponse().code())) {
                 return ResponseEntity.notFound().build();
             }
-            System.err.println("MinIO error loading file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("MinIO error loading file: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            System.err.println("Error loading file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error loading file: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -248,12 +250,13 @@ public class SoundController {
             Map<String, String> payload = new HashMap<>();
             payload.put("jobId", jobId);
             payload.put("soundId", soundId.toString());
+            payload.put("soundName", name);
             payload.put("audioBase64", audioBase64);
             payload.put("contentType", contentType);
 
             audioJobPublisher.publishUploadJob(payload);
-
-            System.out.println("Sound upload job queued. ID: " + soundId + ", JobID: " + jobId);
+            
+            LOGGER.info("Sound upload job published to Redis for sound '{}' (ID: {}, JobID: {})", name, soundId, jobId);
 
             // 3. Audit Log
             String newValue = String.format(
@@ -267,12 +270,12 @@ public class SoundController {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
 
         } catch (IOException e) {
-            System.err.println("IOException during async upload trigger: " + e.getMessage());
+            LOGGER.error("IOException during async upload trigger: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error reading file content: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         } catch (Exception e) {
-            System.err.println("Exception during async upload trigger: " + e.getMessage());
+            LOGGER.error("Exception during async upload trigger: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Unexpected error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -385,10 +388,9 @@ public class SoundController {
         if (sound.getChemin() != null && !sound.getChemin().isEmpty()) {
             try {
                 minioStorageService.deleteSound(sound.getChemin());
-                System.out.println("Deleted object: " + sound.getChemin());
+                LOGGER.info("Deleted MinIO object: {}", sound.getChemin());
             } catch (Exception e) {
-                System.err.println("Error deleting object: " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.error("Error deleting MinIO object {}: {}", sound.getChemin(), e.getMessage());
             }
         }
 

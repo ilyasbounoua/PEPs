@@ -10,6 +10,8 @@
  */
 package peps.peps_back.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +34,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/interactions")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://51.75.126.85"})
 public class InteractionController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InteractionController.class);
 
     @Autowired
     private InteractionRepository interactionRepository;
@@ -178,9 +182,9 @@ public class InteractionController {
             
             try {
                 audioJobPublisher.publishRetrievalJob(retrievalPayload);
-                System.out.println("Triggered retrieval job " + retrievalJobId + " for interaction " + interaction.getIdinteraction());
+                LOGGER.info("Triggered retrieval job {} for interaction {}", retrievalJobId, interaction.getIdinteraction());
             } catch (Exception e) {
-                System.err.println("Failed to trigger retrieval job: " + e.getMessage());
+                LOGGER.error("Failed to trigger retrieval job for interaction {}: {}", interaction.getIdinteraction(), e.getMessage());
             }
         }
 

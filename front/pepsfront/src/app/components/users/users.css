@@ -35,14 +35,14 @@
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
-  /* Default styling for any role */
-  background-color: #607d8b;
+  /* Default styling for any role - improved contrast */
+  background-color: #455a64;
   color: white;
 }
 
-/* Admin gets a distinct color for visibility */
+/* Admin gets a distinct color for visibility - improved contrast */
 .role-admin {
-  background-color: #e91e63;
+  background-color: #ad1457;
   color: white;
 }
 
@@ -56,17 +56,17 @@
 }
 
 .permission-viewer {
-  background-color: #9e9e9e;
+  background-color: #616161;
   color: white;
 }
 
 .permission-editor {
-  background-color: #2196f3;
+  background-color: #1565c0;
   color: white;
 }
 
 .permission-admin {
-  background-color: #e91e63;
+  background-color: #ad1457;
   color: white;
 }
 

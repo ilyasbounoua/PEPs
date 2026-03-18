@@ -65,7 +65,7 @@ mat-card-title {
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
 }
 
@@ -75,19 +75,22 @@ mat-card-title {
     height: 18px;
 }
 
-.action-create {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+.action-create,
+.action-create mat-icon {
+    background-color: #1b5e20;
+    color: #fff !important;
 }
 
-.action-update {
-    background-color: #fff3e0;
-    color: #ef6c00;
+.action-update,
+.action-update mat-icon {
+    background-color: #bf360c;
+    color: #fff !important;
 }
 
-.action-delete {
-    background-color: #ffebee;
-    color: #c62828;
+.action-delete,
+.action-delete mat-icon {
+    background-color: #b71c1c;
+    color: #fff !important;
 }
 
 /* Entity Cell */

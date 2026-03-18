@@ -14,6 +14,10 @@ PEPs is a web-based monitoring system for intelligent modules, with real-time st
 
 ## Quick Start Guide
 
+> [!IMPORTANT]
+> [!IMPORTANT]
+> **For a complete configuration in Docker, Local, or VPS, please check the [Definitive Deployment Guide](file:///c:/Users/srodr/Desktop/NA_I2/INFOSI/PGROU/PROJET/PEPs/DEPLOYMENT_GUIDE.md).**
+
 ### 1. Database Setup
 ```bash
 # 1. Start PostgreSQL

@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -28,6 +28,7 @@ export class Login implements OnInit {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   hidePassword = true;
   loginError = signal('');
@@ -35,18 +36,33 @@ export class Login implements OnInit {
 
   ngOnInit() {
     this.preloadBackground('/backgroundlogin.jpg');
+
+    // If we're already authenticated, redirect to the intended page or dashboard.
+    if (this.authService.isAuthenticated()) {
+      const returnUrl = this.getSafeReturnUrl();
+      this.router.navigateByUrl(returnUrl);
+    }
+  }
+
+  /**
+   * Prevents "Open Redirect" vulnerabilities by ensuring the returnUrl 
+   * is a relative path within our application.
+   */
+  private getSafeReturnUrl(): string {
+    const url = this.route.snapshot.queryParams['returnUrl'];
+    if (url && url.startsWith('/') && !url.startsWith('//')) {
+      return url;
+    }
+    return '/dashboard';
   }
 
   preloadBackground(url: string) {
-    // Check if running in the browser
     if (isPlatformBrowser(this.platformId)) {
       const img = new Image();
       img.src = url;
       img.onload = () => this.isReady.set(true);
       img.onerror = () => this.isReady.set(true);
     } else {
-      // On the server (SSR), 'Image' doesn't exist.
-      // We set ready to true so the server renders the form immediately.
       this.isReady.set(true);
     }
   }
@@ -61,7 +77,8 @@ export class Login implements OnInit {
     const result = await this.authService.login(loginInput.value, passwordInput.value);
 
     if (result.success) {
-      this.router.navigate(['/dashboard']);
+      const returnUrl = this.getSafeReturnUrl();
+      this.router.navigateByUrl(returnUrl);
     } else {
       this.loginError.set(result.error ?? 'Erreur de connexion');
     }

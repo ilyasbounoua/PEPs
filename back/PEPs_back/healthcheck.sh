@@ -1,17 +1,10 @@
 #!/bin/sh
-# Health check script for backend service
+# Simplified Health check for Spring + Tomcat
+# Checks if the server is responding to requests on root
+# IMPORTANT: This file MUST have LF line endings to work in Docker/Linux
 
-# Check if Tomcat is responding
-if curl -f -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
-    echo "Backend is healthy"
+if curl -f -s -X OPTIONS http://localhost:8080/ > /dev/null 2>&1; then
     exit 0
 else
-    # Fallback: check if Tomcat is at least running
-    if curl -f -s http://localhost:8080/ > /dev/null 2>&1; then
-        echo "Backend is responding"
-        exit 0
-    else
-        echo "Backend is not responding"
-        exit 1
-    fi
+    exit 1
 fi
