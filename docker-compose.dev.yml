@@ -1,0 +1,33 @@
+# ============================================================
+# Docker Compose override for Windows local development
+#
+# Problem: On Windows, system-level environment variables
+# (e.g. DB_HOST=localhost) override the values in .env when
+# Docker Compose expands ${VAR} syntax.
+#
+# This file explicitly sets the correct values for Docker
+# networking by hardcoding values that would otherwise be
+# overridden by Windows system environment variables.
+#
+# Usage (Windows only):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+#
+# The VPS uses only the original docker-compose.yml:
+#   docker compose up -d
+# ============================================================
+
+services:
+  backend-web:
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=web
+      # Override Windows system env vars with correct Docker container names
+      - DB_HOST=database
+      - REDIS_HOST=peps-redis
+
+  backend-audio:
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=audio-worker
+      # Override Windows system env vars with correct Docker container names
+      - DB_HOST=database
+      - REDIS_HOST=peps-redis

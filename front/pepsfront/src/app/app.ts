@@ -40,11 +40,32 @@ export class App {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  /** Track the current URL to decide whether to show the shell. */
+  currentUrl = signal('');
+
+  constructor() {
+    // Basic route tracking
+    this.router.events.subscribe(() => {
+      this.currentUrl.set(this.router.url);
+    });
+  }
+
   /** True once the session check from sessionStorage has completed (prevents login flash on SSR). */
   isInitialized = computed(() => this.authService.isInitialized());
 
   /** True when a valid session exists. Controls sidenav/toolbar visibility. */
   isLoggedIn = computed(() => this.authService.isAuthenticated());
+
+  /** 
+   * We show the shell ONLY if:
+   * 1. The user is logged in
+   * 2. They are NOT on the login page (prevents shell-inside-shell glitch)
+   */
+  showShell = computed(() => {
+    const loggedIn = this.isLoggedIn();
+    const onLogin = this.currentUrl().includes('/login');
+    return loggedIn && !onLogin;
+  });
 
   /** True if the current user has the 'admin' role. Controls admin-only menu items. */
   isAdmin = computed(() => this.authService.isAdmin());

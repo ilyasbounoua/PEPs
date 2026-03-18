@@ -14,7 +14,8 @@
                 <input matInput [type]="showCurrentPassword() ? 'text' : 'password'" [ngModel]="currentPassword()"
                     (ngModelChange)="currentPassword.set($event)" name="currentPassword"
                     autocomplete="current-password">
-                <button mat-icon-button matSuffix type="button" (click)="toggleShowCurrentPassword()">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowCurrentPassword()"
+                    [attr.aria-label]="showCurrentPassword() ? 'Masquer le mot de passe actuel' : 'Afficher le mot de passe actuel'">
                     <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
             </mat-form-field>
@@ -24,7 +25,8 @@
                 <mat-label>Nouveau mot de passe</mat-label>
                 <input matInput [type]="showNewPassword() ? 'text' : 'password'" [ngModel]="newPassword()"
                     (ngModelChange)="newPassword.set($event)" name="newPassword" autocomplete="new-password">
-                <button mat-icon-button matSuffix type="button" (click)="toggleShowNewPassword()">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowNewPassword()"
+                    [attr.aria-label]="showNewPassword() ? 'Masquer le nouveau mot de passe' : 'Afficher le nouveau mot de passe'">
                     <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
                 <mat-hint>Au moins 4 caractères</mat-hint>
@@ -35,7 +37,8 @@
                 <mat-label>Confirmer le nouveau mot de passe</mat-label>
                 <input matInput [type]="showConfirmPassword() ? 'text' : 'password'" [ngModel]="confirmPassword()"
                     (ngModelChange)="confirmPassword.set($event)" name="confirmPassword" autocomplete="new-password">
-                <button mat-icon-button matSuffix type="button" (click)="toggleShowConfirmPassword()">
+                <button mat-icon-button matSuffix type="button" (click)="toggleShowConfirmPassword()"
+                    [attr.aria-label]="showConfirmPassword() ? 'Masquer la confirmation du mot de passe' : 'Afficher la confirmation du mot de passe'">
                     <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
             </mat-form-field>

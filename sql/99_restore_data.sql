@@ -23,9 +23,9 @@ SET row_security = off;
 -- ============================================================
 -- Users
 -- ============================================================
+
 INSERT INTO peps.users (login, password_hash, enabled, role, permission, created_at, updated_at)
 VALUES
-    ('admin',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', true, 'admin',   'admin',  NOW(), NOW()),
     ('dauphin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', true, 'dauphin', 'editor', NOW(), NOW()),
     ('aras',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', true, 'aras',    'editor', NOW(), NOW())
 ON CONFLICT (login) DO NOTHING;

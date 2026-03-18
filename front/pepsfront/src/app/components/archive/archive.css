@@ -12,6 +12,10 @@
     margin-bottom: 16px;
 }
 
+.archive-card mat-card-subtitle {
+    color: #555555; /* Overrides default material gray for better contrast */
+}
+
 .archive-card mat-card-title {
     display: flex;
     align-items: center;
@@ -20,11 +24,11 @@
 }
 
 .header-icon {
-    color: #673ab7;
+    color: #4527a0; /* Darker purple for WCAG AAA contrast */
 }
 
 .audit-icon {
-    color: #2196f3;
+    color: #0d47a1; /* Darker blue for WCAG AAA contrast */
 }
 
 .loading-container {
@@ -33,7 +37,7 @@
     align-items: center;
     padding: 48px;
     gap: 16px;
-    color: #666;
+    color: #424242; /* Darker grey for better contrast */
 }
 
 .no-data {
@@ -41,7 +45,7 @@
     flex-direction: column;
     align-items: center;
     padding: 48px;
-    color: #666;
+    color: #424242; /* Darker grey for better contrast */
     text-align: center;
 }
 
@@ -55,7 +59,7 @@
 
 .no-data .hint {
     font-size: 0.9em;
-    color: #999;
+    color: #555555; /* Meets 4.5:1 ratio on white */
     margin-top: 8px;
 }
 

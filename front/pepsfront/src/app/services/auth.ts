@@ -66,8 +66,16 @@ export class AuthService {
   });
 
   constructor() {
-    // Restore session from sessionStorage on service initialization (browser only)
-    this.restoreSession();
+    // Stage 1: Fast sync check (for UX/UI responsiveness)
+    this.restoreFromStorage();
+    
+    // Stage 2: Ground truth from backend
+    if (this.isBrowser()) {
+      this.verifySession();
+    } else {
+      // On server, we consider "initialization" done (it's always unauthenticated by default)
+      this.initialized.set(true);
+    }
   }
 
   /**
@@ -78,33 +86,54 @@ export class AuthService {
   }
 
   /**
-   * Restore session from sessionStorage if exists (browser only)
+   * Fast sync restore (allows near-instant UI rendering if session exists)
    */
-  private restoreSession(): void {
-    if (!this.isBrowser()) {
-      // On server, DON'T mark as initialized - this prevents rendering login page
-      // The browser will initialize properly when it hydrates
-      return;
-    }
-
+  private restoreFromStorage(): void {
+    if (!this.isBrowser()) return;
     try {
       const stored = sessionStorage.getItem(SESSION_KEY);
       if (stored) {
         const session = JSON.parse(stored);
-        this.userId.set(session.userId);
-        this.userLogin.set(session.login);
-        this.userRole.set(session.role);
-        // Fallback for old sessions without permission
-        this.userPermission.set(session.permission || 'viewer');
-        this.isLoggedIn.set(true);
-        console.log('[AuthService] Session restored for user:', session.login, 'Role:', session.role, 'Perm:', session.permission);
+        this.populateState(session);
       }
     } catch (e) {
-      console.error('[AuthService] Failed to restore session:', e);
       this.clearSession();
     }
-    // Mark initialization complete (browser only)
-    this.initialized.set(true);
+  }
+
+  /**
+   * ASYNC initialization: Real session verification with the server.
+   */
+  private async verifySession(): Promise<void> {
+    try {
+      const baseUrl = (environment as any).apiUrl;
+      const response = await firstValueFrom(
+        this.http.get<LoginResponse>(`${baseUrl}/auth/me`, { withCredentials: true })
+      );
+
+      // Backend says we are cool -> update signals and sync storage
+      this.populateState(response);
+      this.saveSession(response.userId, response.login, response.role, response.permission);
+      console.log('[AuthService] Session verified with server:', response.login);
+    } catch (e) {
+      // 401/error -> if we thought we were logged in, we were wrong
+      if (this.isLoggedIn()) {
+        console.warn('[AuthService] Session invalidated by server.');
+        this.logoutLocally();
+      }
+    } finally {
+      // Mark as initialized so Guards and UI can proceed
+      this.initialized.set(true);
+    }
+  }
+
+  /** Helper to populate signals */
+  private populateState(data: any): void {
+    this.userId.set(data.userId);
+    this.userLogin.set(data.login);
+    this.userRole.set(data.role);
+    this.userPermission.set(data.permission || 'viewer');
+    this.isLoggedIn.set(true);
   }
 
   /**
@@ -167,12 +196,16 @@ export class AuthService {
   }
 
   logout(): void {
-    // Ask the server to issue an expired token + Max-Age=0 cookie (double invalidation)
-    // Fire-and-forget — we clear local state immediately regardless of network result
+    // Fire-and-forget server logout, clear local state immediately
     const baseUrl = (environment as any).apiUrl;
     this.http.post(`${baseUrl}/auth/logout`, {}, { withCredentials: true })
-      .subscribe({ error: () => { /* ignore — local state is cleared anyway */ } });
+      .subscribe({ error: () => { /* ignore */ } });
 
+    this.logoutLocally();
+  }
+
+  /** Clears local signals and storage */
+  private logoutLocally(): void {
     this.isLoggedIn.set(false);
     this.userId.set(null);
     this.userLogin.set('');
