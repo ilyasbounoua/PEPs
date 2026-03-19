@@ -7,7 +7,7 @@
  * - Passes role to endpoints to filter data by profile
  */
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod, Notification } from '../models/interfaces';
@@ -27,6 +27,12 @@ export class ApiService {
 
   /** Options shared by all HTTP calls — sends the HttpOnly jwt cookie automatically. */
   private readonly OPT = { withCredentials: true };
+
+  private getHeaders() {
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+  }
 
   // Dashboard
   /**
@@ -164,11 +170,11 @@ export class ApiService {
   }
 
   assignSoundToModule(moduleId: number, soundId: number): Observable<any> {
-    return this.http.post(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, {}, { headers: this.getHeaders() });
+    return this.http.post(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, {}, { ...this.OPT, headers: this.getHeaders() });
   }
 
   unassignSoundFromModule(moduleId: number, soundId: number): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.BASE_URL}/modules/${moduleId}/sounds/${soundId}`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   getSoundModules(soundId: number): Observable<{ id: number, name: string }[]> {
@@ -256,7 +262,7 @@ export class ApiService {
   changeLogin(userId: number, newLogin: string): Observable<any> {
     return this.http.put<any>(`${this.BASE_URL}/users/${userId}`, {
       login: newLogin
-    }, { headers: this.getHeaders() });
+    }, { ...this.OPT, headers: this.getHeaders() });
   }
 
   /**
@@ -370,31 +376,31 @@ export class ApiService {
   // ==========================================
 
   getNotifications(): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications`, { headers: this.getHeaders() });
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   getUnreadNotifications(): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/unread`, { headers: this.getHeaders() });
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/unread`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   pollNewNotifications(lastId: number): Observable<Notification[]> {
-    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/poll?lastId=${lastId}`, { headers: this.getHeaders() });
+    return this.http.get<Notification[]>(`${this.BASE_URL}/notifications/poll?lastId=${lastId}`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   getUnreadNotificationCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.BASE_URL}/notifications/unread/count`, { headers: this.getHeaders() });
+    return this.http.get<{ count: number }>(`${this.BASE_URL}/notifications/unread/count`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   markNotificationAsRead(id: number): Observable<any> {
-    return this.http.put(`${this.BASE_URL}/notifications/${id}/read`, {}, { headers: this.getHeaders() });
+    return this.http.put(`${this.BASE_URL}/notifications/${id}/read`, {}, { ...this.OPT, headers: this.getHeaders() });
   }
 
   deleteNotification(id: number): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/notifications/${id}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.BASE_URL}/notifications/${id}`, { ...this.OPT, headers: this.getHeaders() });
   }
 
   deleteAllNotifications(): Observable<any> {
-    return this.http.delete(`${this.BASE_URL}/notifications/all`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.BASE_URL}/notifications/all`, { ...this.OPT, headers: this.getHeaders() });
   }
 
 }
