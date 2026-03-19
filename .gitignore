@@ -15,5 +15,6 @@ back/PEPs_back/target/*
 .env.local
 .env.*.local
 .env.production
-# Allow .env.dev (safe development defaults)
-!.env.dev
+# Ignore .env.dev and text log files
+.env.dev
+*.txt

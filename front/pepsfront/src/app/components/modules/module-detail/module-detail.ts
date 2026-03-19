@@ -1,11 +1,11 @@
 /**
  * @author BOUNOUA Ilyas and VAZEILLE Clément
- * @description This file contains the logic for the module detail component, which allows viewing, editing, and deleting a module's configuration.
+ * @description Module detail component. Allows viewing, editing, and deleting a module.
  */
-import { Component, input, output, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { Module, Sound } from '../../../models/interfaces';
@@ -22,6 +23,7 @@ import { I18nService } from '../../../services/i18n';
 
 @Component({
   selector: 'app-module-detail',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -33,7 +35,8 @@ import { I18nService } from '../../../services/i18n';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './module-detail.html',
   styleUrl: './module-detail.css',
@@ -42,19 +45,14 @@ export class ModuleDetail implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private document = inject(DOCUMENT);
+  private route = inject(ActivatedRoute);
   readonly i18n = inject(I18nService);
 
   readonly canEdit = this.authService.canEdit;
 
-  module = input.required<Module>();
-  saveSuccess = output<void>();
-  cancel = output<void>();
-  deleteSuccess = output<void>();
-
-  formatVolumeLabel(value: number): string {
-    return `${value}%`;
-  }
+  module = signal<Module | null>(null);
+  isLoading = signal(true);
+  loadError = signal('');
 
   // Sound assignment
   assignedSounds = signal<Sound[]>([]);
@@ -68,57 +66,59 @@ export class ModuleDetail implements OnInit {
   });
 
   ngOnInit() {
-    this.loadSoundAssignments();
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (!id || isNaN(id)) {
+      this.loadError.set(this.i18n.t('modules.invalidId') || 'Identifiant de module invalide.');
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.api.getModuleById(id).subscribe({
+      next: (mod) => {
+        this.module.set(mod);
+        this.loadSoundAssignments(mod.id);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading module:', err);
+        this.loadError.set(this.i18n.t('modules.loadError') || 'Module introuvable ou erreur de chargement.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
-  loadSoundAssignments() {
-    const mod = this.module();
-    if (!mod.id) return;
-    this.api.getModuleSounds(mod.id).subscribe(sounds => this.assignedSounds.set(sounds));
+  loadSoundAssignments(moduleId: number) {
+    this.api.getModuleSounds(moduleId).subscribe(sounds => this.assignedSounds.set(sounds));
     // Load all sounds for the same profile to populate the dropdown
     this.api.getSounds().subscribe(sounds => this.allProfileSounds.set(sounds));
   }
 
   assignSound() {
     const soundId = this.selectedSoundId();
-    const moduleId = this.module().id;
-    if (!soundId || !moduleId) return;
-    this.api.assignSoundToModule(moduleId, soundId).subscribe(() => {
+    const mod = this.module();
+    if (!soundId || !mod) return;
+    this.api.assignSoundToModule(mod.id, soundId).subscribe(() => {
       this.selectedSoundId.set(null);
-      this.loadSoundAssignments();
+      this.loadSoundAssignments(mod.id);
     });
   }
 
   unassignSound(soundId: number) {
-    const moduleId = this.module().id;
-    if (!moduleId) return;
-    this.api.unassignSoundFromModule(moduleId, soundId).subscribe(() => {
-      this.loadSoundAssignments();
+    const mod = this.module();
+    if (!mod) return;
+    this.api.unassignSoundFromModule(mod.id, soundId).subscribe(() => {
+      this.loadSoundAssignments(mod.id);
     });
   }
 
-  private navigateToModules() {
-    // Simulate click on "Modules" link in navigation
-    console.log('Attempting navigation to Modules...');
-    const navItems = this.document.querySelectorAll('.mat-list-item, .mat-mdc-list-item');
-    let clicked = false;
-    for (let i = 0; i < navItems.length; i++) {
-      const item = navItems[i] as HTMLElement;
-      if (item.textContent?.includes('Modules')) {
-        item.click();
-        clicked = true;
-        break;
-      }
-    }
-
-    if (!clicked) {
-      console.log('Modules link not found, forced navigation to /');
-      this.router.navigate(['/'], { onSameUrlNavigation: 'reload' });
-    }
+  formatVolumeLabel(value: number): string {
+    return `${value}%`;
   }
 
   onSave() {
     const moduleToSave = this.module();
+    if (!moduleToSave) return;
 
     if (!moduleToSave.name || moduleToSave.name.trim() === '') {
       alert(this.i18n.t('modules.nameRequiredFull'));
@@ -140,51 +140,33 @@ export class ModuleDetail implements OnInit {
       return;
     }
 
-    const apiCall = moduleToSave.id
-      ? this.api.updateModule(moduleToSave.id, moduleToSave)
-      : this.api.createModule(moduleToSave);
-
-    apiCall.subscribe({
-      next: () => {
-        this.saveSuccess.emit();
-        this.navigateToModules();
-      },
+    this.api.updateModule(moduleToSave.id, moduleToSave).subscribe({
+      next: () => this.router.navigate(['/modules']),
       error: (err) => {
         console.error('Error saving module:', err);
-        if (err.error && err.error.error) {
-          alert(this.i18n.t('common.error') + ': ' + err.error.error);
-        } else {
-          alert(this.i18n.t('modules.saveError'));
-        }
-      }
+        alert(err.error?.error || this.i18n.t('modules.saveError'));
+      },
     });
   }
 
   onCancel() {
-    this.cancel.emit();
-    this.navigateToModules();
+    this.router.navigate(['/modules']);
   }
 
   onDelete() {
     const moduleToDelete = this.module();
+    if (!moduleToDelete) return;
 
     if (!confirm(`${this.i18n.t('modules.deleteConfirm')} "${moduleToDelete.name}" ?`)) {
       return;
     }
 
     this.api.deleteModule(moduleToDelete.id).subscribe({
-      next: () => {
-        this.deleteSuccess.emit();
-        this.navigateToModules();
-      },
+      next: () => this.router.navigate(['/modules']),
       error: (err) => {
         console.error('Error deleting module:', err);
-        if (err.error && err.error.error) {
-          alert(this.i18n.t('common.error') + ': ' + err.error.error);
-        } else {
-          alert(this.i18n.t('modules.deleteError'));
-        }
-      }
+        alert(err.error?.error || this.i18n.t('modules.deleteError'));
+      },
     });
   }
 }

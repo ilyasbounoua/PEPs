@@ -1,5 +1,5 @@
 /**
- * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI, Santiago Alexander RODRIGUEZ TRIANA
  * @description This file contains the ApiService, which handles all HTTP requests to the backend.
  *
  * Multi-profile system:
@@ -7,7 +7,7 @@
  * - Passes role to endpoints to filter data by profile
  */
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StatCard, Interaction, Module, DailyData, Sound, UserDTO, CreateUserDTO, UpdateUserDTO, AuditLog, ArchivePeriod, AuditArchivePeriod, Notification } from '../models/interfaces';
@@ -25,17 +25,8 @@ export class ApiService {
   // Fix for local development (NetBeans/Tomcat)
   private readonly BASE_URL = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
 
-  /**
-   * Helper to get headers with user login for audit logging.
-   */
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const login = this.authService.currentLogin();
-    if (login) {
-      headers = headers.set('X-User-Login', login);
-    }
-    return headers;
-  }
+  /** Options shared by all HTTP calls — sends the HttpOnly jwt cookie automatically. */
+  private readonly OPT = { withCredentials: true };
 
   // Dashboard
   /**
@@ -62,7 +53,7 @@ export class ApiService {
 
     const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
 
-    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${queryString}`);
+    return this.http.get<StatCard>(`${this.BASE_URL}/dashboard${queryString}`, this.OPT);
   }
 
   getDailyStats(filterRole?: string, start?: string, end?: string): Observable<DailyData[]> {
@@ -78,7 +69,7 @@ export class ApiService {
 
     const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
 
-    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${queryString}`);
+    return this.http.get<DailyData[]>(`${this.BASE_URL}/daily-stats${queryString}`, this.OPT);
   }
 
   // Interactions
@@ -89,7 +80,7 @@ export class ApiService {
     let targetRole = isAdmin ? filterRole : userRole;
     const params = targetRole ? `?role=${targetRole}` : '';
 
-    return this.http.get<any[]>(`${this.BASE_URL}/interactions${params}`).pipe(
+    return this.http.get<any[]>(`${this.BASE_URL}/interactions${params}`, this.OPT).pipe(
       map(data => data.map(i => ({
         id: i.id,
         date: new Date(i.date).toISOString().replace('T', ' ').substring(0, 19),
@@ -107,7 +98,11 @@ export class ApiService {
     let targetRole = isAdmin ? filterRole : userRole;
     const params = targetRole ? `?role=${targetRole}` : '';
 
-    return this.http.get<Module[]>(`${this.BASE_URL}/modules${params}`);
+    return this.http.get<Module[]>(`${this.BASE_URL}/modules${params}`, this.OPT);
+  }
+
+  getModuleById(id: number): Observable<Module> {
+    return this.http.get<Module>(`${this.BASE_URL}/modules/${id}`, this.OPT);
   }
 
   createModule(module: Omit<Module, 'id'>, overrideRole?: string): Observable<Module> {
@@ -117,15 +112,15 @@ export class ApiService {
     // Otherwise: non-admin users use their own role, admin without override gets undefined
     const ownerRole = overrideRole !== undefined ? overrideRole : (isAdmin ? undefined : userRole);
     const params = ownerRole ? `?role=${ownerRole}` : '';
-    return this.http.post<Module>(`${this.BASE_URL}/modules${params}`, module, { headers: this.getHeaders() });
+    return this.http.post<Module>(`${this.BASE_URL}/modules${params}`, module, this.OPT);
   }
 
   updateModule(id: number, module: Module): Observable<Module> {
-    return this.http.put<Module>(`${this.BASE_URL}/modules/${id}`, module, { headers: this.getHeaders() });
+    return this.http.put<Module>(`${this.BASE_URL}/modules/${id}`, module, this.OPT);
   }
 
   deleteModule(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/modules/${id}`, { headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.BASE_URL}/modules/${id}`, this.OPT);
   }
 
   // Sounds
@@ -138,7 +133,7 @@ export class ApiService {
     const url = `${this.BASE_URL}/sounds${params}`;
     console.log('[API] getSounds - filterRole:', filterRole, 'targetRole:', targetRole, 'URL:', url);
 
-    return this.http.get<Sound[]>(url);
+    return this.http.get<Sound[]>(url, this.OPT);
   }
 
   uploadSound(formData: FormData, overrideRole?: string): Observable<Sound> {
@@ -148,15 +143,15 @@ export class ApiService {
     // Otherwise: non-admin users use their own role, admin without override gets undefined
     const ownerRole = overrideRole !== undefined ? overrideRole : (isAdmin ? undefined : userRole);
     const params = ownerRole ? `?role=${ownerRole}` : '';
-    return this.http.post<Sound>(`${this.BASE_URL}/sounds${params}`, formData, { headers: this.getHeaders() });
+    return this.http.post<Sound>(`${this.BASE_URL}/sounds${params}`, formData, this.OPT);
   }
 
   updateSound(id: number, data: { name: string, type: string }): Observable<Sound> {
-    return this.http.put<Sound>(`${this.BASE_URL}/sounds/${id}`, data, { headers: this.getHeaders() });
+    return this.http.put<Sound>(`${this.BASE_URL}/sounds/${id}`, data, this.OPT);
   }
 
   deleteSound(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/sounds/${id}`, { headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.BASE_URL}/sounds/${id}`, this.OPT);
   }
 
   getSoundFileUrl(id: number): string {
@@ -189,7 +184,7 @@ export class ApiService {
    * Accessible uniquement aux administrateurs.
    */
   getUsers(): Observable<UserDTO[]> {
-    return this.http.get<UserDTO[]>(`${this.BASE_URL}/users`);
+    return this.http.get<UserDTO[]>(`${this.BASE_URL}/users`, this.OPT);
   }
 
   /**
@@ -211,7 +206,7 @@ export class ApiService {
    * Récupère un utilisateur par son ID.
    */
   getUserById(id: number): Observable<UserDTO> {
-    return this.http.get<UserDTO>(`${this.BASE_URL}/users/${id}`);
+    return this.http.get<UserDTO>(`${this.BASE_URL}/users/${id}`, this.OPT);
   }
 
   /**
@@ -219,7 +214,7 @@ export class ApiService {
    * @param data Login, password et role du nouvel utilisateur
    */
   createUser(data: CreateUserDTO): Observable<UserDTO> {
-    return this.http.post<UserDTO>(`${this.BASE_URL}/users`, data, { headers: this.getHeaders() });
+    return this.http.post<UserDTO>(`${this.BASE_URL}/users`, data, this.OPT);
   }
 
   /**
@@ -228,14 +223,14 @@ export class ApiService {
    * @param data Champs à modifier (tous optionnels)
    */
   updateUser(id: number, data: UpdateUserDTO): Observable<UserDTO> {
-    return this.http.put<UserDTO>(`${this.BASE_URL}/users/${id}`, data, { headers: this.getHeaders() });
+    return this.http.put<UserDTO>(`${this.BASE_URL}/users/${id}`, data, this.OPT);
   }
 
   /**
    * Supprime un utilisateur.
    */
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/users/${id}`, { headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.BASE_URL}/users/${id}`, this.OPT);
   }
 
   /* ===================== */
@@ -251,7 +246,7 @@ export class ApiService {
     return this.http.put<any>(`${this.BASE_URL}/users/${userId}/password`, {
       currentPassword,
       newPassword
-    }, { headers: this.getHeaders() });
+    }, this.OPT);
   }
 
   /**
@@ -285,21 +280,21 @@ export class ApiService {
    * @author Anas EL HOUDI
    */
   getAuditLogs(): Observable<AuditLog[]> {
-    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs`);
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs`, this.OPT);
   }
 
   /**
    * Gets audit logs filtered by entity type.
    */
   getAuditLogsByEntity(entityType: string): Observable<AuditLog[]> {
-    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-entity/${entityType}`);
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-entity/${entityType}`, this.OPT);
   }
 
   /**
    * Gets audit logs for a specific user.
    */
   getAuditLogsByUser(userLogin: string): Observable<AuditLog[]> {
-    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-user/${userLogin}`);
+    return this.http.get<AuditLog[]>(`${this.BASE_URL}/audit-logs/by-user/${userLogin}`, this.OPT);
   }
 
   /* ===================== */
@@ -311,7 +306,7 @@ export class ApiService {
    * @author Anas EL HOUDI
    */
   getArchivePeriods(): Observable<ArchivePeriod[]> {
-    return this.http.get<ArchivePeriod[]>(`${this.BASE_URL}/archive/periods`);
+    return this.http.get<ArchivePeriod[]>(`${this.BASE_URL}/archive/periods`, this.OPT);
   }
 
   /**
@@ -321,7 +316,7 @@ export class ApiService {
    */
   exportAndDeletePeriod(periodId: string): Observable<Blob> {
     return this.http.post(`${this.BASE_URL}/archive/export?periodId=${periodId}`, null, {
-      responseType: 'blob'
+      responseType: 'blob', withCredentials: true
     });
   }
 
@@ -332,7 +327,7 @@ export class ApiService {
    */
   exportAndDeleteAllPeriods(): Observable<Blob> {
     return this.http.post(`${this.BASE_URL}/archive/export-all`, null, {
-      responseType: 'blob'
+      responseType: 'blob', withCredentials: true
     });
   }
 
@@ -345,7 +340,7 @@ export class ApiService {
    * @author Anas EL HOUDI
    */
   getAuditArchivePeriods(): Observable<AuditArchivePeriod[]> {
-    return this.http.get<AuditArchivePeriod[]>(`${this.BASE_URL}/archive/audit-periods`);
+    return this.http.get<AuditArchivePeriod[]>(`${this.BASE_URL}/archive/audit-periods`, this.OPT);
   }
 
   /**
@@ -355,7 +350,7 @@ export class ApiService {
    */
   exportAndDeleteAuditPeriod(periodId: string): Observable<Blob> {
     return this.http.post(`${this.BASE_URL}/archive/audit-export?periodId=${periodId}`, null, {
-      responseType: 'blob'
+      responseType: 'blob', withCredentials: true
     });
   }
 
@@ -366,7 +361,7 @@ export class ApiService {
    */
   exportAndDeleteAllAuditPeriods(): Observable<Blob> {
     return this.http.post(`${this.BASE_URL}/archive/audit-export-all`, null, {
-      responseType: 'blob'
+      responseType: 'blob', withCredentials: true
     });
   }
 

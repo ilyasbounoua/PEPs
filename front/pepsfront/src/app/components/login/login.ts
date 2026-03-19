@@ -1,6 +1,7 @@
-import { Component, output, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,14 +30,13 @@ export class Login implements OnInit {
   private authService = inject(AuthService);
   private api = inject(ApiService);
   private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
   readonly i18n = inject(I18nService);
 
   hidePassword = true;
   hideNewPassword = true;
   hideConfirmPassword = true;
-  loginSuccess = output<void>();
   loginError = signal('');
-
   isReady = signal(false);
 
   // Reset password mode
@@ -55,15 +55,12 @@ export class Login implements OnInit {
   }
 
   preloadBackground(url: string) {
-    // Check if running in the browser
     if (isPlatformBrowser(this.platformId)) {
       const img = new Image();
       img.src = url;
       img.onload = () => this.isReady.set(true);
       img.onerror = () => this.isReady.set(true);
     } else {
-      // On the server (SSR), 'Image' doesn't exist.
-      // We set ready to true so the server renders the form immediately.
       this.isReady.set(true);
     }
   }
@@ -78,13 +75,12 @@ export class Login implements OnInit {
     const result = await this.authService.login(loginInput.value, passwordInput.value);
 
     if (result.success) {
-      this.loginSuccess.emit();
+      this.router.navigate(['/dashboard']);
     } else {
       this.loginError.set(result.error ?? this.i18n.t('login.error'));
     }
   }
 
-  /** Show the reset password form */
   showReset() {
     this.showResetForm.set(true);
     this.resetDone.set(false);
@@ -97,7 +93,6 @@ export class Login implements OnInit {
     this.redirectCountdown.set(0);
   }
 
-  /** Go back to login form */
   backToLogin() {
     this.showResetForm.set(false);
     this.resetDone.set(false);
@@ -106,7 +101,6 @@ export class Login implements OnInit {
     this.redirectCountdown.set(0);
   }
 
-  /** Submit the password reset form */
   submitReset() {
     this.resetError.set('');
     this.resetSuccess.set('');
@@ -139,7 +133,6 @@ export class Login implements OnInit {
         this.isResetting.set(false);
         this.resetDone.set(true);
         this.resetSuccess.set(this.i18n.t('login.resetSuccess'));
-        // Start countdown for auto-redirect
         this.startRedirectCountdown();
       },
       error: () => {
@@ -149,7 +142,6 @@ export class Login implements OnInit {
     });
   }
 
-  /** Auto-redirect to login page after 5 seconds countdown */
   private startRedirectCountdown() {
     this.redirectCountdown.set(5);
     const interval = setInterval(() => {

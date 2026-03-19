@@ -35,6 +35,23 @@ curl -X POST http://localhost:8080/PEPs_back/modules \
   }
 }'
 ```
+
+
+# Command to simulate sending a complete Interaction (Bash/Zsh)
+### Note: The $(date ...) variable automatically inserts the current UTC date and time.
+
+```bash
+curl -X POST http://localhost:8080/PEPs_back/interactions \
+-H "Content-Type: application/json" \
+-k \
+-d "{
+  \"idsound\": 1,
+  \"idmodule\": 1,
+  \"typeInteraction\": \"SENSOR_TRIGGER\",
+  \"time_lancement\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\",
+  \"owner_id\": 1
+}"
+```
 ### Explication des arguments :
 
 * **-X POST** : Définit la méthode HTTP.

@@ -221,6 +221,11 @@ export class Users implements OnInit {
         }
     }
 
+    /** True when the entered role is 'admin' — permission select is forced to 'editor'. */
+    get isAdminRole(): boolean {
+        return this.formRole?.toLowerCase().trim() === 'admin';
+    }
+
     /**
      * Soumet le formulaire (création ou modification)
      */
