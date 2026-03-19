@@ -1,11 +1,16 @@
 /**
  * @author BOUNOUA Ilyas and VAZEILLE Clément
- * @description This file contains the logic for the module form component, which allows creating a new module.
+ * @description Module creation form component.
+ *
+ * Migration note: previously received targetRole as @Input from App parent.
+ * Now reads the role from the ?role= query param via ActivatedRoute.
+ * Navigation back to /modules is done via Router.navigate().
+ * The DOM-clicking navigateToModules() hack has been removed.
  */
-import { Component, output, signal, inject, input } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,7 +32,7 @@ import { Module } from '../../../models/interfaces';
     MatSlideToggleModule,
     MatSliderModule,
     MatSelectModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './module-form.html',
   styleUrl: './module-form.css',
@@ -35,13 +40,16 @@ import { Module } from '../../../models/interfaces';
 export class ModuleForm {
   private api = inject(ApiService);
   private router = inject(Router);
-  private document = inject(DOCUMENT);
+  private route = inject(ActivatedRoute);
 
-  // Input: target role for the new module (passed by parent when admin selects a filter)
-  targetRole = input<string | undefined>(undefined);
+  /**
+   * Role assigned to the new module.
+   * Read from the ?role= query param (set by ModulesList when admin selects a filter).
+   * Undefined for non-admin users — ApiService uses their own role in that case.
+   */
+  private readonly targetRole: string | undefined =
+    this.route.snapshot.queryParamMap.get('role') ?? undefined;
 
-  createSuccess = output<void>();
-  cancel = output<void>();
   errorMessage = signal('');
 
   newModule = signal<Omit<Module, 'id'>>({
@@ -53,46 +61,17 @@ export class ModuleForm {
       volume: 50,
       mode: 'Manuel',
       actif: false,
-      son: true
-    }
+      son: true,
+    },
   });
 
   formatVolumeLabel(value: number): string {
     return `${value}%`;
   }
 
-  private navigateToModules() {
-    // Simulate click on "Modules" link in navigation
-    console.log('Attempting navigation to Modules...');
-    const navItems = this.document.querySelectorAll('.mat-list-item, .mat-mdc-list-item');
-    let clicked = false;
-    for (let i = 0; i < navItems.length; i++) {
-      const item = navItems[i] as HTMLElement;
-      if (item.textContent?.includes('Modules')) {
-        item.click();
-        clicked = true;
-        break;
-      }
-    }
-
-    if (!clicked) {
-      console.log('Modules link not found, forced navigation to /');
-      this.router.navigate(['/'], { onSameUrlNavigation: 'reload' });
-    }
-  }
-
   onCreate() {
     const module = this.newModule();
-    const role = this.targetRole();
     this.errorMessage.set('');
-
-    // If role is undefined and api service determines user is admin, show error
-    // (admin must select a specific role before creating a module)
-    if (role === undefined) {
-      // Check if this is an admin without a selected role
-      // The api service will handle non-admin users correctly
-      // For safety, we just pass undefined and let api handle it
-    }
 
     if (!module.name || module.name.trim() === '') {
       this.errorMessage.set('Le nom est obligatoire');
@@ -100,34 +79,26 @@ export class ModuleForm {
     }
 
     if (!module.ip || module.ip.trim() === '') {
-      this.errorMessage.set('L\'adresse IP est obligatoire');
+      this.errorMessage.set("L'adresse IP est obligatoire");
       return;
     }
 
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(module.ip)) {
-      this.errorMessage.set('Format d\'adresse IP invalide');
+      this.errorMessage.set("Format d'adresse IP invalide");
       return;
     }
 
-    this.api.createModule(module, role).subscribe({
-      next: () => {
-        this.createSuccess.emit();
-        this.navigateToModules();
-      },
-      error: (err) => {
+    this.api.createModule(module, this.targetRole).subscribe({
+      next: () => this.router.navigate(['/modules']),
+      error: (err: any) => {
         console.error('Error creating module:', err);
-        if (err.error && err.error.error) {
-          this.errorMessage.set(err.error.error);
-        } else {
-          this.errorMessage.set('Erreur lors de l\'ajout du module');
-        }
-      }
+        this.errorMessage.set(err.error?.error ?? "Erreur lors de l'ajout du module");
+      },
     });
   }
 
   onCancel() {
-    this.cancel.emit();
-    this.navigateToModules();
+    this.router.navigate(['/modules']);
   }
 
   updateName(name: string) {

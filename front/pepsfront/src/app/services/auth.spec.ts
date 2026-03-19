@@ -20,6 +20,13 @@ describe('AuthService', () => {
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
+
+    // Mock the automatic GET /auth/me call triggered by verifySession() in constructor
+    const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+    const meReq = httpMock.expectOne(`${baseUrl}/auth/me`);
+    expect(meReq.request.method).toBe('GET');
+    // We flush an error by default in beforeEach so it doesn't auto-login unless specified
+    meReq.flush(null, { status: 401, statusText: 'Unauthorized' });
   });
 
   afterEach(() => {
@@ -97,9 +104,147 @@ describe('AuthService', () => {
 
     // then, logout
     service.logout();
+
+    const logoutReq = httpMock.expectOne(`${baseUrl}/auth/logout`);
+    expect(logoutReq.request.method).toBe('POST');
+    logoutReq.flush({});
+
     expect(service.isAuthenticated()).toBe(false);
     expect(service.currentUserId()).toBe(null);
     expect(service.currentLogin()).toBe('');
     expect(service.currentRole()).toBe('');
+  });
+
+  describe('AuthService Additional Tests', () => {
+    it('should return error if login or password are not provided', async () => {
+      let result = await service.login('', 'password');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Login et mot de passe requis.');
+
+      result = await service.login('login', '');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Login et mot de passe requis.');
+    });
+
+    it('should restore session from sessionStorage', () => {
+      const session = {
+        userId: 1,
+        login: 'testuser',
+        role: 'admin',
+        permission: 'admin'
+      };
+      sessionStorage.setItem('peps_auth_session', JSON.stringify(session));
+
+      // Manually trigger session restoration for the test
+      (service as any).restoreFromStorage();
+
+      expect(service.isAuthenticated()).toBe(true);
+      expect(service.currentUserId()).toBe(1);
+      expect(service.currentLogin()).toBe('testuser');
+      expect(service.currentRole()).toBe('admin');
+      expect(service.currentUserPermission()).toBe('admin');
+    });
+
+    it('should not restore session if sessionStorage is empty', () => {
+      // The service was already injected in beforeEach, and sessionStorage was empty
+      // so the constructor already tried to restore from empty storage.
+      expect(service.isAuthenticated()).toBe(false);
+    });
+
+    it('isAdmin should be true for admin user', async () => {
+      const login = 'adminuser';
+      const password = 'password';
+      const mockResponse = {
+        message: 'Login successful',
+        userId: 1,
+        login: 'adminuser',
+        role: 'admin',
+        permission: 'admin'
+      };
+
+      const promise = service.login(login, password);
+
+      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+      const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+      req.flush(mockResponse);
+      await promise;
+
+      expect(service.isAdmin()).toBe(true);
+    });
+
+    it('isAdmin should be false for non-admin user', async () => {
+      const login = 'testuser';
+      const password = 'password';
+      const mockResponse = {
+        message: 'Login successful',
+        userId: 2,
+        login: 'testuser',
+        role: 'dauphin',
+        permission: 'viewer'
+      };
+
+      const promise = service.login(login, password);
+
+      const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+      const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+      req.flush(mockResponse);
+      await promise;
+
+      expect(service.isAdmin()).toBe(false);
+    });
+
+    it('canEdit should be true for admin user', async () => {
+        const login = 'adminuser';
+        const password = 'password';
+        const mockResponse = {
+            message: 'Login successful',
+            userId: 1,
+            login: 'adminuser',
+            role: 'admin',
+            permission: 'admin'
+        };
+        const promise = service.login(login, password);
+        const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+        const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+        req.flush(mockResponse);
+        await promise;
+        expect(service.canEdit()).toBe(true);
+    });
+
+    it('canEdit should be true for editor user', async () => {
+        const login = 'editoruser';
+        const password = 'password';
+        const mockResponse = {
+            message: 'Login successful',
+            userId: 2,
+            login: 'editoruser',
+            role: 'dauphin',
+            permission: 'editor'
+        };
+        const promise = service.login(login, password);
+        const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+        const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+        req.flush(mockResponse);
+        await promise;
+        expect(service.canEdit()).toBe(true);
+    });
+
+    it('canEdit should be false for viewer user', async () => {
+        const login = 'vieweruser';
+        const password = 'password';
+        const mockResponse = {
+            message: 'Login successful',
+            userId: 3,
+            login: 'vieweruser',
+            role: 'aras',
+            permission: 'viewer'
+        };
+        const promise = service.login(login, password);
+        const baseUrl = (environment as any).apiUrl || 'http://localhost:8080/PEPs_back';
+        const req = httpMock.expectOne(`${baseUrl}/auth/login`);
+        req.flush(mockResponse);
+        await promise;
+        expect(service.canEdit()).toBe(false);
+    });
   });
 });

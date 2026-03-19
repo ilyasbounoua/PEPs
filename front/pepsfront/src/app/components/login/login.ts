@@ -1,4 +1,4 @@
-import { Component, output, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -26,27 +27,42 @@ import { AuthService } from '../../services/auth';
 export class Login implements OnInit {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   hidePassword = true;
-  loginSuccess = output<void>();
   loginError = signal('');
-
   isReady = signal(false);
 
   ngOnInit() {
     this.preloadBackground('/backgroundlogin.jpg');
+
+    // If we're already authenticated, redirect to the intended page or dashboard.
+    if (this.authService.isAuthenticated()) {
+      const returnUrl = this.getSafeReturnUrl();
+      this.router.navigateByUrl(returnUrl);
+    }
+  }
+
+  /**
+   * Prevents "Open Redirect" vulnerabilities by ensuring the returnUrl 
+   * is a relative path within our application.
+   */
+  private getSafeReturnUrl(): string {
+    const url = this.route.snapshot.queryParams['returnUrl'];
+    if (url && url.startsWith('/') && !url.startsWith('//')) {
+      return url;
+    }
+    return '/dashboard';
   }
 
   preloadBackground(url: string) {
-    // Check if running in the browser
     if (isPlatformBrowser(this.platformId)) {
       const img = new Image();
       img.src = url;
       img.onload = () => this.isReady.set(true);
       img.onerror = () => this.isReady.set(true);
     } else {
-      // On the server (SSR), 'Image' doesn't exist.
-      // We set ready to true so the server renders the form immediately.
       this.isReady.set(true);
     }
   }
@@ -61,7 +77,8 @@ export class Login implements OnInit {
     const result = await this.authService.login(loginInput.value, passwordInput.value);
 
     if (result.success) {
-      this.loginSuccess.emit();
+      const returnUrl = this.getSafeReturnUrl();
+      this.router.navigateByUrl(returnUrl);
     } else {
       this.loginError.set(result.error ?? 'Erreur de connexion');
     }

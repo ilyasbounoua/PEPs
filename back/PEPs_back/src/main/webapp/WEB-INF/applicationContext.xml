@@ -28,20 +28,33 @@
     p:password="${jdbc.password}" /-->
 
     <!-- ADD PERSISTENCE SUPPORT HERE (jpa, hibernate, etc) -->
+    <context:property-placeholder />
+    <tx:annotation-driven transaction-manager="transactionManager" />
     <mvc:annotation-driven/>
-    <context:component-scan base-package="peps.peps_back.controllers,peps.peps_back.services" />
+    <context:component-scan base-package="peps.peps_back.controllers,peps.peps_back.services,peps.peps_back.config,peps.peps_back.workers" />
+
+    <!-- DataSource definition using environment variables -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver" />
+        <property name="url" value="jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:peps_db}?currentSchema=peps" />
+        <property name="username" value="${DB_USER:peps_admin}" />
+        <property name="password" value="${DB_PASSWORD}" />
+    </bean>
 
     <jpa:repositories base-package="peps.peps_back.repositories"
                         entity-manager-factory-ref="entityManagerFactoryBean" />
 
     <bean id="entityManagerFactoryBean"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
         <property name="persistenceUnitName" value="peps.peps_back.0PU"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" />
+        </property>
     </bean>
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
     <property name="entityManagerFactory" ref="entityManagerFactoryBean" />
     </bean>
 
-    <security:http pattern="/modules/**" security="none"/>
 </beans>

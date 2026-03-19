@@ -1,13 +1,16 @@
 /**
- * @author BOUNOUA Ilyas, VAZEILLE Clément, Anas EL HOUDI
- * @description This file contains the logic for the modules list component, which displays a list of modules and allows selecting or adding a module.
- * 
+ * @author BOUNOUA Ilyas, VAZEILLE Clément, Santiago Alexander RODRIGUEZ TRIANA
+ * @description Modules list component. Displays modules filtered by role.
+ *
  * Multi-profile system:
  * - Admin can filter by role using dropdown
- * - Regular users see only their own data
+ * - Regular users see only their own data (API filters by role)
+ *
+ * Navigation: uses Angular Router — no Output events to parent.
  */
-import { Component, OnInit, output, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,21 +30,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class ModulesList implements OnInit {
   private api = inject(ApiService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   readonly isAdmin = this.authService.isAdmin;
   readonly canEdit = this.authService.canEdit;
 
-  // Admin Filter: role name or empty for all (regular property for ngModel binding)
+  // Admin Filter: role name or empty for all
   selectedRole = '';
 
-  // Profiles for dropdown - loaded from DB (regular array for template iteration)
+  // Profiles for dropdown - loaded from DB
   profiles: { role: string; name: string }[] = [
     { role: '', name: 'Tous les profils' }
   ];
 
   modules = signal<Module[]>([]);
-  selectModule = output<Module>();
-  addModule = output<string | undefined>();
 
   ngOnInit() {
     // Load available roles for admin filter
@@ -72,12 +74,20 @@ export class ModulesList implements OnInit {
   }
 
   onModuleClick(module: Module) {
-    this.selectModule.emit(module);
+    this.router.navigate(['/modules', module.id]);
+  }
+
+  onModuleKeydown(event: KeyboardEvent, module: Module) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onModuleClick(module);
+    }
   }
 
   onAddClick() {
-    // Emit the currently selected role filter (or undefined if "Tous les profils")
-    this.addModule.emit(this.selectedRole || undefined);
+    // Pass the currently selected role as a query param so ModuleForm knows which role to assign
+    const extras = this.selectedRole ? { queryParams: { role: this.selectedRole } } : {};
+    this.router.navigate(['/modules/new'], extras);
   }
 
   refreshData() {

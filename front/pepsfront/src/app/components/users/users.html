@@ -58,10 +58,12 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let user">
-            <button mat-icon-button color="primary" (click)="openEditForm(user)" matTooltip="Modifier">
+            <button mat-icon-button color="primary" (click)="openEditForm(user)" matTooltip="Modifier"
+              aria-label="Modifier">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Supprimer">
+            <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Supprimer"
+              aria-label="Supprimer">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -109,8 +111,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Permission</mat-label>
-          <mat-select [(ngModel)]="formPermission" name="permission" [disabled]="formRole?.toLowerCase() === 'admin'"
-            required>
+          <mat-select [(ngModel)]="formPermission" name="permission" [disabled]="isAdminRole" required>
             <mat-option value="viewer">Lecteur (lecture seule)</mat-option>
             <mat-option value="editor">Éditeur (lecture + écriture)</mat-option>
           </mat-select>

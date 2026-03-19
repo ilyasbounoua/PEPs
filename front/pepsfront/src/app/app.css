@@ -564,7 +564,7 @@
 }
 
 .status-active {
-  color: var(--accent-color);
+  color: #000000;
   font-weight: 600;
   padding: 4px 12px;
   background: rgba(76, 175, 80, 0.1);
@@ -573,7 +573,7 @@
 }
 
 .status-inactive {
-  color: var(--warn-color);
+  color: #000000;
   font-weight: 600;
   padding: 4px 12px;
   background: rgba(231, 76, 60, 0.1);
