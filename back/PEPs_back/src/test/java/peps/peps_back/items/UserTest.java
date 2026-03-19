@@ -54,7 +54,7 @@ public class UserTest {
         assertEquals(user.getPasswordHash(),"mdp");
         assertEquals(user.getEnabled(),true);
         assertEquals(user.getRole(),"ara");
-        assertEquals(user.getLogin(),"viewer");
+        assertEquals(user.getPermission(),"viewer");
         
         user.setIdUser(id2);
         user.setLogin("p");

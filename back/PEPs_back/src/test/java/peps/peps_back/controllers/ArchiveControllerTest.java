@@ -1,141 +1,127 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package peps.peps_back.controllers;
 
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import peps.peps_back.items.AuditLog;
+import peps.peps_back.items.Interaction;
 import peps.peps_back.repositories.AuditLogRepository;
 import peps.peps_back.repositories.InteractionRepository;
-import peps.peps_back.services.AuditService;
 
 /**
- *
- * @author Clément
+ * Unit tests for ArchiveController.
  */
 public class ArchiveControllerTest {
-    
-    public ArchiveControllerTest() {
-    }
-    
-    private AuditLogRepository auditLogRepository;
+
     private InteractionRepository interactionRepository;
-    ArchiveController instance;
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+    private AuditLogRepository auditLogRepository;
+    private ArchiveController instance;
+
     @BeforeEach
     public void setUp() {
-        // 1. Create Mock repositorys
-        auditLogRepository = mock(AuditLogRepository.class);
         interactionRepository = mock(InteractionRepository.class);
-        
-        // 2. Inject Mock into Controller
+        auditLogRepository = mock(AuditLogRepository.class);
         instance = new ArchiveController(interactionRepository, auditLogRepository);
     }
-    
-    @AfterEach
-    public void tearDown() {
-    }
 
-    /**
-     * Test of getArchivablePeriods method, of class ArchiveController.
-     */
     @Test
-    public void testGetArchivablePeriods() {
-        System.out.println("getArchivablePeriods");
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity<List<ArchivePeriodDTO>> expResult = null;
+    @DisplayName("Should return empty list when no archivable interactions exist")
+    public void testGetArchivablePeriods_Empty() {
+        when(interactionRepository.findByTimeLancementBefore(any(Date.class)))
+            .thenReturn(Collections.emptyList());
+
         ResponseEntity<List<ArchivePeriodDTO>> result = instance.getArchivablePeriods();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertTrue(result.getBody().isEmpty());
     }
 
-    /**
-     * Test of exportAndDelete method, of class ArchiveController.
-     */
     @Test
+    @DisplayName("Should generate periods when old interactions exist")
+    public void testGetArchivablePeriods_WithData() {
+        // Create a date older than 3 months
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -6);
+        Date oldDate = cal.getTime();
+
+        Interaction mockInteraction = new Interaction();
+        mockInteraction.setTimeLancement(oldDate);
+
+        when(interactionRepository.findByTimeLancementBefore(any(Date.class)))
+            .thenReturn(List.of(mockInteraction));
+        
+        Long l = new Long(1);
+        when(interactionRepository.countByTimeLancementBetween(any(Date.class), any(Date.class)))
+            .thenReturn(l);
+
+        ResponseEntity<List<ArchivePeriodDTO>> result = instance.getArchivablePeriods();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertFalse(result.getBody().isEmpty());
+        verify(interactionRepository, atLeastOnce()).countByTimeLancementBetween(any(), any());
+    }
+
+    @Test
+    @DisplayName("Should export and delete interactions for a valid period")
     public void testExportAndDelete() {
-        System.out.println("exportAndDelete");
-        String periodId = "";
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity expResult = null;
-        ResponseEntity result = instance.exportAndDelete(periodId);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String periodId = "2023-01"; // Format expected by parsePeriodId: yyyy-MM
+        Interaction mockInteraction = new Interaction();
+        mockInteraction.setTimeLancement(new Date());
+        
+        when(interactionRepository.findByTimeLancementBetween(any(Date.class), any(Date.class)))
+            .thenReturn(List.of(mockInteraction));
+
+        ResponseEntity<byte[]> result = instance.exportAndDelete(periodId);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        // Verify deletion logic was triggered
+        verify(interactionRepository).deleteByTimeLancementBetween(any(Date.class), any(Date.class));
     }
 
-    /**
-     * Test of exportAllAndDelete method, of class ArchiveController.
-     */
     @Test
-    public void testExportAllAndDelete() {
-        System.out.println("exportAllAndDelete");
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity expResult = null;
-        ResponseEntity result = instance.exportAllAndDelete();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    @DisplayName("Should return 404 if no interactions found for period export")
+    public void testExportAndDelete_NotFound() {
+        String periodId = "2020-01";
+        when(interactionRepository.findByTimeLancementBetween(any(Date.class), any(Date.class)))
+            .thenReturn(Collections.emptyList());
+
+        ResponseEntity<byte[]> result = instance.exportAndDelete(periodId);
+
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
-    /**
-     * Test of getAuditArchivablePeriods method, of class ArchiveController.
-     */
     @Test
-    public void testGetAuditArchivablePeriods() {
-        System.out.println("getAuditArchivablePeriods");
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity<List<ArchivePeriodDTO>> expResult = null;
-        ResponseEntity<List<ArchivePeriodDTO>> result = instance.getAuditArchivablePeriods();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of exportAuditAndDelete method, of class ArchiveController.
-     */
-    @Test
-    public void testExportAuditAndDelete() {
-        System.out.println("exportAuditAndDelete");
-        String periodId = "";
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity expResult = null;
-        ResponseEntity result = instance.exportAuditAndDelete(periodId);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of exportAllAuditAndDelete method, of class ArchiveController.
-     */
-    @Test
+    @DisplayName("Should export and delete all audit logs older than cutoff")
     public void testExportAllAuditAndDelete() {
-        System.out.println("exportAllAuditAndDelete");
-        ArchiveController instance = new ArchiveController();
-        ResponseEntity expResult = null;
-        ResponseEntity result = instance.exportAllAuditAndDelete();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        AuditLog log = new AuditLog();
+        log.setTimestamp(new Date());
+        log.setAction("LOGIN");
+        log.setEntityType("USER");
+
+        when(auditLogRepository.findByTimestampBefore(any(Date.class)))
+            .thenReturn(List.of(log));
+
+        ResponseEntity<byte[]> result = instance.exportAllAuditAndDelete();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        // Verify repository interaction
+        verify(auditLogRepository).deleteByTimestampBetween(any(Date.class), any(Date.class));
     }
-    
+
+    @Test
+    @DisplayName("Should handle errors during audit export gracefully")
+    public void testExportAuditAndDelete_Error() {
+        // Force an exception (e.g., malformed period ID)
+        ResponseEntity<byte[]> result = instance.exportAuditAndDelete("invalid-id");
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+    }
 }

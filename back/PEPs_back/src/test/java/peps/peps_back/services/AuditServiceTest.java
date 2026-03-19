@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import peps.peps_back.controllers.SoundController;
 import peps.peps_back.repositories.AuditLogRepository;
 import peps.peps_back.repositories.SoundRepository;
@@ -66,7 +67,7 @@ public class AuditServiceTest {
         String newValue = "patapouf";
         String details = "oooooo";
         
-        doNothing().when(auditLogRepository).save(any());
+        when(auditLogRepository.save(any())).thenReturn(null);
         
         instance.log(action, entityType, entityId, entityName, entityRole, userLogin, oldValue, newValue, details);
 
