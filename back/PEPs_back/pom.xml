@@ -19,6 +19,7 @@
 
         <sonar.organization>ilyasfr</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
     </properties>
     
     <dependencies>
@@ -174,7 +175,7 @@
          <dependency>
              <groupId>org.mockito</groupId>
              <artifactId>mockito-core</artifactId>
-             <version>5.14.0</version>
+             <version>5.23.0</version>
              <scope>test</scope>
          </dependency>
         <!-- explicit Byte Buddy version so inline mocks work on newer JDKs -->
@@ -198,7 +199,7 @@
          <dependency>
              <groupId>org.mockito</groupId>
              <artifactId>mockito-junit-jupiter</artifactId>
-             <version>5.14.0</version>
+             <version>5.23.0</version>
              <scope>test</scope>
          </dependency>
 
@@ -238,24 +239,24 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.12</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+                <goal>report</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -307,7 +308,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+                    <argLine>${argLine}</argLine> 
                 </configuration>
             </plugin>
             <plugin>

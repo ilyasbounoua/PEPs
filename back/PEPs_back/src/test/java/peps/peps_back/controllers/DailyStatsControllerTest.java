@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
-@WebAppConfiguration
+
 public class DailyStatsControllerTest {
     
     private InteractionRepository interactionRepository;
@@ -49,6 +48,7 @@ public class DailyStatsControllerTest {
         
         String role = null;
         String startDate = "2026-01-01T12:08:56";
+        
         String endDate = "2026-01-01T12:20:56";
         
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -65,5 +65,7 @@ public class DailyStatsControllerTest {
             e.printStackTrace();
             assertTrue(false);
         }
+ 
     }
 }
+
